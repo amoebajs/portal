@@ -131,7 +131,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       module: meta.moduleName,
       name: meta.name,
       displayName: meta.displayName === meta.name ? null : meta.displayName,
-      version: meta.metadata.entity.version,
+      version: (<any>meta.metadata.entity).version,
       metadata: meta.metadata,
       type,
       source: model,

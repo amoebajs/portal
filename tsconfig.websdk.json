@@ -2,6 +2,11 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
+    "declaration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
     "outDir": "websdk"
   },
   "include": ["server/src/core/index.websdk.ts"]

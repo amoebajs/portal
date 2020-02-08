@@ -50,7 +50,7 @@ export class ModuleListComponent implements OnInit, OnDestroy {
       module: target.moduleName,
       name: target.name,
       displayName: target.displayName === target.name ? null : target.displayName,
-      version: target.metadata.entity.version,
+      version: (<any>target.metadata.entity).version,
       metadata: target.metadata,
     });
   }

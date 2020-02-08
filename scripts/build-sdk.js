@@ -1,10 +1,7 @@
 const webpack = require("webpack");
 const chalk = require("chalk");
-// import * as fs from "fs-extra";
-// import * as path from "path";
+const { spawn } = require("child_process");
 const config = require("../webpack.config");
-
-// const typings = [`import * as BuilderSdk from "./index.websdk";`, `export { BuilderSdk };`];
 
 function createrPlugin() {
   const buildingStatus = {
@@ -35,9 +32,9 @@ webpack({ ...config, plugins: [...config.plugins, createrPlugin()] }, (err, stat
   if (stats.hasErrors()) {
     throw new Error(stats.toString());
   }
-
-  //   fs.writeFileSync(path.resolve(__dirname, "..", "..", "websdk-dist", "index.d.ts"), typings.join("\n"), {
-  //     encoding: "utf8",
-  //     flag: "w+",
-  //   });
+  spawn("tsc", ["-p", "tsconfig.websdk.json"], {
+    env: process.env,
+    cwd: process.cwd(),
+    stdio: ["pipe", process.stdout, process.stderr],
+  });
 });

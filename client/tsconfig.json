@@ -14,7 +14,15 @@
     "importHelpers": true,
     "target": "es2015",
     "typeRoots": ["node_modules/@types"],
-    "lib": ["es2018", "dom"]
+    "lib": ["es2018", "dom"],
+    // 桥接了server端关于websdk的相关定义，但注意不要在前端中直接引用，可以采用import(xxx).xxx的方式使用定义
+    "paths": {
+      "#websdk": ["../websdk/index.websdk"],
+      "@amoebajs/builder": ["../server/node_modules/@amoebajs/builder/index.websdk"],
+      "@amoebajs/builder/*": ["../server/node_modules/@amoebajs/builder/*"],
+      "@amoebajs/basic-modules": ["../server/node_modules/@amoebajs/basic-modules/index"],
+      "@amoebajs/basic-modules/*": ["../server/node_modules/@amoebajs/basic-modules/*"]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

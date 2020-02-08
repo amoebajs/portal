@@ -1,33 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Subject, BehaviorSubject } from "rxjs";
 
-declare global {
-  interface BuilderSdk {
-    [name: string]: any;
-  }
-
-  interface BuilderSdkUtils {
-    createEntityId(): string;
-    [name: string]: any;
-  }
-
-  interface BuilderFactory {
-    [prop: string]: any;
-  }
-
-  interface IConstructor<T> {
-    new (...args: any[]): T;
-  }
-
-  interface IEwsWindow {
-    AmoebajsBuilderSdk: BuilderSdk;
-    AmoebajsBuilderUtils: BuilderSdkUtils;
-    EwsBuilderFactory: IConstructor<BuilderFactory>;
-  }
-
-  interface Window extends IEwsWindow {}
-}
-
 export interface IDirectiveDefine {
   module: string;
   name: string;
@@ -61,15 +34,10 @@ export interface ICompileContext {
   page?: IPageDefine;
 }
 
-export interface ISourceModule {
-  name: string;
-  displayName: string | null;
-  value: Function;
-  provider: "react";
-  metadata: { entity: IEntityDefine };
-  components: Record<string, IImportDeclaration>;
-  directives: Record<string, IImportDeclaration>;
-}
+type IModuleEntry = import("@amoebajs/builder").IModuleEntry;
+type IMapEntry = import("@amoebajs/builder").IMapEntry;
+
+export interface ISourceModule extends IModuleEntry {}
 
 export interface ICompileModule extends Omit<ISourceModule, "components" | "directives"> {
   components: IImportDeclaration[];
@@ -114,21 +82,7 @@ export interface IEntityDefine {
   description: string | null;
 }
 
-export interface IImportDeclaration {
-  name: string;
-  displayName: string;
-  moduleName: string;
-  value: Function;
-  provider: "react";
-  metadata: {
-    entity: IEntityDefine;
-    groups: Record<string, IGroupDefine>;
-    inputs: Record<string, IInputDefine>;
-    attaches: Record<string, IInputDefine>;
-    props: Record<string, any>;
-    entityExtensions: Record<string, any>;
-  };
-}
+export interface IImportDeclaration extends IMapEntry {}
 
 @Injectable()
 export class Builder {
@@ -136,10 +90,10 @@ export class Builder {
   private _initing = false;
   private _loaded = false;
 
-  private factory!: any;
-  public SDK!: BuilderSdk;
-  public Utils!: BuilderSdkUtils;
-  public builder!: any;
+  private factory!: import("@amoebajs/builder/index.websdk").Factory;
+  public SDK!: typeof import("@amoebajs/builder/index.websdk");
+  public Utils!: typeof import("@amoebajs/builder/index.websdk").Utils;
+  public builder!: import("@amoebajs/builder").Builder;
   public moduleList: ICompileModule[] = [];
 
   private readonly _onLoad = new BehaviorSubject<boolean | Error>(this._loaded);
@@ -178,11 +132,11 @@ export class Builder {
   }
 
   private initBuilder() {
-    this.factory = new window.EwsBuilderFactory().parse();
-    this.Utils = window.AmoebajsBuilderUtils;
-    this.SDK = window.AmoebajsBuilderSdk;
+    this.factory = new (<any>window).EwsBuilderFactory().parse();
+    this.Utils = (<any>window).AmoebajsBuilderUtils;
+    this.SDK = (<any>window).AmoebajsBuilderSdk;
     this.builder = this.factory.builder;
-    const modules = this.builder.globalMap.maps.modules;
+    const modules = this.builder["globalMap"].maps.modules;
     Object.entries<ISourceModule>(modules).forEach(([name, md]) => {
       const components = Object.entries(md.components).map(([, cp]) => cp);
       const directives = Object.entries(md.directives).map(([, cp]) => cp);
@@ -191,10 +145,10 @@ export class Builder {
   }
 
   public getComponent(module: string, name: string): IImportDeclaration {
-    return this.builder.globalMap.getComponent(module, name);
+    return this.builder["globalMap"].getComponent(module, name);
   }
 
   public getDirective(module: string, name: string): IImportDeclaration {
-    return this.builder.globalMap.getDirective(module, name);
+    return this.builder["globalMap"].getDirective(module, name);
   }
 }
