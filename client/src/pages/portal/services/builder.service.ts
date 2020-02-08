@@ -84,15 +84,21 @@ export interface IEntityDefine {
 
 export interface IImportDeclaration extends IMapEntry {}
 
+declare global {
+  interface Window {
+    EwsContext: import("#websdk").EwsWindow;
+  }
+}
+
 @Injectable()
 export class Builder {
   private _init = false;
   private _initing = false;
   private _loaded = false;
 
-  private factory!: import("@amoebajs/builder/index.websdk").Factory;
-  public SDK!: typeof import("@amoebajs/builder/index.websdk");
-  public Utils!: typeof import("@amoebajs/builder/index.websdk").Utils;
+  private factory!: import("#websdk").BuilderFactory;
+  public SDK!: typeof import("@amoebajs/builder");
+  public Utils!: typeof import("@amoebajs/builder").Utils;
   public builder!: import("@amoebajs/builder").Builder;
   public moduleList: ICompileModule[] = [];
 
@@ -132,9 +138,9 @@ export class Builder {
   }
 
   private initBuilder() {
-    this.factory = new (<any>window).EwsBuilderFactory().parse();
-    this.Utils = (<any>window).AmoebajsBuilderUtils;
-    this.SDK = (<any>window).AmoebajsBuilderSdk;
+    this.factory = new window.EwsContext.BuilderFactory().parse();
+    this.Utils = window.EwsContext.BuilderUtils;
+    this.SDK = window.EwsContext.BuilderSdk;
     this.builder = this.factory.builder;
     const modules = this.builder["globalMap"].maps.modules;
     Object.entries<ISourceModule>(modules).forEach(([name, md]) => {

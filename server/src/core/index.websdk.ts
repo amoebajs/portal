@@ -3,25 +3,33 @@ import { CommonModule, LayoutModule, ZentModule } from "@amoebajs/basic-modules"
 import { BuilderFactory } from "./index";
 
 declare global {
-  interface EwsWindow {
-    AmoebajsBuilderSdk: typeof BuilderSdk;
-    AmoebajsBuilderUtils: typeof BuilderSdk.Utils;
-    EwsBuilderFactory: typeof BuilderFactory;
-    EwsModules: {
-      CommonModule: typeof CommonModule;
-      LayoutModule: typeof LayoutModule;
-      ZentModule: typeof ZentModule;
-    };
+  interface Window {
+    EwsContext: EwsWindow;
   }
-
-  interface Window extends EwsWindow {}
 }
 
-window.AmoebajsBuilderSdk = BuilderSdk;
-window.AmoebajsBuilderUtils = BuilderSdk.Utils;
-window.EwsBuilderFactory = BuilderFactory;
-window.EwsModules = {
-  CommonModule,
-  LayoutModule,
-  ZentModule,
+export interface EwsWindow {
+  BuilderSdk: typeof BuilderSdk;
+  BuilderUtils: typeof BuilderSdk.Utils;
+  BuilderFactory: typeof BuilderFactory;
+  ExposedModules: {
+    CommonModule: typeof CommonModule;
+    LayoutModule: typeof LayoutModule;
+    ZentModule: typeof ZentModule;
+  };
+}
+
+const context: EwsWindow = {
+  BuilderSdk,
+  BuilderFactory,
+  BuilderUtils: BuilderSdk.Utils,
+  ExposedModules: {
+    CommonModule,
+    LayoutModule,
+    ZentModule,
+  },
 };
+
+export { BuilderFactory, CommonModule, LayoutModule, ZentModule };
+
+window.EwsContext = context;
