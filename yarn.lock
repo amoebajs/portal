@@ -3859,6 +3859,13 @@ tryer@^1.0.1:
   resolved "https://registry.npm.taobao.org/tryer/download/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"
   integrity sha1-8shUBoALmw90yfdGW4HqrSQSUvg=
 
+ts-import-plugin@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.npm.taobao.org/ts-import-plugin/download/ts-import-plugin-1.6.2.tgz#9a9680b6e3e4a4c94fba9f2be7ce6a0ed478c438"
+  integrity sha1-mpaAtuPkpMlPup8r585qDtR4xDg=
+  dependencies:
+    tslib "^1.10.0"
+
 ts-loader@^6.2.1:
   version "6.2.1"
   resolved "https://registry.npm.taobao.org/ts-loader/download/ts-loader-6.2.1.tgz#67939d5772e8a8c6bdaf6277ca023a4812da02ef"
@@ -3870,7 +3877,7 @@ ts-loader@^6.2.1:
     micromatch "^4.0.0"
     semver "^6.0.0"
 
-tslib@^1.8.1, tslib@^1.9.0:
+tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.10.0"
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha1-w8GflZc/sKYpc/sJ2Q2WHuQ+XIo=

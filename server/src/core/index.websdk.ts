@@ -1,4 +1,4 @@
-import * as BuilderSdk from "@amoebajs/builder/index.websdk";
+import * as BuilderSdk from "@amoebajs/builder";
 import { CommonModule, LayoutModule, ZentModule } from "@amoebajs/basic-modules";
 import { BuilderFactory } from "./index";
 

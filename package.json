@@ -8,6 +8,7 @@
     "pigwang <pigw4ng@gmail.com>"
   ],
   "license": "AGPL-3.0-only",
+  "sideEffects": false,
   "private": true,
   "scripts": {
     "install:client": "cd client && yarn install",
@@ -43,6 +44,7 @@
     "eslint-plugin-react": "^7.17.0",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
+    "ts-import-plugin": "^1.6.2",
     "typescript": "^3.7.3"
   }
 }

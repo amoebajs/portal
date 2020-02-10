@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@amoebajs/basic-modules@^0.0.1-alpha.1580905735984":
-  version "0.0.1-alpha.1580905735984"
-  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1580905735984.tgz#7a7876abb0226ae558029c8e316a740d98ad26f5"
-  integrity sha512-kRszrK14+ngrJUwsnpRRRzQsiCUZU1NZvmvPC58OCtJ6+AHrZdFMXeY7Mdnz4T/NYaHChJZ74+sJHNAeDp03JA==
+"@amoebajs/basic-modules@^0.0.1-alpha.1581343256615":
+  version "0.0.1-alpha.1581343256615"
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1581343256615.tgz#c904e2e0ccf8a7f2315f3e359a62d68ddf5e9b57"
+  integrity sha512-MdEtdRgwQF8cNqr7rCnB23YlQhWzod6CAtYPYqXkuF+I1BE2SVnT4PscXPldYzH5K7rEONA7M6qi8vvhIMmo2Q==
 
-"@amoebajs/builder@^0.0.2-alpha.1581333932562":
-  version "0.0.2-alpha.1581333932562"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1581333932562.tgz#87552be3e8c1f4bcf9c949de3a9fa6cb358e335e"
-  integrity sha512-W1al6rY0ItXQyvmyvhbZa+kV8+JFwAU7SxoPBpmA7u1kKqU3c/WjcUTnAWR0edihbjZnSKoogzYj1BEEIVtWMg==
+"@amoebajs/builder@^0.0.2-alpha.1581344539548":
+  version "0.0.2-alpha.1581344539548"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1581344539548.tgz#a5da36fe4c083c4ecd42f8d22c8c256f7a9ac0a6"
+  integrity sha512-yJKAo6hFa7y7kyRsEOJadK3xJw6ntq3amGWX5AtxG/mqMOIKEObeXX9NtQlpQQhmv4PJWCn6+VtaJxgNYQBHig==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -26,8 +26,6 @@
     "@types/webpack" "^4.41.0"
     chalk "^3.0.0"
     cheerio "^0.22.0"
-    chokidar "^3.3.0"
-    copy-webpack-plugin "^5.0.5"
     css-loader "^3.2.0"
     fs-extra "^8.1.0"
     html-webpack-plugin "^3.2.0"
@@ -1085,11 +1083,6 @@ ajv@6.9.1:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ansi-colors@^3.0.0:
-  version "3.2.4"
-  resolved "https://registry.npm.taobao.org/ansi-colors/download/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
-  integrity sha1-46PaS/uubIapwoViXeEkojQCb78=
-
 ansi-escapes@^3.0.0:
   version "3.2.0"
   resolved "https://registry.npm.taobao.org/ansi-escapes/download/ansi-escapes-3.2.0.tgz#8780b98ff9dbf5638152d1f1fe5c1d7b4442976b"
@@ -1222,22 +1215,10 @@ array-flatten@1.1.1:
   resolved "https://registry.npm.taobao.org/array-flatten/download/array-flatten-1.1.1.tgz?cache=0&sync_timestamp=1574313315299&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Farray-flatten%2Fdownload%2Farray-flatten-1.1.1.tgz#9a5f699051b1e7073328f2a008968b64ea2955d2"
   integrity sha1-ml9pkFGx5wczKPKgCJaLZOopVdI=
 
-array-union@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.npm.taobao.org/array-union/download/array-union-1.0.2.tgz#9a34410e4f4e3da23dea375be5be70f24778ec39"
-  integrity sha1-mjRBDk9OPaI96jdb5b5w8kd47Dk=
-  dependencies:
-    array-uniq "^1.0.1"
-
 array-union@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npm.taobao.org/array-union/download/array-union-2.1.0.tgz#b798420adbeb1de828d84acd8a2e23d3efe85e8d"
   integrity sha1-t5hCCtvrHego2ErNii4j0+/oXo0=
-
-array-uniq@^1.0.1:
-  version "1.0.3"
-  resolved "https://registry.npm.taobao.org/array-uniq/download/array-uniq-1.0.3.tgz#af6ac877a25cc7f74e058894753858dfdb24fdb6"
-  integrity sha1-r2rId6Jcx/dOBYiUdThY39sk/bY=
 
 array-unique@^0.3.2:
   version "0.3.2"
@@ -1634,7 +1615,7 @@ bytes@3.1.0:
   resolved "https://registry.npm.taobao.org/bytes/download/bytes-3.1.0.tgz#f6cf7933a360e0588fa9fde85651cdc7f805d1f6"
   integrity sha1-9s95M6Ng4FiPqf3oVlHNx/gF0fY=
 
-cacache@^12.0.2, cacache@^12.0.3:
+cacache@^12.0.2:
   version "12.0.3"
   resolved "https://registry.npm.taobao.org/cacache/download/cacache-12.0.3.tgz?cache=0&sync_timestamp=1569877543868&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcacache%2Fdownload%2Fcacache-12.0.3.tgz#be99abba4e1bf5df461cd5a2c1071fc432573390"
   integrity sha1-vpmruk4b9d9GHNWiwQcfxDJXM5A=
@@ -2125,24 +2106,6 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.npm.taobao.org/copy-descriptor/download/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
-copy-webpack-plugin@^5.0.5:
-  version "5.1.1"
-  resolved "https://registry.npm.taobao.org/copy-webpack-plugin/download/copy-webpack-plugin-5.1.1.tgz#5481a03dea1123d88a988c6ff8b78247214f0b88"
-  integrity sha1-VIGgPeoRI9iKmIxv+LeCRyFPC4g=
-  dependencies:
-    cacache "^12.0.3"
-    find-cache-dir "^2.1.0"
-    glob-parent "^3.1.0"
-    globby "^7.1.1"
-    is-glob "^4.0.1"
-    loader-utils "^1.2.3"
-    minimatch "^3.0.4"
-    normalize-path "^3.0.0"
-    p-limit "^2.2.1"
-    schema-utils "^1.0.0"
-    serialize-javascript "^2.1.2"
-    webpack-log "^2.0.0"
-
 copy@^0.3.2:
   version "0.3.2"
   resolved "https://registry.npm.taobao.org/copy/download/copy-0.3.2.tgz#870b871d02a599b3c6ef27bc5b3d4c4102261909"
@@ -2480,13 +2443,6 @@ diffie-hellman@^5.0.0:
     bn.js "^4.1.0"
     miller-rabin "^4.0.0"
     randombytes "^2.0.0"
-
-dir-glob@^2.0.0:
-  version "2.2.2"
-  resolved "https://registry.npm.taobao.org/dir-glob/download/dir-glob-2.2.2.tgz#fa09f0694153c8918b18ba0deafae94769fc50c4"
-  integrity sha1-+gnwaUFTyJGLGLoN6vrpR2n8UMQ=
-  dependencies:
-    path-type "^3.0.0"
 
 dir-glob@^3.0.1:
   version "3.0.1"
@@ -3354,18 +3310,6 @@ globby@^10.0.1:
     merge2 "^1.2.3"
     slash "^3.0.0"
 
-globby@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.npm.taobao.org/globby/download/globby-7.1.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fglobby%2Fdownload%2Fglobby-7.1.1.tgz#fb2ccff9401f8600945dfada97440cca972b8680"
-  integrity sha1-+yzP+UAfhgCUXfral0QMypcrhoA=
-  dependencies:
-    array-union "^1.0.1"
-    dir-glob "^2.0.0"
-    glob "^7.1.2"
-    ignore "^3.3.5"
-    pify "^3.0.0"
-    slash "^1.0.0"
-
 graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.4, graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   version "4.2.3"
   resolved "https://registry.npm.taobao.org/graceful-fs/download/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
@@ -3613,11 +3557,6 @@ iferr@^0.1.5:
   version "0.1.5"
   resolved "https://registry.npm.taobao.org/iferr/download/iferr-0.1.5.tgz#c60eed69e6d8fdb6b3104a1fcbca1c192dc5b501"
   integrity sha1-xg7taebY/bazEEofy8ocGS3FtQE=
-
-ignore@^3.3.5:
-  version "3.3.10"
-  resolved "https://registry.npm.taobao.org/ignore/download/ignore-3.3.10.tgz#0a97fb876986e8081c631160f8f9f389157f0043"
-  integrity sha1-Cpf7h2mG6AgcYxFg+PnziRV/AEM=
 
 ignore@^5.1.1:
   version "5.1.4"
@@ -5486,7 +5425,7 @@ p-finally@^1.0.0:
   resolved "https://registry.npm.taobao.org/p-finally/download/p-finally-1.0.0.tgz?cache=0&sync_timestamp=1560955759606&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fp-finally%2Fdownload%2Fp-finally-1.0.0.tgz#3fbcfb15b899a44123b34b6dcc18b724336a2cae"
   integrity sha1-P7z7FbiZpEEjs0ttzBi3JDNqLK4=
 
-p-limit@^2.0.0, p-limit@^2.2.1:
+p-limit@^2.0.0:
   version "2.2.1"
   resolved "https://registry.npm.taobao.org/p-limit/download/p-limit-2.2.1.tgz#aa07a788cc3151c939b5131f63570f0dd2009537"
   integrity sha1-qgeniMwxUck5tRMfY1cPDdIAlTc=
@@ -6409,11 +6348,6 @@ sisteransi@^1.0.3:
   version "1.0.4"
   resolved "https://registry.npm.taobao.org/sisteransi/download/sisteransi-1.0.4.tgz#386713f1ef688c7c0304dc4c0632898941cad2e3"
   integrity sha1-OGcT8e9ojHwDBNxMBjKJiUHK0uM=
-
-slash@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npm.taobao.org/slash/download/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
-  integrity sha1-xB8vbDn8FtHNF61LXYlhFK5HDVU=
 
 slash@^2.0.0:
   version "2.0.0"
@@ -7368,14 +7302,6 @@ webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.npm.taobao.org/webidl-conversions/download/webidl-conversions-4.0.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fwebidl-conversions%2Fdownload%2Fwebidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
   integrity sha1-qFWYCx8LazWbodXZ+zmulB+qY60=
-
-webpack-log@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.npm.taobao.org/webpack-log/download/webpack-log-2.0.0.tgz?cache=0&sync_timestamp=1564684394562&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fwebpack-log%2Fdownload%2Fwebpack-log-2.0.0.tgz#5b7928e0637593f119d32f6227c1e0ac31e1b47f"
-  integrity sha1-W3ko4GN1k/EZ0y9iJ8HgrDHhtH8=
-  dependencies:
-    ansi-colors "^3.0.0"
-    uuid "^3.3.2"
 
 webpack-node-externals@1.7.2:
   version "1.7.2"

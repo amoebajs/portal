@@ -1,4 +1,5 @@
 const path = require("path");
+const TsImportPlugin = require("ts-import-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
@@ -11,7 +12,8 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js", ".json"],
     alias: {
-      "@amoebajs/builder$": "@amoebajs/builder/index.websdk",
+      "@amoebajs/builder$": "@amoebajs/builder/es/index.websdk",
+      "@amoebajs/builder": "@amoebajs/builder/es",
     },
   },
   optimization: {
@@ -28,6 +30,19 @@ module.exports = {
             options: {
               transpileOnly: true,
               configFile: "tsconfig.websdk.json",
+              getCustomTransformers: () => ({
+                before: [
+                  TsImportPlugin({
+                    style: false,
+                    libraryName: "lodash",
+                    libraryDirectory: null,
+                    camel2DashComponentName: false,
+                  }),
+                ],
+              }),
+              compilerOptions: {
+                module: "es2015",
+              },
             },
           },
         ],
