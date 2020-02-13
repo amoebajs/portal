@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { IGlobalMap, IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
+import { ICompileTask } from "#app/services/core-compile.service";
+import { createToken } from "#utils/di";
 
 export enum TaskType {
   CommonPageBuild = 1,
@@ -28,3 +30,6 @@ export abstract class CompileService<T> {
   ): Promise<ISourceCreateResult>;
   public abstract queryTask(id: string): Promise<T | null>;
 }
+
+export type Compiler = CompileService<ICompileTask>;
+export const Compiler = createToken<Compiler>(CompileService);

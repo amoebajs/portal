@@ -1,13 +1,12 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { CompileService, TaskType } from "#global/services/compile.service";
-import { UserService } from "#global/services/user.service";
+import { TaskType, Compiler } from "#global/services/compile.service";
+import { User } from "#global/services/user.service";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
-import { ICompileTask } from "../services/core-compile.service";
 
 @Controller("api")
 @UseRolesAuthentication({ roles: ["admin"] })
 export class ApiController {
-  constructor(private readonly compiler: CompileService<ICompileTask>, private readonly user: UserService) {}
+  constructor(private readonly compiler: Compiler, private readonly user: User) {}
 
   @Get("user")
   @SetRoles("admin")

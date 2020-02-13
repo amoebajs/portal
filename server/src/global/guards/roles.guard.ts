@@ -2,11 +2,11 @@ import { CanActivate, ExecutionContext, Injectable, Scope } from "@nestjs/common
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
 import { ROLES_GUARD__CLASS_ROLES, ROLES_GUARD__ROLES } from "#utils/roles";
-import { AuthService } from "../services/auth.service";
+import { Authentication } from "../services/auth.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class RolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector, private readonly auth: AuthService) {}
+  constructor(private readonly reflector: Reflector, private readonly auth: Authentication) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<any[]>(ROLES_GUARD__ROLES, context.getHandler());

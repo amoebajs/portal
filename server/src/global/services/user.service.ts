@@ -1,4 +1,5 @@
 import { Injectable, Scope } from "@nestjs/common";
+import { createToken } from "#utils/di";
 
 export interface IUserInfos<I, R, T> {
   logined: boolean;
@@ -98,3 +99,6 @@ export class UserService<
     return this;
   }
 }
+
+export type User = UserService<number, string, {}>;
+export const User = createToken<User>(UserService);

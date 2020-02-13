@@ -2,13 +2,11 @@ import * as path from "path";
 import * as fs from "fs-extra";
 import chalk from "chalk";
 import uuid from "uuid/v4";
-// import { cloneDeep } from "lodash";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { CompileService, ICommonBuildConfigs, TaskType, ISourceCreateResult } from "#global/services/compile.service";
 import { ClusterWorker } from "#global/services/worker.service";
 import { BuilderFactory } from "#core/index";
-import { createToken } from "#utils/di";
 
 export enum CompileTaskStatus {
   Pending,
@@ -47,11 +45,8 @@ const RANDOM_DELAY = Math.floor(Math.random() * 3000);
 const TASKID = "task::core-compile-work";
 const STORAGEID = "storage::core-compile-work";
 
-export type Compiler = CompileService<ICompileTask>;
-export const Compiler = createToken<Compiler>(CompileService);
-
 @Injectable()
-export class CoreCompiler implements Compiler {
+export class CoreCompiler implements CompileService<ICompileTask> {
   private _factory = new BuilderFactory();
   private _hash: IWebsitePageHash = {};
   // private _mapCache!: IGlobalMap;
