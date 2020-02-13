@@ -4,6 +4,7 @@ import compression from "compression";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
+import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { ConfigService, IServerConfigs } from "#global/services/config.service";
 import { ClusterWorker } from "#global/services/worker.service";
 import { MainModule } from "./main.module";
@@ -40,13 +41,13 @@ export async function bootstrap({
   await app.listen(3000);
 }
 
-export function useTemplateEngine(app: NestExpressApplication) {
-  app.engine("html", useNunjucks(app, { noCache: false }).render);
+export function useTemplateEngine(app: NestExpressApplication, options: Partial<{ noCache: boolean }> = {}) {
+  app.engine("html", useNunjucks(app, { noCache: false, ...options }).render);
   app.setViewEngine("html");
 }
 
 export function useStaticAssets(app: NestExpressApplication, options: ServeStaticOptions) {
-  app.useStaticAssets(BUILD_ROOT, { maxAge: 3600000, ...options });
+  app.useStaticAssets(BUILD_ROOT, { maxAge: "30d", ...options });
 }
 
 export function useGzip(app: NestExpressApplication, configs: IServerConfigs) {
@@ -54,6 +55,10 @@ export function useGzip(app: NestExpressApplication, configs: IServerConfigs) {
   if (useGizp) {
     app.use(compression(gzipOptions));
   }
+}
+
+export function useCORS(app: NestExpressApplication, options: Partial<CorsOptions> = {}) {
+  app.enableCors(options);
 }
 
 export function useNunjucks(app: NestExpressApplication, { noCache = false }: { noCache?: boolean } = {}) {

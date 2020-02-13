@@ -117,9 +117,14 @@ export class Builder {
   public async loadServerWebsdk() {
     this._initing = true;
     return new Promise((resolve, reject) => {
+      const ewsGlobal = (<any>window).EWS_Global;
       const element = document.createElement("script");
       element.type = "text/javascript";
       element.src = "ews-server-websdk.js";
+      // 生产环境支持hash
+      if (ewsGlobal) {
+        element.src = `ews-server-websdk.${ewsGlobal.projectHash}.js`;
+      }
       element.onload = () => {
         this._initing = false;
         this.initBuilder();

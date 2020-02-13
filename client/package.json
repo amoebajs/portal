@@ -5,8 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build:dev": "ng build",
-    "build:8192": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --prod",
-    "build": "ng build --prod",
+    "build:8192": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build --prod --stats-json",
+    "build": "ng build --prod --stats-json",
     "test": "ng test",
     "e2e": "ng e2e"
   },
