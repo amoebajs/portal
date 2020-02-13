@@ -8,6 +8,7 @@ import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/bui
 import { CompileService, ICommonBuildConfigs, TaskType, ISourceCreateResult } from "#global/services/compile.service";
 import { ClusterWorker } from "#global/services/worker.service";
 import { BuilderFactory } from "#core/index";
+import { createToken } from "#utils/di";
 
 export enum CompileTaskStatus {
   Pending,
@@ -46,8 +47,11 @@ const RANDOM_DELAY = Math.floor(Math.random() * 3000);
 const TASKID = "task::core-compile-work";
 const STORAGEID = "storage::core-compile-work";
 
+export type Compiler = CompileService<ICompileTask>;
+export const Compiler = createToken<Compiler>(CompileService);
+
 @Injectable()
-export class CoreCompiler implements CompileService<ICompileTask> {
+export class CoreCompiler implements Compiler {
   private _factory = new BuilderFactory();
   private _hash: IWebsitePageHash = {};
   // private _mapCache!: IGlobalMap;

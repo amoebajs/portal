@@ -1,13 +1,10 @@
 import { ExceptionFilter, SetMetadata, UseFilters, UseGuards } from "@nestjs/common";
 import { RolesGuard } from "#global/guards/roles.guard";
 import { ForbiddenExceptionFilter } from "#global/filters/forbidden.filter";
+import { IConstructor } from "./base";
 
 export const ROLES_GUARD__ROLES = "RolesGuard::roles";
 export const ROLES_GUARD__CLASS_ROLES = "RolesGuard::classRoles";
-
-export interface IConstructor<T> {
-  new (...args: any[]): T;
-}
 
 export interface IRolesOptions<T> {
   roles: T[];

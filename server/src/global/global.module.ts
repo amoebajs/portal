@@ -1,9 +1,7 @@
 import { Global, Module } from "@nestjs/common";
-import { AuthService } from "#global/services/auth.service";
-import { FakeAuthService } from "#app/services/fake-auth.service";
+import { FakeAuthService, Authentication } from "#app/services/fake-auth.service";
 import { UserService } from "#global/services/user.service";
-import { CompileService } from "#global/services/compile.service";
-import { CoreCompiler } from "#app/services/core-compile.service";
+import { CoreCompiler, Compiler } from "#app/services/core-compile.service";
 import { ConfigService } from "#global/services/config.service";
 import { ClusterWorker } from "#global/services/worker.service";
 import { AppModule } from "#app/app.module";
@@ -16,9 +14,9 @@ import { AppModule } from "#app/app.module";
     ClusterWorker,
     ConfigService,
     UserService,
-    { provide: AuthService, useClass: FakeAuthService },
-    { provide: CompileService, useClass: CoreCompiler },
+    { provide: Authentication, useClass: FakeAuthService },
+    { provide: Compiler, useClass: CoreCompiler },
   ],
-  exports: [ConfigService, AuthService, UserService, CompileService],
+  exports: [ConfigService, Authentication, UserService, Compiler],
 })
 export class GlobalModule {}
