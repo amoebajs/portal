@@ -56,7 +56,7 @@ export interface IEntityEditResult {
   id: string;
   module: string;
   name: string;
-  type: "component" | "directive";
+  type: "component" | "directive" | "composition";
   version: string | number;
   input: Record<string, any>;
 }

@@ -8,7 +8,7 @@
 <ng-template #moduleGroup let-model="model">
   <div class="module-title" (click)="onModuleExpand(model)">
     <i nz-icon [nzType]="model.displayInfo.expanded? 'down': 'right'" nzTheme="outline"></i>
-    <i nz-icon nzType="code-sandbox" nzTheme="outline"></i>
+    <i nz-icon nzType="folder" nzTheme="outline"></i>
     <span [title]="model.displayInfo.displayName">{{ model.displayName }}</span>
   </div>
   <div *ngIf="model.displayInfo.expanded">
@@ -24,6 +24,13 @@
         model: model,
         type: 'directive',
         target: 'directives'
+      }"
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="moduleSubGroup; context: {
+        model: model,
+        type: 'composition',
+        target: 'compositions'
       }"
     ></ng-container>
   </div>

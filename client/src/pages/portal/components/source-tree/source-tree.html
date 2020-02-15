@@ -3,6 +3,7 @@
     <ng-container *ngIf="tree">
       <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'component' }"></ng-container>
       <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'directive' }"></ng-container>
+      <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'composition' }"></ng-container>
       <ng-container *ngTemplateOutlet="entityNode; context: { model: tree.page, type: 'component' }"></ng-container>
       <ng-container *ngTemplateOutlet="emptySourceTree"></ng-container>
     </ng-container>
@@ -31,14 +32,20 @@
               model: null,
               enabled: enabled,
               type: type,
-              expanded: type === 'component'? tree.compExpanded: tree.direExpanded
+              expanded: type === 'component'? tree.compExpanded: type === 'composition'? tree.cpsiExpanded: tree.direExpanded
             }"
           ></ng-container>
-          <i nz-icon [nzType]=" type === 'component' ? 'appstore': 'api' " nzTheme="outline"></i>
-          <span>{{ type === 'component'? '组件': '指令' }}</span>
+          <i
+            nz-icon
+            [nzType]=" type === 'component' ? 'appstore': type === 'composition'? 'code-sandbox': 'api' "
+            nzTheme="outline"
+          ></i>
+          <span>{{ type === 'component'? '组件': type === 'composition'? '捆绑': '指令' }}</span>
         </div>
       </div>
-      <ng-container *ngIf="type === 'component'? tree.compExpanded: tree.direExpanded">
+      <ng-container
+        *ngIf="type === 'component'? tree.compExpanded: type === 'composition'? tree.cpsiExpanded: tree.direExpanded"
+      >
         <div class="section" *ngFor="let comp of tree[type + 's']">
           <ng-container *ngTemplateOutlet="importNode; context: { model: comp, type: type }"></ng-container>
         </div>

@@ -33,15 +33,20 @@ type IDisplay<T> = T & {
 interface ISourceTree {
   components: IDisplay<IComponentDefine>[];
   directives: IDisplay<IDirectiveDefine>[];
+  compositions: IDisplay<IDirectiveDefine>[];
   compExpanded: boolean;
   direExpanded: boolean;
+  cpsiExpanded: boolean;
   page?: IDisplay<IDisplayEntity>;
 }
 
 interface IDisplayEntity extends IPageDefine {
   children?: IDisplay<IDisplayEntity>[];
   directives?: IDisplay<IDisplayEntity>[];
+  compositions?: IDisplay<IDisplayEntity>[];
 }
+
+type XType = "component" | "directive" | "composition";
 
 @Component({
   selector: "app-portal-source-tree",
@@ -102,7 +107,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: import("@angular/core").SimpleChanges): void {}
 
-  public entityCreateClick(model: IDisplay<IDisplayEntity>, type: "component" | "directive", paths?: string) {
+  public entityCreateClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
@@ -118,7 +123,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  public entityEditClick(model: IDisplay<IDisplayEntity>, type: "component" | "directive", paths?: string) {
+  public entityEditClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
@@ -146,7 +151,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: "component" | "directive", paths?: string) {
+  public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     const { found, path, index } = this.findPath((paths && paths.split("#")) || [], model);
     if (found) {
       this.willDelete = found;
@@ -179,9 +184,11 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     entity.displayInfo.expanded = !entity.displayInfo.expanded;
   }
 
-  public groupExpand(type: "component" | "directive") {
+  public groupExpand(type: XType) {
     if (type === "component") {
       this.tree.compExpanded = !this.tree.compExpanded;
+    } else if (type === "composition") {
+      this.tree.cpsiExpanded = !this.tree.cpsiExpanded;
     } else {
       this.tree.direExpanded = !this.tree.direExpanded;
     }
@@ -249,7 +256,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     md: string,
     name: string,
     version: string | number,
-    createType: "component" | "directive",
+    createType: XType,
     path: string,
     id: string,
     others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name">,
@@ -274,12 +281,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private getImportTargetSafely(
-    md: string,
-    name: string,
-    version: string | number,
-    createType: "component" | "directive",
-  ) {
+  private getImportTargetSafely(md: string, name: string, version: string | number, createType: XType) {
     let target: IComponentDefine | IDirectiveDefine = this.getImportTarget(md, name);
     if (!target) {
       target = {
@@ -291,6 +293,9 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       if (createType === "component") {
         this.context.components = this.context.components || [];
         this.context.components.push(target);
+      } else if (createType === "composition") {
+        this.context.compositions = this.context.compositions || [];
+        this.context.compositions.push(target);
       } else {
         this.context.directives = this.context.directives || [];
         this.context.directives.push(target);
@@ -342,13 +347,22 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         expanded: false,
       },
     }));
+    const compositions = (context.compositions || []).map(i => ({
+      ...i,
+      displayInfo: {
+        displayName: getDisplayText(this.builder.getComposition(i.module, i.name).displayName, i.name),
+        expanded: false,
+      },
+    }));
     const oldTree = this.tree;
     this.tree = {
       page: null,
       directives,
       components,
+      compositions,
       compExpanded: false,
       direExpanded: false,
+      cpsiExpanded: false,
     };
     if (oldTree) {
       this.tree.compExpanded = oldTree.compExpanded;
@@ -361,13 +375,15 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
 
   private getEntityDisplayName(target: IDisplayEntity | IPageDefine): IDisplay<IDisplayEntity> {
     const { ref } = target;
-    const { children, directives, ...others } = target;
-    const comp = this.tree.components.find(i => i.id === ref);
+    const { children, directives, compositions, ...others } = target;
+    let comp = this.tree.components.find(i => i.id === ref);
+    if (!comp) comp = this.tree.compositions.find(i => i.id === ref);
     if (comp) {
       return {
         ...others,
         children: (children || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
         directives: (directives || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
+        compositions: (compositions || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
         displayInfo: {
           displayName: comp.displayInfo.displayName,
           expanded: true,
@@ -377,6 +393,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private getEntityMetaWithRef(model: IDisplay<IDisplayEntity>) {
+    console.log(model);
     const comp = this.tree.components.find(i => i.id === model.ref);
     if (comp) {
       return this.builder.getComponent(comp.module, comp.name);
@@ -384,6 +401,10 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     const dire = this.tree.directives.find(i => i.id === model.ref);
     if (dire) {
       return this.builder.getDirective(comp.module, comp.name);
+    }
+    const cpsi = this.tree.compositions.find(i => i.id === model.ref);
+    if (cpsi) {
+      return this.builder.getComposition(cpsi.module, cpsi.name);
     }
   }
 

@@ -24,6 +24,7 @@ export interface IComponentChildDefine extends IDirectiveChildDefine {
 }
 
 export interface IPageDefine extends IComponentChildDefine {
+  compositions?: IDirectiveChildDefine[];
   slot?: string;
 }
 
@@ -31,6 +32,7 @@ export interface ICompileContext {
   provider: "react";
   components?: IComponentDefine[];
   directives?: IDirectiveDefine[];
+  compositions?: IDirectiveDefine[];
   page?: IPageDefine;
 }
 
@@ -39,9 +41,10 @@ type IMapEntry = import("@amoebajs/builder").IMapEntry;
 
 export interface ISourceModule extends IModuleEntry {}
 
-export interface ICompileModule extends Omit<ISourceModule, "components" | "directives"> {
+export interface ICompileModule extends Omit<ISourceModule, "components" | "directives" | "compositions"> {
   components: IImportDeclaration[];
   directives: IImportDeclaration[];
+  compositions: IImportDeclaration[];
 }
 
 export type ICompileTypeMeta = "string" | "number" | "map" | "enums" | "onject";
@@ -151,7 +154,8 @@ export class Builder {
     Object.entries<ISourceModule>(modules).forEach(([name, md]) => {
       const components = Object.entries(md.components).map(([, cp]) => cp);
       const directives = Object.entries(md.directives).map(([, cp]) => cp);
-      this.moduleList.push({ ...md, components, directives });
+      const compositions = Object.entries(md.compositions).map(([, cp]) => cp);
+      this.moduleList.push({ ...md, components, directives, compositions });
     });
   }
 
@@ -161,5 +165,9 @@ export class Builder {
 
   public getDirective(module: string, name: string): IImportDeclaration {
     return this.builder["globalMap"].getDirective(module, name);
+  }
+
+  public getComposition(module: string, name: string): IImportDeclaration {
+    return this.builder["globalMap"].getComposition(module, name);
   }
 }

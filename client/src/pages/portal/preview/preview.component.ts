@@ -168,6 +168,9 @@ function createDefaultConfigs(): ICompileContext {
       { id: "GlobalState", name: "global-state", module: "ambjs-common-module", version: "0.0.1-beta.0" },
       { id: "ZentCssImport", name: "zent-base-css", module: "zent-module", version: "0.0.1" },
     ],
+    compositions: [
+      { id: "DemoComposition", name: "demo-composition", module: "ambjs-layout-module", version: "0.0.1-beta.0" },
+    ],
     page: {
       ref: "GridLayout",
       id: "GridLayoutPageRoot",
@@ -283,11 +286,8 @@ function createDefaultConfigs(): ICompileContext {
           },
         },
         {
-          ref: "GridLayout",
+          ref: "DemoComposition",
           id: "GridLayoutChild03",
-          input: {
-            basic: { background: { type: "literal", expression: "rgb(254, 38, 76)" } },
-          },
         },
         {
           ref: "GridLayout",

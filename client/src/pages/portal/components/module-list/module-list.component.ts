@@ -3,7 +3,7 @@ import { Builder, ICompileModule, IImportDeclaration } from "../../services/buil
 
 export interface IEntityCreate {
   id: string;
-  type: "component" | "directive";
+  type: "component" | "directive" | "composition";
   module: string;
   name: string;
   displayName: string | null;
@@ -15,9 +15,10 @@ export interface IDisplayImport extends IImportDeclaration {
   displayInfo: { displayName: string };
 }
 
-export interface IDisplayModule extends Omit<ICompileModule, "components" | "directives"> {
+export interface IDisplayModule extends Omit<ICompileModule, "components" | "directives" | "compositions"> {
   components: IDisplayImport[];
   directives: IDisplayImport[];
+  compositions: IDisplayImport[];
   displayInfo: {
     displayName: string;
     expanded: boolean;
@@ -68,6 +69,10 @@ export class ModuleListComponent implements OnInit, OnDestroy {
           displayInfo: { displayName: createDisplayName(e) },
         })),
         directives: (i.directives || []).map<IDisplayImport>(e => ({
+          ...e,
+          displayInfo: { displayName: createDisplayName(e) },
+        })),
+        compositions: (i.compositions || []).map<IDisplayImport>(e => ({
           ...e,
           displayInfo: { displayName: createDisplayName(e) },
         })),
