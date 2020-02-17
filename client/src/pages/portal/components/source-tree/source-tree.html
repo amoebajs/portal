@@ -56,7 +56,11 @@
 
 <ng-template #importNode let-model="model" let-type="type">
   <div class="import-decla">
-    <i nz-icon [nzType]=" type === 'component' ? 'appstore': 'api' " nzTheme="outline"></i>
+    <i
+      nz-icon
+      [nzType]=" type === 'component' ? 'appstore':type === 'composition'? 'code-sandbox': 'api' "
+      nzTheme="outline"
+    ></i>
     <span [title]="model.id">{{ model.displayInfo.displayName }}</span>
   </div>
 </ng-template>

@@ -14,6 +14,8 @@ module.exports = {
     alias: {
       "@amoebajs/builder$": "@amoebajs/builder/es/index.websdk",
       "@amoebajs/builder": "@amoebajs/builder/es",
+      "@amoebajs/basic-modules$": "@amoebajs/basic-modules/es/index",
+      "@amoebajs/basic-modules": "@amoebajs/basic-modules/es",
     },
   },
   optimization: {

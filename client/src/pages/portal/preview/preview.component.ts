@@ -158,18 +158,47 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 function createDefaultConfigs(): ICompileContext {
   return {
     provider: "react",
-    // framework: { sdk: "0.0.1" },
     components: [
-      { id: "GridLayout", name: "grid-layout", module: "ambjs-layout-module", version: "0.0.1-beta.0" },
-      { id: "StackLayout", name: "stack-layout", module: "ambjs-layout-module", version: "0.0.1-beta.0" },
-      { id: "ZentButton", name: "zent-button", module: "zent-module", version: "0.0.1" },
+      {
+        id: "GridLayout",
+        name: "grid-layout",
+        module: "ambjs-layout-module",
+        version: "0.0.1-beta.0",
+      },
+      {
+        id: "StackLayout",
+        name: "stack-layout",
+        module: "ambjs-layout-module",
+        version: "0.0.1-beta.0",
+      },
+      {
+        id: "ZentButton",
+        name: "button",
+        module: "zent-module",
+        version: "0.0.1",
+      },
     ],
     directives: [
-      { id: "GlobalState", name: "global-state", module: "ambjs-common-module", version: "0.0.1-beta.0" },
-      { id: "ZentCssImport", name: "zent-base-css", module: "zent-module", version: "0.0.1" },
+      {
+        id: "GlobalState",
+        name: "global-state",
+        module: "ambjs-common-module",
+        version: "0.0.1-beta.0",
+      },
+      {
+        id: "ZentCssImport",
+        name: "base-css",
+        module: "zent-module",
+        version: "0.0.1",
+      },
     ],
     compositions: [
-      { id: "DemoComposition", name: "demo-composition", module: "ambjs-layout-module", version: "0.0.1-beta.0" },
+      {
+        id: "DemoComposition",
+        name: "demo-composition",
+        module: "ambjs-layout-module",
+        version: "0.0.1-beta.0",
+      },
     ],
     page: {
       ref: "GridLayout",
@@ -177,12 +206,24 @@ function createDefaultConfigs(): ICompileContext {
       slot: "app",
       input: {
         basic: {
-          width: { type: "literal", expression: "100vw" },
-          height: { type: "literal", expression: "100vh" },
+          width: {
+            type: "literal",
+            expression: "100vw",
+          },
+          height: {
+            type: "literal",
+            expression: "100vh",
+          },
         },
         grid: {
-          rowCount: { type: "literal", expression: 2 },
-          columnCount: { type: "literal", expression: 3 },
+          rowCount: {
+            type: "literal",
+            expression: 2,
+          },
+          columnCount: {
+            type: "literal",
+            expression: 3,
+          },
           rowSizes: {
             type: "literal",
             expression: [
@@ -201,18 +242,30 @@ function createDefaultConfigs(): ICompileContext {
         },
       },
       directives: [
-        { ref: "ZentCssImport", id: "ZentCssImportInstance01" },
+        {
+          ref: "ZentCssImport",
+          id: "ZentCssImportInstance01",
+        },
         {
           ref: "GlobalState",
           id: "GlobalStateInstance01",
           input: {
-            name: { type: "literal", expression: "AppContext" },
+            name: {
+              type: "literal",
+              expression: "AppContext",
+            },
             state: {
               type: "literal",
               expression: [
                 ["demoNumber", 123456],
                 ["buttonName", "XXXXXXXXXX"],
-                ["objectState", { a: 24523, b: false }],
+                [
+                  "objectState",
+                  {
+                    a: 24523,
+                    b: false,
+                  },
+                ],
               ],
             },
           },
@@ -224,8 +277,14 @@ function createDefaultConfigs(): ICompileContext {
           id: "GridLayoutChild01",
           input: {
             basic: {
-              background: { type: "literal", expression: "#fea500" },
-              padding: { type: "literal", expression: [["all", "10px"]] },
+              background: {
+                type: "literal",
+                expression: "#fea500",
+              },
+              padding: {
+                type: "literal",
+                expression: [["all", "10px"]],
+              },
             },
           },
           children: [
@@ -233,28 +292,55 @@ function createDefaultConfigs(): ICompileContext {
               ref: "StackLayout",
               id: "StackLayoutChild01",
               input: {
-                basic: { background: { type: "literal", expression: "#888888" } },
+                basic: {
+                  background: {
+                    type: "literal",
+                    expression: "#888888",
+                  },
+                },
               },
               children: [
                 {
                   ref: "ZentButton",
                   id: "ZentButtonInstance02",
-                  props: { children: { type: "literal", syntaxType: "string", expression: "BUTTON01" } },
+                  props: {
+                    children: {
+                      type: "literal",
+                      syntaxType: "string",
+                      expression: "BUTTON01",
+                    },
+                  },
                 },
                 {
                   ref: "ZentButton",
                   id: "ZentButtonInstance03",
                   props: {
-                    children: { type: "literal", syntaxType: "string", expression: "BUTTON02" },
-                    type: { type: "literal", syntaxType: "string", expression: "primary" },
+                    children: {
+                      type: "literal",
+                      syntaxType: "string",
+                      expression: "BUTTON02",
+                    },
+                    type: {
+                      type: "literal",
+                      syntaxType: "string",
+                      expression: "primary",
+                    },
                   },
                 },
                 {
                   ref: "ZentButton",
                   id: "ZentButtonInstance04",
                   props: {
-                    children: { type: "literal", syntaxType: "string", expression: "BUTTON03" },
-                    type: { type: "literal", syntaxType: "string", expression: "danger" },
+                    children: {
+                      type: "literal",
+                      syntaxType: "string",
+                      expression: "BUTTON03",
+                    },
+                    type: {
+                      type: "literal",
+                      syntaxType: "string",
+                      expression: "danger",
+                    },
                   },
                 },
               ],
@@ -266,7 +352,10 @@ function createDefaultConfigs(): ICompileContext {
           id: "GridLayoutChild02",
           input: {
             basic: {
-              background: { type: "literal", expression: "#323233" },
+              background: {
+                type: "literal",
+                expression: "#323233",
+              },
               borderColor: {
                 type: "literal",
                 expression: [
@@ -274,7 +363,10 @@ function createDefaultConfigs(): ICompileContext {
                   ["bottom", "#fea588"],
                 ],
               },
-              borderWidth: { type: "literal", expression: [["all", "4px"]] },
+              borderWidth: {
+                type: "literal",
+                expression: [["all", "4px"]],
+              },
               borderStyle: {
                 type: "literal",
                 expression: [
@@ -288,22 +380,47 @@ function createDefaultConfigs(): ICompileContext {
         {
           ref: "DemoComposition",
           id: "GridLayoutChild03",
+          input: {
+            loadingStateName: {
+              type: "literal",
+              expression: "objectState.b",
+            },
+          },
         },
         {
           ref: "GridLayout",
           id: "GridLayoutChild04",
           input: {
-            basic: { background: { type: "literal", expression: "rgb(54, 158, 106)" } },
+            basic: {
+              background: {
+                type: "literal",
+                expression: "rgb(54, 158, 106)",
+              },
+            },
           },
           children: [
             {
               ref: "ZentButton",
               id: "ZentButtonInstance01",
               props: {
-                loading: { type: "state", expression: "objectState.b" },
-                children: { type: "state", expression: "buttonName" },
-                size: { type: "literal", syntaxType: "string", expression: "large" },
-                type: { type: "literal", syntaxType: "string", expression: "danger" },
+                loading: {
+                  type: "state",
+                  expression: "objectState.b",
+                },
+                children: {
+                  type: "state",
+                  expression: "buttonName",
+                },
+                size: {
+                  type: "literal",
+                  syntaxType: "string",
+                  expression: "large",
+                },
+                type: {
+                  type: "literal",
+                  syntaxType: "string",
+                  expression: "danger",
+                },
               },
             },
           ],
@@ -313,37 +430,85 @@ function createDefaultConfigs(): ICompileContext {
         rowStart: {
           type: "childRefs",
           expression: [
-            { id: "GridLayoutChild01", value: 1 },
-            { id: "GridLayoutChild02", value: 1 },
-            { id: "GridLayoutChild03", value: 2 },
-            { id: "GridLayoutChild04", value: 2 },
+            {
+              id: "GridLayoutChild01",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild02",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild03",
+              value: 2,
+            },
+            {
+              id: "GridLayoutChild04",
+              value: 2,
+            },
           ],
         },
         columnStart: {
           type: "childRefs",
           expression: [
-            { id: "GridLayoutChild01", value: 1 },
-            { id: "GridLayoutChild02", value: 2 },
-            { id: "GridLayoutChild03", value: 1 },
-            { id: "GridLayoutChild04", value: 3 },
+            {
+              id: "GridLayoutChild01",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild02",
+              value: 2,
+            },
+            {
+              id: "GridLayoutChild03",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild04",
+              value: 3,
+            },
           ],
         },
         rowSpan: {
           type: "childRefs",
           expression: [
-            { id: "GridLayoutChild01", value: 1 },
-            { id: "GridLayoutChild02", value: 1 },
-            { id: "GridLayoutChild03", value: 1 },
-            { id: "GridLayoutChild04", value: 1 },
+            {
+              id: "GridLayoutChild01",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild02",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild03",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild04",
+              value: 1,
+            },
           ],
         },
         columnSpan: {
           type: "childRefs",
           expression: [
-            { id: "GridLayoutChild01", value: 1 },
-            { id: "GridLayoutChild02", value: 2 },
-            { id: "GridLayoutChild03", value: 2 },
-            { id: "GridLayoutChild04", value: 1 },
+            {
+              id: "GridLayoutChild01",
+              value: 1,
+            },
+            {
+              id: "GridLayoutChild02",
+              value: 2,
+            },
+            {
+              id: "GridLayoutChild03",
+              value: 2,
+            },
+            {
+              id: "GridLayoutChild04",
+              value: 1,
+            },
           ],
         },
       },
