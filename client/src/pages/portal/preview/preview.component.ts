@@ -196,7 +196,7 @@ function createDefaultConfigs(): ICompileContext {
       {
         id: "DemoComposition",
         name: "demo-composition",
-        module: "ambjs-layout-module",
+        module: "ambjs-composition-module",
         version: "0.0.1-beta.0",
       },
     ],
