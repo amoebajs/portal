@@ -48,6 +48,11 @@ interface IDisplayEntity extends IPageDefine {
 
 type XType = "component" | "directive" | "composition";
 
+interface CleanPayload {
+  type: "c" | "d" | "cs";
+  value: any;
+}
+
 @Component({
   selector: "app-portal-source-tree",
   templateUrl: "./source-tree.html",
@@ -417,6 +422,10 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     if (dire) {
       return dire;
     }
+    const cops = this.tree.compositions.find(i => i.module === module && i.name === name);
+    if (cops) {
+      return cops;
+    }
   }
 }
 
@@ -430,13 +439,16 @@ export function callContextValidation(ctx: ICompileContext) {
   if (!page) {
     context.components = [];
     context.directives = [];
+    context.compositions = [];
     return { ...context };
   }
-  const importGroup: Record<string, any> = {};
+  const importGroup: Record<string, CleanPayload> = {};
   const existDirectives: Record<string, any> = {};
   const existComponents: Record<string, any> = {};
+  const existCompositions: Record<string, any> = {};
   (context.components || []).forEach(e => (importGroup[e.id] = { type: "c", value: e }));
   (context.directives || []).forEach(e => (importGroup[e.id] = { type: "d", value: e }));
+  (context.compositions || []).forEach(e => (importGroup[e.id] = { type: "cs", value: e }));
   const directives = page.directives || [];
   for (const d of directives) {
     const element = importGroup[d.ref];
@@ -444,20 +456,34 @@ export function callContextValidation(ctx: ICompileContext) {
       existDirectives[d.ref] = element.value;
     }
   }
-  doChildrenRefCheck(page, importGroup, existComponents);
+  doChildrenRefCheck(page, importGroup, existComponents, existCompositions);
   context.components = Object.entries(existComponents).map(([, e]) => e);
   context.directives = Object.entries(existDirectives).map(([, e]) => e);
   return { ...context };
 }
 
-function doChildrenRefCheck(page: IPageDefine, importGroup: Record<string, any>, existComponents: Record<string, any>) {
+function doChildrenRefCheck(
+  page: IPageDefine,
+  importGroup: Record<string, CleanPayload>,
+  existComponents: Record<string, any>,
+  existCompositions: Record<string, any>,
+) {
   const children = page.children || [];
   for (const d of children) {
     const element = importGroup[d.ref];
     if (element) {
-      existComponents[d.ref] = element.value;
+      switch (element.type) {
+        case "c":
+          existComponents[d.ref] = element.value;
+          break;
+        case "cs":
+          existCompositions[d.ref] = element.value;
+          break;
+        default:
+          break;
+      }
     }
-    doChildrenRefCheck(d, importGroup, existComponents);
+    doChildrenRefCheck(d, importGroup, existComponents, existCompositions);
   }
 }
 
