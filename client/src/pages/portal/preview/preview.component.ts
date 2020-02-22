@@ -6,7 +6,7 @@ import { NzMessageService } from "ng-zorro-antd";
 import { Project } from "@stackblitz/sdk/typings/interfaces";
 import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
-import { ICompileContext } from "../services/builder.service";
+import { ICompileContext, Builder } from "../services/builder.service";
 import { callContextValidation } from "../components/source-tree/source-tree.component";
 
 const CommonDepts = {
@@ -57,7 +57,12 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     return Object.entries(this.lastDepts);
   }
 
-  constructor(private renderer: Renderer2, private portal: PortalService, private message: NzMessageService) {
+  constructor(
+    private renderer: Renderer2,
+    private portal: PortalService,
+    private builder: Builder,
+    private message: NzMessageService,
+  ) {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
   }
 
@@ -99,12 +104,15 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   private async runUpdate(confs?: any) {
     try {
       const configs = confs || this.createContext;
-      const result = await this.portal.createSource(configs);
-      const hasDeptsChange = this.checkIfAllEqual(result.data.dependencies);
+      // const result = await this.portal.createSource(configs);
+      // 使用websdk构建源代码，脱离服务器构建
+      const result = await this.builder.createSource(configs);
+      console.log(result.sourceCode);
+      const hasDeptsChange = this.checkIfAllEqual(result.dependencies);
       if (this.vm && hasDeptsChange) {
         this.vm.applyFsDiff({
           create: {
-            "src/index.js": result.data.source,
+            "src/index.js": result.sourceCode,
           },
           destroy: [],
         });
@@ -114,11 +122,11 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
           this.renderer.removeChild(this.previewRender.nativeElement, firstChild);
           this.vm = null;
         }
-        this.project.files["src/index.js"] = result.data.source;
-        this.lastDepts = { ...result.data.dependencies };
+        this.project.files["src/index.js"] = result.sourceCode;
+        this.lastDepts = { ...result.dependencies };
         this.project.dependencies = {
           ...CommonDepts,
-          ...result.data.dependencies,
+          ...result.dependencies,
         };
         this.onStart();
       }
@@ -202,7 +210,7 @@ function createDefaultConfigs(): ICompileContext {
     ],
     page: {
       ref: "GridLayout",
-      id: "GridLayoutPageRoot",
+      id: "App",
       slot: "app",
       input: {
         basic: {

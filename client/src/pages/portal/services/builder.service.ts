@@ -95,9 +95,7 @@ declare global {
 
 @Injectable()
 export class Builder {
-  private _init = false;
   private _initing = false;
-  private _loaded = false;
 
   private factory!: import("#websdk").BuilderFactory;
   public SDK!: typeof import("@amoebajs/builder");
@@ -105,7 +103,7 @@ export class Builder {
   public builder!: import("@amoebajs/builder").Builder;
   public moduleList: ICompileModule[] = [];
 
-  private readonly _onLoad = new BehaviorSubject<boolean | Error>(this._loaded);
+  private readonly _onLoad = new BehaviorSubject<boolean | Error>(false);
   public readonly onLoad = this._onLoad.asObservable();
 
   private readonly _onLoadError = new Subject<Error>();
@@ -169,5 +167,19 @@ export class Builder {
 
   public getComposition(module: string, name: string): IImportDeclaration {
     return this.builder["globalMap"].getComposition(module, name);
+  }
+
+  public async createSource(configs: import("@amoebajs/builder").IPageCreateOptions) {
+    if (!this._onLoad.getValue()) throw new Error("websdk has not been loaded.");
+    return this.builder.createSource({
+      configs,
+      prettier: false,
+      transpile: {
+        module: "es2015",
+        target: "es2015",
+        enabled: true,
+        jsx: "react",
+      },
+    });
   }
 }

@@ -19,8 +19,8 @@
     "update:core": "yarn add @amoebajs/builder @amoebajs/basic-modules"
   },
   "dependencies": {
-    "@amoebajs/basic-modules": "^0.0.1-alpha.1582359785572",
-    "@amoebajs/builder": "^0.0.2-alpha.1582358568968",
+    "@amoebajs/basic-modules": "^0.0.1-alpha.1582385553342",
+    "@amoebajs/builder": "^0.0.2-alpha.1582385412899",
     "@nestjs/common": "^6.7.2",
     "@nestjs/core": "^6.7.2",
     "@nestjs/platform-express": "^6.7.2",
