@@ -134,7 +134,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     }
     const parentPaths = (paths && paths.split("#")) || [];
     parentPaths.push(model.id);
-    const meta = this.getEntityMetaWithRef(model);
+    const meta = this.getEntityMetaWithRef(model, type);
     this.lastModalOk = false;
     this.tempEntityData = {
       id: model.id,
@@ -199,8 +199,14 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  public checkIfShowChildren(entity: IDisplay<IPageDefine>) {
-    return entity.children && entity.children.length > 0 && entity.displayInfo.expanded;
+  public checkIfShowChildren(entity: IDisplay<IPageDefine>, type: XType = "component") {
+    if (type === "component") {
+      return entity.children && entity.children.length > 0 && entity.displayInfo.expanded;
+    }
+    if (type === "directive") {
+      return entity.directives && entity.directives.length > 0 && entity.displayInfo.expanded;
+    }
+    return false;
   }
 
   public saveEntityTemp(e: IEntityCreate) {
@@ -395,21 +401,34 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         },
       };
     }
+    const dire = this.tree.directives.find(i => i.id === ref);
+    if (dire) {
+      return {
+        ...others,
+        displayInfo: {
+          displayName: dire.displayInfo.displayName,
+          expanded: true,
+        },
+      };
+    }
   }
 
-  private getEntityMetaWithRef(model: IDisplay<IDisplayEntity>) {
-    console.log(model);
-    const comp = this.tree.components.find(i => i.id === model.ref);
-    if (comp) {
-      return this.builder.getComponent(comp.module, comp.name);
-    }
-    const dire = this.tree.directives.find(i => i.id === model.ref);
-    if (dire) {
-      return this.builder.getDirective(comp.module, comp.name);
-    }
-    const cpsi = this.tree.compositions.find(i => i.id === model.ref);
-    if (cpsi) {
-      return this.builder.getComposition(cpsi.module, cpsi.name);
+  private getEntityMetaWithRef(model: IDisplay<IDisplayEntity>, type: XType) {
+    if (type === "component") {
+      const comp = this.tree.components.find(i => i.id === model.ref);
+      if (comp) {
+        return this.builder.getComponent(comp.module, comp.name);
+      }
+    } else if (type === "composition") {
+      const cpsi = this.tree.compositions.find(i => i.id === model.ref);
+      if (cpsi) {
+        return this.builder.getComposition(cpsi.module, cpsi.name);
+      }
+    } else {
+      const dire = this.tree.directives.find(i => i.id === model.ref);
+      if (dire) {
+        return this.builder.getDirective(dire.module, dire.name);
+      }
     }
   }
 

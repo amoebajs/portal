@@ -69,10 +69,21 @@
   <div *ngIf="model" class="section" [class.not-root]="!!paths">
     <div class="common-decla">
       <div class="common-title">
-        <ng-container *ngTemplateOutlet="entityTitleContent; context: { model: model }"></ng-container>
+        <ng-container *ngTemplateOutlet="entityTitleContent; context: { model: model, type: type }"></ng-container>
         <ng-container
           *ngTemplateOutlet="entityActions; context: { model: model, paths: paths, type: type }"
         ></ng-container>
+      </div>
+      <div class="entity-children" *ngIf="checkIfShowChildren(model, 'directive')">
+        <ng-container *ngFor="let directiveNode of model.directives">
+          <ng-container
+            *ngTemplateOutlet="entityNode; context: {
+              model: directiveNode,
+              paths: !paths? model.id: (paths + '#' + model.id),
+              type: 'directive'
+            }"
+          ></ng-container>
+        </ng-container>
       </div>
       <div class="entity-children" *ngIf="checkIfShowChildren(model)">
         <ng-container *ngFor="let childNode of model.children">
@@ -89,7 +100,7 @@
   </div>
 </ng-template>
 
-<ng-template #entityTitleContent let-model="model">
+<ng-template #entityTitleContent let-model="model" let-type="type">
   <div>
     <ng-container
       *ngTemplateOutlet="expandButton; context: {
@@ -99,7 +110,7 @@
         type: 'entity'
       }"
     ></ng-container>
-    <i nz-icon nzType="layout" nzTheme="outline"></i>
+    <i nz-icon [nzType]="type === 'directive'? 'control': 'layout'" nzTheme="outline"></i>
     <span [title]="model.id">{{ model.displayInfo.displayName }}</span>
   </div>
 </ng-template>
