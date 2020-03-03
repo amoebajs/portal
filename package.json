@@ -14,7 +14,7 @@
     "install:client": "cd client && yarn install",
     "install:server": "cd server && yarn install",
     "install:all": "yarn && yarn install:client && yarn install:server && yarn build:websdk",
-    "update:core": "cd server && yarn update:core",
+    "update:core": "cd server && yarn update:core && cd .. && yarn install:all",
     "start": "cd server && yarn start",
     "start:watch": "cd server && yarn start --watch",
     "start:prod": "cd server && yarn start:prod",
