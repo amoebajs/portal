@@ -149,12 +149,14 @@ export class Builder {
     this.SDK = window.EwsContext.BuilderSdk;
     this.builder = this.factory.builder;
     const modules = this.builder["globalMap"].maps.modules;
+    console.log(modules);
     Object.entries<ISourceModule>(modules).forEach(([name, md]) => {
       const components = Object.entries(md.components).map(([, cp]) => cp);
       const directives = Object.entries(md.directives).map(([, cp]) => cp);
       const compositions = Object.entries(md.compositions).map(([, cp]) => cp);
       this.moduleList.push({ ...md, components, directives, compositions });
     });
+    console.log(this.moduleList);
   }
 
   public getComponent(module: string, name: string): IImportDeclaration {

@@ -468,26 +468,37 @@ export function callContextValidation(ctx: ICompileContext) {
   (context.components || []).forEach(e => (importGroup[e.id] = { type: "c", value: e }));
   (context.directives || []).forEach(e => (importGroup[e.id] = { type: "d", value: e }));
   (context.compositions || []).forEach(e => (importGroup[e.id] = { type: "cs", value: e }));
-  const directives = page.directives || [];
-  for (const d of directives) {
-    const element = importGroup[d.ref];
-    if (element) {
-      existDirectives[d.ref] = element.value;
-    }
-  }
-  doChildrenRefCheck(page, importGroup, existComponents, existCompositions);
+  doChildrenRefCheck(page, importGroup, existComponents, existCompositions, existDirectives, true);
   context.components = Object.entries(existComponents).map(([, e]) => e);
   context.directives = Object.entries(existDirectives).map(([, e]) => e);
+  context.compositions = Object.entries(existCompositions).map(([, e]) => e);
   return { ...context };
 }
 
+interface IPayload {
+  ref: string;
+  children?: IPayload[];
+  directives?: IPayload[];
+  root?: boolean;
+}
+
 function doChildrenRefCheck(
-  page: IPageDefine,
+  page: IPayload,
   importGroup: Record<string, CleanPayload>,
   existComponents: Record<string, any>,
   existCompositions: Record<string, any>,
+  existDirectives: Record<string, any>,
+  checkSelf = false,
 ) {
-  const children = page.children || [];
+  const directives: IPayload[] = page.directives || [];
+  for (const e of directives) {
+    const element = importGroup[e.ref];
+    if (element) {
+      existDirectives[e.ref] = element.value;
+    }
+  }
+  const children: IPayload[] = [...(page.children || [])];
+  if (checkSelf) children.unshift({ ref: page.ref, root: true });
   for (const d of children) {
     const element = importGroup[d.ref];
     if (element) {
@@ -502,7 +513,9 @@ function doChildrenRefCheck(
           break;
       }
     }
-    doChildrenRefCheck(d, importGroup, existComponents, existCompositions);
+    if (!d.root) {
+      doChildrenRefCheck(d, importGroup, existComponents, existDirectives, existCompositions);
+    }
   }
 }
 
