@@ -107,15 +107,6 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
       const configs = confs || this.createContext;
       // const result = await this.portal.createSource(configs);
       // 使用websdk构建源代码，脱离服务器构建
-      console.log(configs);
-      const components = configs.components || [];
-      for (const c of components) {
-        console.log(this.builder.getComponent(c.module, c.name));
-      }
-      const directives = configs.directives || [];
-      for (const d of directives) {
-        console.log(this.builder.getDirective(d.module, d.name));
-      }
       const result = await this.builder.createSource(configs);
       console.log(result.sourceCode);
       const hasDeptsChange = this.checkIfAllEqual(result.dependencies);
