@@ -468,10 +468,11 @@ export function callContextValidation(ctx: ICompileContext) {
   (context.components || []).forEach(e => (importGroup[e.id] = { type: "c", value: e }));
   (context.directives || []).forEach(e => (importGroup[e.id] = { type: "d", value: e }));
   (context.compositions || []).forEach(e => (importGroup[e.id] = { type: "cs", value: e }));
-  doChildrenRefCheck(page, importGroup, existComponents, existCompositions, existDirectives, true);
+  doChildrenRefCheck(page, importGroup, { existComponents, existCompositions, existDirectives }, true);
   context.components = Object.entries(existComponents).map(([, e]) => e);
   context.directives = Object.entries(existDirectives).map(([, e]) => e);
   context.compositions = Object.entries(existCompositions).map(([, e]) => e);
+  console.log(context);
   return { ...context };
 }
 
@@ -485,16 +486,19 @@ interface IPayload {
 function doChildrenRefCheck(
   page: IPayload,
   importGroup: Record<string, CleanPayload>,
-  existComponents: Record<string, any>,
-  existCompositions: Record<string, any>,
-  existDirectives: Record<string, any>,
+  exists: {
+    existComponents: Record<string, any>;
+    existCompositions: Record<string, any>;
+    existDirectives: Record<string, any>;
+  },
   checkSelf = false,
 ) {
   const directives: IPayload[] = page.directives || [];
   for (const e of directives) {
+    console.log(e);
     const element = importGroup[e.ref];
     if (element) {
-      existDirectives[e.ref] = element.value;
+      exists.existDirectives[e.ref] = element.value;
     }
   }
   const children: IPayload[] = [...(page.children || [])];
@@ -504,17 +508,17 @@ function doChildrenRefCheck(
     if (element) {
       switch (element.type) {
         case "c":
-          existComponents[d.ref] = element.value;
+          exists.existComponents[d.ref] = element.value;
           break;
         case "cs":
-          existCompositions[d.ref] = element.value;
+          exists.existCompositions[d.ref] = element.value;
           break;
         default:
           break;
       }
     }
     if (!d.root) {
-      doChildrenRefCheck(d, importGroup, existComponents, existDirectives, existCompositions);
+      doChildrenRefCheck(d, importGroup, exists);
     }
   }
 }
