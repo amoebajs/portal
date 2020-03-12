@@ -161,6 +161,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   }
 
   private trackPreviewIfNeed(confs?: any) {
+    // console.log(confs || this.createContext);
     if (this.showPreview.preview) {
       this.runUpdate(confs);
     }

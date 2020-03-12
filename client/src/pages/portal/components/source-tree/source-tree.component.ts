@@ -157,7 +157,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
-    const { found, path, index } = this.findPath((paths && paths.split("#")) || [], model);
+    const { found, path, index } = this.findPath((paths && paths.split("#")) || [], { id: model.id, type });
     if (found) {
       this.willDelete = found;
       const ref = this.modal.warning({
@@ -233,18 +233,21 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createOrUpdateNode(e: IEntityEditResult) {
-    const { found, path, index } = this.findPath(this.tempParentPath, e);
+    // console.log(e);
+    const { found, path, index } = this.findPath(this.tempParentPath, { id: e.id, type: e.type });
     const { module: md, name, id, version, type: createType, ...others } = e;
+    // console.log({ found, path, index });
     if (!found) {
       //create
-      this.createNewNode(md, name, version, createType, path, id, others);
+      this.createNewNode(e.type, md, name, version, createType, path, id, others);
     } else {
       // edit
-      this.updateExistNode(path, others, index);
+      this.updateExistNode(e.type, path, others, index);
     }
   }
 
   private updateExistNode(
+    type: XType,
     path: string,
     others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name">,
     index: number,
@@ -254,16 +257,24 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         ...this.context.page,
         ...others,
       };
-    } else {
+    } else if (type !== "directive") {
       const children = get(this.context, path);
       children[index] = {
         ...children[index],
+        ...others,
+      };
+    } else {
+      const directives = get(this.context, path);
+      // console.log([directives, others]);
+      directives[index] = {
+        ...directives[index],
         ...others,
       };
     }
   }
 
   private createNewNode(
+    type: XType,
     md: string,
     name: string,
     version: string | number,
@@ -279,12 +290,23 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         ref: target.id,
         ...others,
       };
-    } else {
+    } else if (type !== "directive") {
       let children = get(this.context, path);
       if (!children) {
         set(this.context, path, (children = []));
       }
       children.push({
+        id,
+        ref: target.id,
+        ...others,
+      });
+    } else {
+      // TODO
+      let directives = get(this.context, path);
+      if (!directives) {
+        set(this.context, path, (directives = []));
+      }
+      directives.push({
         id,
         ref: target.id,
         ...others,
@@ -315,7 +337,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     return target;
   }
 
-  private findPath(paths: string[], model: { id: string }) {
+  private findPath(paths: string[], model: { id: string; type: XType }) {
     let found!: IDisplay<IDisplayEntity>;
     let path: string = "";
     let isRoot = true;
@@ -323,24 +345,45 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.tree.page) {
       return { found: undefined, path: "['page']", index: -1 };
     }
-    let list: IDisplay<IDisplayEntity>[] = [this.tree.page];
-    paths.push(model.id);
-    for (const ph of paths) {
-      lastIndex = list.findIndex(i => i.id === ph);
-      if (isRoot) {
-        isRoot = false;
-        path += ph === model.id ? "['page']" : "['page']['children']";
-      } else if (ph !== model.id) {
-        path += `[${lastIndex}]['children']`;
+    if (model.type === "directive") {
+      let target: IDisplay<IDisplayEntity> = this.tree.page;
+      let list: IDisplay<IDisplayEntity>[] = [this.tree.page];
+      for (let index = 0; index < paths.length; index++) {
+        const ph = paths[index];
+        if (index === 0) {
+          path += "['page']";
+          list = target.children || [];
+        } else if (index === paths.length - 1) {
+          lastIndex = (target.directives || []).findIndex(i => i.id === ph);
+          path += `['directives']`;
+        } else {
+          lastIndex = list.findIndex(i => i.id === ph);
+          target = list[lastIndex];
+          list = target.children || [];
+          path += `['children'][${lastIndex}]`;
+        }
       }
-      found = list[lastIndex];
-      if (!found || !found.children) continue;
-      list = found.children || [];
-      if (ph === model.id) {
-        break;
+      return { index: lastIndex, found: target, path };
+    } else {
+      let list: IDisplay<IDisplayEntity>[] = [this.tree.page];
+      paths.push(model.id);
+      for (const ph of paths) {
+        lastIndex = list.findIndex(i => i.id === ph);
+        if (isRoot) {
+          isRoot = false;
+          path += ph === model.id ? "['page']" : "['page']['children']";
+        } else if (ph !== model.id) {
+          path += `[${lastIndex}]['children']`;
+        }
+        found = list[lastIndex];
+        if (!found || !found.children) continue;
+        list = found.children || [];
+        if (ph === model.id) {
+          break;
+        }
       }
+      return { index: lastIndex, found, path };
     }
-    return { index: lastIndex, found, path };
   }
 
   private initTree(context: ICompileContext) {
@@ -472,7 +515,7 @@ export function callContextValidation(ctx: ICompileContext) {
   context.components = Object.entries(existComponents).map(([, e]) => e);
   context.directives = Object.entries(existDirectives).map(([, e]) => e);
   context.compositions = Object.entries(existCompositions).map(([, e]) => e);
-  console.log(context);
+  // console.log(context);
   return { ...context };
 }
 
@@ -495,7 +538,7 @@ function doChildrenRefCheck(
 ) {
   const directives: IPayload[] = page.directives || [];
   for (const e of directives) {
-    console.log(e);
+    // console.log(e);
     const element = importGroup[e.ref];
     if (element) {
       exists.existDirectives[e.ref] = element.value;
