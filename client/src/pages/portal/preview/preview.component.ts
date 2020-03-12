@@ -88,8 +88,10 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 
   onTextareaChange(value: string) {
     try {
-      console.log(yamljs.safeLoad(value));
-      this.createContext = callContextValidation(yamljs.safeLoad(value));
+      const newValue = yamljs.safeLoad(value);
+      console.log(newValue);
+      console.log(JSON.stringify(newValue, null, "  "));
+      this.createContext = callContextValidation(newValue);
       this.trackPreviewIfNeed();
     } catch (error) {
       console.log(error);
@@ -176,37 +178,23 @@ function createDefaultConfigs(): ICompileContext {
         version: "0.0.1-beta.0",
       },
       {
-        id: "StackLayout",
-        name: "stack-layout",
-        module: "ambjs-layout-module",
-        version: "0.0.1-beta.0",
-      },
-      {
-        id: "ZentButton",
-        name: "button",
+        id: "ZentForm",
+        name: "universal-form",
         module: "zent-module",
-        version: "0.0.1",
+        version: "0.0.1-beta.0",
       },
     ],
     directives: [
       {
-        id: "GlobalState",
-        name: "global-state",
-        module: "ambjs-common-module",
+        id: "ZentFormField",
+        name: "universal-form-field",
+        module: "zent-module",
         version: "0.0.1-beta.0",
       },
       {
-        id: "ZentCssImport",
-        name: "base-css",
+        id: "ZentFormSubmit",
+        name: "universal-form-submit",
         module: "zent-module",
-        version: "0.0.1",
-      },
-    ],
-    compositions: [
-      {
-        id: "DemoComposition",
-        name: "demo-composition",
-        module: "ambjs-composition-module",
         version: "0.0.1-beta.0",
       },
     ],
@@ -216,312 +204,212 @@ function createDefaultConfigs(): ICompileContext {
       slot: "app",
       input: {
         basic: {
-          width: {
-            type: "literal",
-            expression: "100vw",
-          },
-          height: {
-            type: "literal",
-            expression: "100vh",
-          },
-        },
-        grid: {
-          rowCount: {
-            type: "literal",
-            expression: 2,
-          },
-          columnCount: {
-            type: "literal",
-            expression: 3,
-          },
-          rowSizes: {
+          padding: {
             type: "literal",
             expression: [
-              [1, 50],
-              [2, 50],
-            ],
-          },
-          columnSizes: {
-            type: "literal",
-            expression: [
-              [1, 30],
-              [2, 40],
-              [3, 30],
+              ["left", "24px"],
+              ["right", "24px"],
+              ["top", "36px"],
             ],
           },
         },
       },
-      directives: [
-        {
-          ref: "ZentCssImport",
-          id: "ZentCssImportInstance01",
-        },
-        {
-          ref: "GlobalState",
-          id: "GlobalStateInstance01",
-          input: {
-            name: {
-              type: "literal",
-              expression: "AppContext",
-            },
-            state: {
-              type: "literal",
-              expression: [
-                ["demoNumber", 123456],
-                ["buttonName", "XXXXXXXXXX"],
-                [
-                  "objectState",
-                  {
-                    a: 24523,
-                    b: false,
-                  },
-                ],
-              ],
-            },
-          },
-        },
-      ],
       children: [
         {
-          ref: "GridLayout",
-          id: "GridLayoutChild01",
-          input: {
-            basic: {
-              background: {
-                type: "literal",
-                expression: "#fea500",
-              },
-              padding: {
-                type: "literal",
-                expression: [["all", "10px"]],
-              },
-            },
-          },
-          children: [
+          ref: "ZentForm",
+          id: "AppInnerSection01",
+          directives: [
             {
-              ref: "StackLayout",
-              id: "StackLayoutChild01",
+              ref: "ZentFormField",
+              id: "FormFieldInstance01",
               input: {
-                basic: {
-                  background: {
-                    type: "literal",
-                    expression: "#888888",
-                  },
-                },
-              },
-              children: [
-                {
-                  ref: "ZentButton",
-                  id: "ZentButtonInstance02",
-                  props: {
-                    children: {
-                      type: "literal",
-                      syntaxType: "string",
-                      expression: "BUTTON01",
-                    },
-                  },
-                },
-                {
-                  ref: "ZentButton",
-                  id: "ZentButtonInstance03",
-                  props: {
-                    children: {
-                      type: "literal",
-                      syntaxType: "string",
-                      expression: "BUTTON02",
-                    },
-                    type: {
-                      type: "literal",
-                      syntaxType: "string",
-                      expression: "primary",
-                    },
-                  },
-                },
-                {
-                  ref: "ZentButton",
-                  id: "ZentButtonInstance04",
-                  props: {
-                    children: {
-                      type: "literal",
-                      syntaxType: "string",
-                      expression: "BUTTON03",
-                    },
-                    type: {
-                      type: "literal",
-                      syntaxType: "string",
-                      expression: "danger",
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          ref: "GridLayout",
-          id: "GridLayoutChild02",
-          input: {
-            basic: {
-              background: {
-                type: "literal",
-                expression: "#323233",
-              },
-              borderColor: {
-                type: "literal",
-                expression: [
-                  ["all", "#ffffff"],
-                  ["bottom", "#fea588"],
-                ],
-              },
-              borderWidth: {
-                type: "literal",
-                expression: [["all", "4px"]],
-              },
-              borderStyle: {
-                type: "literal",
-                expression: [
-                  ["all", "hidden"],
-                  ["bottom", "solid"],
-                ],
-              },
-            },
-          },
-        },
-        {
-          ref: "DemoComposition",
-          id: "GridLayoutChild03",
-          input: {
-            loadingStateName: {
-              type: "literal",
-              expression: "objectState.b",
-            },
-          },
-        },
-        {
-          ref: "GridLayout",
-          id: "GridLayoutChild04",
-          input: {
-            basic: {
-              background: {
-                type: "literal",
-                expression: "rgb(54, 158, 106)",
-              },
-            },
-          },
-          children: [
-            {
-              ref: "ZentButton",
-              id: "ZentButtonInstance01",
-              props: {
-                loading: {
-                  type: "state",
-                  expression: "objectState.b",
-                },
-                children: {
-                  type: "state",
-                  expression: "buttonName",
-                },
-                size: {
-                  type: "literal",
-                  syntaxType: "string",
-                  expression: "large",
-                },
                 type: {
                   type: "literal",
-                  syntaxType: "string",
-                  expression: "danger",
+                  expression: "number",
+                },
+                required: {
+                  type: "literal",
+                  expression: true,
+                },
+                name: {
+                  type: "literal",
+                  expression: "field01",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段01：",
+                },
+                placeholder: {
+                  type: "literal",
+                  expression: "请输入内容",
+                },
+                value: {
+                  type: "literal",
+                  expression: 2345124351,
+                },
+              },
+            },
+            {
+              ref: "ZentFormField",
+              id: "FormFieldInstance02",
+              input: {
+                type: {
+                  type: "literal",
+                  expression: "text",
+                },
+                name: {
+                  type: "literal",
+                  expression: "field02",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段02：",
+                },
+                placeholder: {
+                  type: "literal",
+                  expression: "请输入内容22222",
+                },
+                value: {
+                  type: "literal",
+                  expression: "evgbweshbestnb",
+                },
+              },
+            },
+            {
+              ref: "ZentFormField",
+              id: "FormFieldInstance03",
+              input: {
+                type: {
+                  type: "literal",
+                  expression: "textarea",
+                },
+                name: {
+                  type: "literal",
+                  expression: "field03",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段03：",
+                },
+                placeholder: {
+                  type: "literal",
+                  expression: "xxx",
+                },
+                value: {
+                  type: "literal",
+                  expression: "wsvgqw77we7d27adscf873f8a7dtf",
+                },
+              },
+            },
+            {
+              ref: "ZentFormField",
+              id: "FormFieldInstance04",
+              input: {
+                type: {
+                  type: "literal",
+                  expression: "checkbox",
+                },
+                name: {
+                  type: "literal",
+                  expression: "field04",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段04：",
+                },
+                value: {
+                  type: "literal",
+                  expression: ["abcd", "ijkl"],
+                },
+                options: {
+                  type: "literal",
+                  expression: [
+                    ["option01", "abcd"],
+                    ["option02", "efgh"],
+                    ["option03", "ijkl"],
+                    ["optionn4", "mnop"],
+                  ],
+                },
+              },
+            },
+            {
+              ref: "ZentFormField",
+              id: "FormFieldInstance05",
+              input: {
+                type: {
+                  type: "literal",
+                  expression: "select",
+                },
+                name: {
+                  type: "literal",
+                  expression: "field05",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段05：",
+                },
+                placeholder: {
+                  type: "literal",
+                  expression: "select-placeholder",
+                },
+                value: {
+                  type: "literal",
+                  expression: "abcd",
+                },
+                options: {
+                  type: "literal",
+                  expression: [
+                    ["option01", "abcd"],
+                    ["option02", "efgh"],
+                    ["option03", "ijkl"],
+                    ["optionn4", "mnop"],
+                  ],
+                },
+              },
+            },
+            {
+              ref: "ZentFormField",
+              id: "FormFieldInstance06",
+              input: {
+                type: {
+                  type: "literal",
+                  expression: "switch",
+                },
+                name: {
+                  type: "literal",
+                  expression: "field06",
+                },
+                label: {
+                  type: "literal",
+                  expression: "字段06：",
+                },
+                value: {
+                  type: "literal",
+                  expression: true,
+                },
+              },
+            },
+            {
+              ref: "ZentFormSubmit",
+              id: "FormSubmitInstance",
+              input: {
+                showCancel: {
+                  type: "literal",
+                  expression: true,
+                },
+                submitText: {
+                  type: "literal",
+                  expression: "提交",
+                },
+                cancelText: {
+                  type: "literal",
+                  expression: "放弃",
                 },
               },
             },
           ],
         },
       ],
-      attach: {
-        rowStart: {
-          type: "childRefs",
-          expression: [
-            {
-              id: "GridLayoutChild01",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild02",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild03",
-              value: 2,
-            },
-            {
-              id: "GridLayoutChild04",
-              value: 2,
-            },
-          ],
-        },
-        columnStart: {
-          type: "childRefs",
-          expression: [
-            {
-              id: "GridLayoutChild01",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild02",
-              value: 2,
-            },
-            {
-              id: "GridLayoutChild03",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild04",
-              value: 3,
-            },
-          ],
-        },
-        rowSpan: {
-          type: "childRefs",
-          expression: [
-            {
-              id: "GridLayoutChild01",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild02",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild03",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild04",
-              value: 1,
-            },
-          ],
-        },
-        columnSpan: {
-          type: "childRefs",
-          expression: [
-            {
-              id: "GridLayoutChild01",
-              value: 1,
-            },
-            {
-              id: "GridLayoutChild02",
-              value: 2,
-            },
-            {
-              id: "GridLayoutChild03",
-              value: 2,
-            },
-            {
-              id: "GridLayoutChild04",
-              value: 1,
-            },
-          ],
-        },
-      },
     },
   };
 }

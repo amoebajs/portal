@@ -39,6 +39,10 @@
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="numberGroup; context: { model: model, data: data }"></ng-container>
     </div>
+    <div *ngSwitchCase="'boolean'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="booleanGroup; context: { model: model, data: data }"></ng-container>
+    </div>
     <div *ngSwitchCase="'enums'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="enumsGroup; context: { model: model, data: data }"></ng-container>
@@ -72,6 +76,12 @@
     <button *ngIf="data.value !== null" nz-button nzType="danger" (click)="clearNumberValue(model)">
       清除
     </button>
+  </div>
+</ng-template>
+
+<ng-template #booleanGroup let-model="model" let-data="data">
+  <div class="number-input-group">
+    <nz-switch [(ngModel)]="data.value"></nz-switch>
   </div>
 </ng-template>
 

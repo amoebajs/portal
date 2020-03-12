@@ -202,7 +202,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     });
     const forkData: any = cloneDeep(model.source || {});
     const sourceValue = get(forkData.input, propertyPath, null);
-    if (d.type.meta === "string" || d.type.meta === "number") {
+    if (d.type.meta === "string" || d.type.meta === "number" || d.type.meta === "boolean") {
       ngModel.value = sourceValue === null ? null : sourceValue.expression;
     } else if (d.type.meta === "map") {
       ngModel.value = sourceValue === null ? [] : sourceValue.expression;

@@ -19,7 +19,7 @@
     "update:core": "yarn add @amoebajs/builder @amoebajs/basic-modules --registry=https://registry.npmjs.org"
   },
   "dependencies": {
-    "@amoebajs/basic-modules": "^0.0.1-alpha.1584001425770",
+    "@amoebajs/basic-modules": "^0.0.1-alpha.1584002557229",
     "@amoebajs/builder": "^0.0.2-alpha.1583915074404",
     "@nestjs/common": "^6.7.2",
     "@nestjs/core": "^6.7.2",

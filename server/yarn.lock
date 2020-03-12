@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@amoebajs/basic-modules@^0.0.1-alpha.1584001425770":
-  version "0.0.1-alpha.1584001425770"
-  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1584001425770.tgz#683039e35216361eb7096803b0571afc85bb87c8"
-  integrity sha512-u1fVv5V+tuwevbPZzheRbxLXW8b2kLHoPR08olFk6WQz5PAZPQBctLR9KJIeFF5hYEYwR62+VZox2RVbfnFbDA==
+"@amoebajs/basic-modules@^0.0.1-alpha.1584002557229":
+  version "0.0.1-alpha.1584002557229"
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1584002557229.tgz#beeb62ec4ae0e723e4762664ba1eb9bd5bda78a2"
+  integrity sha512-hO1zJg5YTOw0VCrrAYplxs88K5Q0O/onbkJEY7RT1RqWU8aBEn6ZMi4baLH6MMEJnR12Ks5u7QiNpX+wtN4eiw==
 
 "@amoebajs/builder@^0.0.2-alpha.1583915074404":
   version "0.0.2-alpha.1583915074404"

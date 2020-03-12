@@ -47,7 +47,7 @@ export interface ICompileModule extends Omit<ISourceModule, "components" | "dire
   compositions: IImportDeclaration[];
 }
 
-export type ICompileTypeMeta = "string" | "number" | "map" | "enums" | "onject";
+export type ICompileTypeMeta = "string" | "number" | "boolean" | "map" | "enums" | "onject";
 
 export interface IInputDefine {
   realName: string;
