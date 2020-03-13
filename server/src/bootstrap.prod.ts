@@ -6,7 +6,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { ConfigService, IServerConfigs } from "#global/services/config.service";
-import { ClusterWorker } from "#global/services/worker.service";
+import { TaskWorker } from "#global/services/worker.service";
 import { MainModule } from "./main.module";
 
 export const BUILD_ROOT = path.join(__dirname, "..", "build");
@@ -29,11 +29,11 @@ export async function bootstrap({
   staticOptions = {},
 }: Partial<IBootstrapOptions> = {}) {
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
-  app.get(ClusterWorker);
   app
     .get(ConfigService)
     .setConfig(configs)
     .setEnv(ewsEnvs);
+  app.get(TaskWorker);
   useStaticAssets(app, staticOptions);
   useGzip(app, configs);
   useTemplateEngine(app);

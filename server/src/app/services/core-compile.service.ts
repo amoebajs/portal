@@ -5,7 +5,7 @@ import uuid from "uuid/v4";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { CompileService, ICommonBuildConfigs, TaskType, ISourceCreateResult } from "#global/services/compile.service";
-import { ClusterWorker } from "#global/services/worker.service";
+import { TaskWorker } from "#global/services/worker.service";
 import { BuilderFactory } from "#core/index";
 
 export enum CompileTaskStatus {
@@ -55,8 +55,8 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return this._factory.builder;
   }
 
-  constructor(protected worker: ClusterWorker) {
-    worker.ACTIVE.subscribe(active => {
+  constructor(protected worker: TaskWorker) {
+    worker.active.subscribe(active => {
       if (active) {
         // console.log("start set interval " + INTERVAL);
         worker
@@ -111,7 +111,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   }
 
   public async queryTask(id: string): Promise<ICompileTask | null> {
-    const snapshot = await this.worker.queryTaskStatus<ICompileStorage>(TASKID);
+    const snapshot = await this.worker.queryTaskStatus(TASKID);
     const currentList = snapshot.storage || {};
     const target = currentList[id];
     if (!target) {
@@ -134,7 +134,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   protected async findAndStartTask() {
     const worker = this.worker;
     try {
-      const snapshot = await worker.queryTaskStatus<ICompileStorage>(TASKID);
+      const snapshot = await worker.queryTaskStatus(TASKID);
       // console.log("current snapshot operator --> " + snapshot.operator);
       // console.log("current query worker --> " + worker.id);
       // 非当前worker操作的任务，退出

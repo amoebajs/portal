@@ -1,21 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { Worker } from "../../clusters";
-import { BehaviorSubject } from "rxjs";
+import { Observable } from "rxjs";
 
 @Injectable()
-export class ClusterWorker extends Worker {
-  private __init = false;
-  public readonly ACTIVE = new BehaviorSubject(false);
-
-  constructor() {
-    super();
-    this.onActive(() => this.ACTIVE.next(true));
-    this.__init = true;
-  }
-
-  public onActive(fn: () => void) {
-    if (!this.__init) {
-      super.onActive(fn);
-    }
-  }
+export abstract class TaskWorker {
+  public abstract active: Observable<boolean>;
+  public abstract id: any;
+  public abstract registerTask(task: string, options: any): Promise<any>;
+  public abstract updateTask(task: string, options: any): Promise<any>;
+  public abstract queryTaskStatus(task: string): Promise<any>;
+  public abstract runTask(task: string): Promise<any>;
+  public abstract finishTask(task: string): Promise<any>;
 }

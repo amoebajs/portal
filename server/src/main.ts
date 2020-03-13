@@ -13,6 +13,7 @@ async function load() {
   switch (CONF.startMode) {
     case "mysql":
       require("./app.mysql");
+      break;
     case "cluster":
       if (CONF.cluster.maxCpuNum !== null) {
         process.env.MAX_CPU_NUM = String(CONF.cluster.maxCpuNum);

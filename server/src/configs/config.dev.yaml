@@ -13,7 +13,7 @@ configs:
     host: http://127.0.0.1
     port: 1234
   mysql:
-    host: http://localhost
+    host: localhost
     port: 3306
     database: mysql
     user: root

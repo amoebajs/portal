@@ -11,7 +11,6 @@ import {
   IWorkerUpdateTaskSendMsg,
 } from "./message";
 import { Task, TaskManager } from "./task";
-import { ClusterStorage } from "./storage";
 
 export interface IMasterOptions {
   maxWorker?: number;
