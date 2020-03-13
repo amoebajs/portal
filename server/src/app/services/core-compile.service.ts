@@ -61,9 +61,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         // console.log("start set interval " + INTERVAL);
         worker
           .registerTask(TASKID, {
-            storage: STORAGEID,
             data: <ICompileStorage>{},
-            autoReset: true,
           })
           .then(async () => {
             await worker.runTask(TASKID);

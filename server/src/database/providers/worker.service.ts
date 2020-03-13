@@ -1,7 +1,14 @@
+import omit from "lodash/omit";
 import { Injectable } from "@nestjs/common";
 import { createConnection, getManager, Connection } from "typeorm";
 import { BehaviorSubject } from "rxjs";
-import { TaskWorker } from "#global/services/worker.service";
+import {
+  TaskWorker,
+  ITaskRegisterOptions,
+  ITaskUpdateOptions,
+  ITask,
+  TaskStatus,
+} from "#global/services/worker.service";
 import { ConfigService } from "#global/services/config.service";
 import { CompileTask } from "../entity/task.entity";
 import { createOrmOptions } from "../ormconfig";
@@ -37,27 +44,70 @@ export class MysqlWorker implements TaskWorker {
     this.active.next(true);
   }
 
-  public async registerTask(task: string, options: any): Promise<any> {
-    const all = await this.repo.find({ name: task });
+  private async queryTask(name: string) {
+    const all = await this.repo.find({ name });
     if (all.length !== 0) {
-      throw new Error("task exist");
+      return void 0;
     }
-    return this.repo.insert({ name: task, storage: JSON.stringify(options || {}) });
+    return all[0];
   }
 
-  public updateTask(task: string, options: any): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async registerTask(name: string, options: ITaskRegisterOptions): Promise<boolean> {
+    const task = await this.queryTask(name);
+    if (!task) {
+      await this.repo.insert({
+        name,
+        status: TaskStatus.Pending,
+        creator: String(this.id),
+        operator: String(this.id),
+        data: JSON.stringify(options.data || {}),
+      });
+      return true;
+    }
+    return false;
   }
 
-  public queryTaskStatus(task: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async updateTask(name: string, options: ITaskUpdateOptions): Promise<boolean> {
+    const task = await this.queryTask(name);
+    if (!task) {
+      return false;
+    }
+    const updates: Partial<CompileTask> = {
+      operator: String(this.id),
+    };
+    if (options.data !== void 0) {
+      updates.data = JSON.stringify(options.data || {});
+    }
+    const result = await this.repo.update({ id: task.id }, updates);
+    return result.affected > 0;
   }
 
-  public runTask(task: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async queryTaskStatus(name: string): Promise<ITask | undefined> {
+    const task = await this.queryTask(name);
+    if (!task) {
+      return void 0;
+    }
+    return {
+      ...omit(task, "id", "data", "createAt", "updateAt"),
+      data: JSON.parse(task.data || "{}"),
+    };
   }
 
-  public finishTask(task: string): Promise<any> {
-    throw new Error("Method not implemented.");
+  public async runTask(name: string): Promise<boolean> {
+    const task = await this.queryTask(name);
+    if (!task) {
+      return false;
+    }
+    const result = await this.repo.update({ id: task.id, status: TaskStatus.Pending }, { status: TaskStatus.Running });
+    return result.affected > 0;
+  }
+
+  public async finishTask(name: string): Promise<boolean> {
+    const task = await this.queryTask(name);
+    if (!task) {
+      return false;
+    }
+    const result = await this.repo.update({ id: task.id, status: TaskStatus.Running }, { status: TaskStatus.Done });
+    return result.affected > 0;
   }
 }

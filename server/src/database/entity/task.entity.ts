@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { TaskStatus } from "#global/services/worker.service";
 
-@Entity("ews_compile_task")
+@Entity("compile_task")
 export class CompileTask {
   @PrimaryGeneratedColumn({
     name: "id",
@@ -14,18 +15,11 @@ export class CompileTask {
   })
   name!: string;
 
-  @Column("varchar", {
-    nullable: false,
-    name: "task_type",
-    length: 128,
-  })
-  type!: string;
-
   @Column("integer", {
     nullable: false,
-    name: "task_locked",
+    name: "task_status",
   })
-  locked!: 0 | 1;
+  status!: TaskStatus;
 
   @Column("varchar", {
     nullable: false,
@@ -41,10 +35,10 @@ export class CompileTask {
 
   @Column("varchar", {
     nullable: false,
-    name: "task_storage",
+    name: "task_data",
     length: 256,
   })
-  storage!: string;
+  data!: string;
 
   @Column("datetime", {
     nullable: false,
