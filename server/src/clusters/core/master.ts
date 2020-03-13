@@ -9,7 +9,7 @@ import {
   IWorkerSendMsg,
   IWorkerUpdateTaskReceiveMsg,
   IWorkerUpdateTaskSendMsg,
-} from "./message";
+} from "../../typings/message";
 import { Task, TaskManager } from "./task";
 
 export interface IMasterOptions {

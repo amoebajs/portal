@@ -14,8 +14,7 @@ import {
   IWorkerUpdateTaskReceiveMsg,
   IWorkerUpdateTaskSendMsg,
   IWorkerSendMsg,
-} from "./message";
-import { ClusterStorage } from "./storage";
+} from "../../typings/message";
 
 const FakeRels: Record<IWorkerSendMsg["type"], IWorkerReceiveMsg["type"]> = {
   init: "active",

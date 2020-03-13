@@ -9,10 +9,17 @@ export class CompileTask {
 
   @Column("varchar", {
     nullable: false,
-    name: "task_id",
+    name: "task_name",
     length: 128,
   })
-  taskId!: string;
+  name!: string;
+
+  @Column("varchar", {
+    nullable: false,
+    name: "task_type",
+    length: 128,
+  })
+  type!: string;
 
   @Column("integer", {
     nullable: false,
