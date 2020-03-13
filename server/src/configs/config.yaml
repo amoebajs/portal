@@ -14,11 +14,16 @@ configs:
       token: api
       type: redirect
   redis:
-    enabled: false
     host: http://127.0.0.1
     port: 1234
+  mysql:
+    host: http://127.0.0.1
+    port: 3306
+    database: mysql
+    user: root
+    password: 123456
   cluster:
-    enabled: true
     maxCpuNum: null
   gzip:
     enabled: true
+  startMode: cluster

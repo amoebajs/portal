@@ -9,8 +9,10 @@ export interface IServerConfigs {
     site: { uri: string; token: string; type: string };
     api: { uri: string; token: string; type: string };
   };
-  redis: { enabled: boolean; host: string; port: number };
-  cluster: { enabled: boolean; maxCpuNum: number | null };
+  startMode: "redis" | "mysql" | "cluster" | "app";
+  redis: { host: string; port: number };
+  mysql: { host: string; port: number; database: string; user: string; password: number | string };
+  cluster: { maxCpuNum: number | null };
   gzip: { enabled: boolean; options?: Partial<CompressionOptions> };
 }
 
