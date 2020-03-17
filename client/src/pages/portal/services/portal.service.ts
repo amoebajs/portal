@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "../../../services/http.service";
+import { UseRouter } from "../router";
 
 export interface IMenuItem {
   name: string;
@@ -31,34 +32,20 @@ export class PortalService {
       name: "配置化面板",
       icon: "user",
       selected: false,
-      items: [
-        {
-          name: "控制台",
-          link: "/portal",
+      items: Object.entries(UseRouter.data)
+        .filter(i => i[0] !== "edit")
+        .map(i => ({
+          name: i[1].data.title,
+          link: "/portal" + (i[1].path === "" ? "" : "/" + i[1].path),
           selected: false,
-        },
-        {
-          name: "页面管理",
-          link: "/portal/manage/pages",
-          selected: false,
-        },
-        {
-          name: "预览",
-          link: "/portal/preview/create",
-          selected: false,
-        },
-        {
-          name: "设置",
-          link: "/portal/settings",
-          selected: false,
-        },
-      ],
+        })),
     },
   ];
 
   public userInfos: any = { logined: false, name: "" };
 
   constructor(private readonly http: HttpService) {
+    console.log(this.menulist);
     this.fetchUserInfos();
   }
 

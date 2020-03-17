@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { RouterModule } from "@angular/router";
+import { UseRouter } from "./router";
 import { PortalRootComponent } from "./root/root.component";
 import { PortalLayoutComponent } from "./layout/layout.component";
 import { CommonsModule } from "../../shared/commons.module";
@@ -12,14 +13,6 @@ import { EntityEditComponent } from "./components/entity-edit/entity-edit.compon
 import { SourceTreeComponent } from "./components/source-tree/source-tree.component";
 import { PortalManageComponent } from "./manage/manage.component";
 
-const routes: Routes = [
-  { path: "", component: PortalRootComponent, data: { title: "控制台" } },
-  { path: "manage/pages", component: PortalManageComponent, data: { title: "页面管理" } },
-  { path: "preview/create", component: PortalPreviewComponent, data: { title: "创建页面" } },
-  { path: "preview/edit/:version", component: PortalPreviewComponent, data: { title: "编辑页面" } },
-  { path: "settings", component: PortalSettingComponent, data: { title: "设置" } },
-];
-
 @NgModule({
   declarations: [
     PortalLayoutComponent,
@@ -31,7 +24,18 @@ const routes: Routes = [
     EntityEditComponent,
     SourceTreeComponent,
   ],
-  imports: [CommonsModule, RouterModule.forChild(routes)],
+  imports: [
+    CommonsModule,
+    RouterModule.forChild(
+      UseRouter({
+        index: PortalRootComponent,
+        pages: PortalManageComponent,
+        create: PortalPreviewComponent,
+        edit: PortalPreviewComponent,
+        settings: PortalSettingComponent,
+      }),
+    ),
+  ],
   providers: [PortalService, Builder],
   entryComponents: [EntityEditComponent],
 })
