@@ -15,7 +15,7 @@ export class FakeAuthService extends AuthService<string> {
   ): boolean | Promise<boolean> | Observable<boolean> {
     getUserDelegate(this.user)
       .setLogined(true)
-      .setUserId(new Date().getTime())
+      .setUserId(12345678)
       .setUserName("fakeUser")
       .setUserAccount("fakeUserAccount")
       .setUserRoles(roles)

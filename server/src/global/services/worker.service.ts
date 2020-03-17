@@ -17,6 +17,7 @@ export interface ICompileTask {
   pageId: number | string;
   versionId: number | string;
   status: TaskStatus;
+  name: string;
   creator: string;
   createdAt: Date;
   updatedAt: Date;
@@ -55,6 +56,7 @@ export interface IPageListQueryOptions {
 
 export interface ITaskListQueryOptions {
   name?: string;
+  pageId?: string;
   creator?: string;
   current: number;
   size: number;
@@ -62,6 +64,7 @@ export interface ITaskListQueryOptions {
 
 export interface IVersionListQueryOptions {
   name?: string;
+  pageId?: string;
   creator?: string;
   current: number;
   size: number;
@@ -112,6 +115,7 @@ export interface IVersionCreateUpdateOptions {
 
 export interface IVersionQueryOptions {
   id: string | number;
+  name?: string;
 }
 
 @Injectable()
@@ -121,8 +125,8 @@ export abstract class TaskWorker {
   public abstract queryPageList(options: IPageListQueryOptions): Promise<IListQueryResult<IPage>>;
   public abstract queryTaskList(options: ITaskListQueryOptions): Promise<IListQueryResult<ICompileTask>>;
   public abstract queryVersionList(options: IVersionListQueryOptions): Promise<IListQueryResult<IPageVersion>>;
-  public abstract createUpdatePage(options: IPageCreateUpdateOptions): Promise<string>;
-  public abstract createUpdateVersion(options: IVersionCreateUpdateOptions): Promise<string>;
+  public abstract createUpdatePage(options: IPageCreateUpdateOptions): Promise<unknown>;
+  public abstract createUpdateVersion(options: IVersionCreateUpdateOptions): Promise<unknown>;
   public abstract queryPage(options: IPageQueryOptions): Promise<IPage>;
   public abstract queryVersion(options: IVersionQueryOptions): Promise<IPageVersion>;
   public abstract startTask(options: ITaskStartOptions): Promise<string>;

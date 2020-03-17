@@ -13,13 +13,19 @@ export class CompileTask implements ICompileTask {
     nullable: true,
     name: "page_id",
   })
-  pageId!: string;
+  pageId!: string | number;
 
   @Column("varchar", {
     nullable: true,
     name: "version_id",
   })
-  versionId!: string;
+  versionId!: string | number;
+
+  @Column("varchar", {
+    nullable: false,
+    name: "name",
+  })
+  name!: string;
 
   @Column("integer", {
     nullable: false,

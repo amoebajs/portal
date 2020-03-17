@@ -149,18 +149,18 @@ export class CoreCompiler implements CompileService<ICompileTask> {
           dist: JSON.stringify(cache.files),
         });
         // 后期要做成版本控制，暂时直接绑定新版本
-        await this.worker.createUpdatePage({ id: page.id, versionId: version });
-        this.manager.updatePage(page.name, { latest: version });
-        await this.moveHtmlBundle(page.name, version, buildDir);
+        await this.worker.createUpdatePage({ id: page.id, versionId: <string>version });
+        this.manager.updatePage(page.name, { latest: <string>version });
+        await this.moveHtmlBundle(page.name, <string>version, buildDir);
       }
-      await this.worker.endTask({ id: task.id, operator: page.creator });
+      await this.worker.endTask({ id: task.id, operator: task.creator });
       console.log(JSON.stringify(cache, null, "  "));
       const cost = this.getSecondsCost(stamp);
       console.log(chalk.green(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}] in ${cost}s`));
       return true;
     } catch (error) {
       console.log(error);
-      await this.worker.endTask({ id: task.id, operator: page.creator, status: TaskStatus.Failed });
+      await this.worker.endTask({ id: task.id, operator: task.creator, status: TaskStatus.Failed });
       const cost = this.getSecondsCost(stamp);
       console.log(chalk.red(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}]  in ${cost}s`));
       console.log(chalk.yellow(`[COMPILE-TASK] task[${task.id}] failed.`));
