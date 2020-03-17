@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { TaskStatus, ICompileTask } from "#global/services/worker.service";
+import { ICompileTask, TaskStatus } from "../typings";
 
 @Entity("ews_compile_task")
 export class CompileTask implements ICompileTask {

@@ -4,9 +4,10 @@ import chalk from "chalk";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#global/services/compile.service";
-import { TaskWorker, ICompileTask, TaskStatus } from "#global/services/worker.service";
 import { BuilderFactory } from "#core/index";
 import { PageManager, IWebsitePageHash } from "#global/services/page.service";
+import { MysqlWorker } from "#database/providers/worker.service";
+import { ICompileTask, TaskStatus } from "#database/typings";
 
 const ASSETS_DIR = path.resolve(__dirname, "..", "..", "assets");
 
@@ -21,16 +22,12 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return this._factory.builder;
   }
 
-  constructor(protected readonly worker: TaskWorker, protected readonly manager: PageManager) {
+  constructor(protected readonly worker: MysqlWorker, protected readonly manager: PageManager) {
     worker.active.subscribe(async active => {
       if (active) {
         this._init = true;
       }
     });
-  }
-
-  public getTemplateGroup(): any {
-    return {};
   }
 
   public async queryPageUri(name: string) {
@@ -144,14 +141,15 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         },
       });
       if (shouldMoveBundle) {
-        const version = await this.worker.createUpdateVersion({
+        await this.worker.createUpdateVersion({
           id: curver.id,
           dist: JSON.stringify(cache.files),
         });
+        const version = String(curver.id);
         // 后期要做成版本控制，暂时直接绑定新版本
-        await this.worker.createUpdatePage({ id: page.id, versionId: <string>version });
-        this.manager.updatePage(page.name, { latest: <string>version });
-        await this.moveHtmlBundle(page.name, <string>version, buildDir);
+        await this.worker.createUpdatePage({ id: page.id, versionId: version });
+        this.manager.updatePage(page.name, { latest: version });
+        await this.moveHtmlBundle(page.name, version, buildDir);
       }
       await this.worker.endTask({ id: task.id, operator: task.creator });
       console.log(JSON.stringify(cache, null, "  "));

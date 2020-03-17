@@ -25,24 +25,28 @@ export class HttpService {
   public get<T = any>(url: string, queries: { [prop: string]: any } = {}, options: IHttpOptions = {}) {
     return this.client
       .get<T>(`${ENV.server.api}/${url}${processQueries(queries)}`, { withCredentials: true, ...options })
-      .toPromise();
+      .toPromise()
+      .then((resp: any) => resp.data);
   }
 
   public post<T = any>(url: string, body: { [prop: string]: any } = {}, options: IHttpOptions = {}) {
     return this.client
       .post<T>(`${ENV.server.api}/${url}`, body, { withCredentials: true, ...options })
-      .toPromise();
+      .toPromise()
+      .then((resp: any) => resp.data);
   }
 
   public put<T = any>(url: string, body: { [prop: string]: any } = {}, options: IHttpOptions = {}) {
     return this.client
       .put<T>(`${ENV.server.api}/${url}`, body, { withCredentials: true, ...options })
-      .toPromise();
+      .toPromise()
+      .then((resp: any) => resp.data);
   }
 
   public delete<T = any>(url: string, queries: { [prop: string]: any } = {}, options: IHttpOptions = {}) {
     return this.client
       .delete<T>(`${ENV.server.api}/${url}${processQueries(queries)}`, { withCredentials: true, ...options })
-      .toPromise();
+      .toPromise()
+      .then((resp: any) => resp.data);
   }
 }

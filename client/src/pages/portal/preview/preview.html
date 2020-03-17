@@ -1,29 +1,36 @@
 <app-portal-layout>
   <div class="buttons-group">
-    <nz-button-group class="button-item">
-      <button nz-button [nzType]="showEditor === 'view'? 'primary': 'default'" (click)="onEditorClick('view')">
-        视图
-      </button>
-      <button nz-button [nzType]="showEditor === 'config'? 'primary': 'default'" (click)="onEditorClick('config')">
-        参数
-      </button>
-    </nz-button-group>
-    <nz-button-group class="button-item">
-      <button nz-button [nzType]="showPreview.edit? 'primary': 'default'" (click)="onPreviewClick('edit')">编辑</button>
-      <button nz-button [nzType]="showPreview.preview? 'primary': 'default'" (click)="onPreviewClick('preview')">
-        预览
-      </button>
-    </nz-button-group>
-    <div class="buttom-dropdown">
-      <a nz-dropdown [nzDropdownMenu]="menu">
-        查看NPM依赖
-        <i nz-icon nzType="down"></i>
-      </a>
-      <nz-dropdown-menu #menu="nzDropdownMenu">
-        <ul nz-menu nzSelectable>
-          <li *ngFor="let dependency of lastDeptKvs" nz-menu-item>{{ dependency[0] }}: {{ dependency[1] }}</li>
-        </ul>
-      </nz-dropdown-menu>
+    <div class="buttons-group-section">
+      <nz-button-group class="button-item">
+        <button nz-button [nzType]="showEditor === 'view'? 'primary': 'default'" (click)="onEditorClick('view')">
+          视图
+        </button>
+        <button nz-button [nzType]="showEditor === 'config'? 'primary': 'default'" (click)="onEditorClick('config')">
+          参数
+        </button>
+      </nz-button-group>
+      <nz-button-group class="button-item">
+        <button nz-button [nzType]="showPreview.edit? 'primary': 'default'" (click)="onPreviewClick('edit')">
+          编辑
+        </button>
+        <button nz-button [nzType]="showPreview.preview? 'primary': 'default'" (click)="onPreviewClick('preview')">
+          预览
+        </button>
+      </nz-button-group>
+      <div class="buttom-dropdown">
+        <a nz-dropdown [nzDropdownMenu]="menu">
+          查看NPM依赖
+          <i nz-icon nzType="down"></i>
+        </a>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu nzSelectable>
+            <li *ngFor="let dependency of lastDeptKvs" nz-menu-item>{{ dependency[0] }}: {{ dependency[1] }}</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+    <div class="buttons-group-section">
+      <button nz-button [nzType]="'primary'" (click)="onPreviewSaveClick()">保存</button>
     </div>
   </div>
   <div class="editor-group">
@@ -88,7 +95,12 @@
 
   .buttons-group {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 12px;
+  }
+
+  .buttons-group-section {
+    display: flex;
   }
 
   .button-item {

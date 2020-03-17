@@ -1,6 +1,6 @@
 import { BaseMysqlService } from "./base.service";
-import { IListQueryResult, IVersionListQueryOptions, IVersionQueryOptions } from "#global/services/worker.service";
-import { PageVersion } from "#database/entity/page-version.entity";
+import { PageVersion } from "../entity/page-version.entity";
+import { IVersionListQueryOptions, IListQueryResult, IVersionQueryOptions } from "../typings";
 
 export interface ICreateOptions {
   name?: string;
@@ -11,6 +11,7 @@ export interface ICreateOptions {
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
+  updatedAt: Date;
   dist?: string;
 }
 
@@ -43,6 +44,6 @@ export class VersionService extends BaseMysqlService {
     repo = this.repository,
   ): Promise<boolean> {
     const [w, o] = this.useSkipOmit(options, where);
-    return this.updateEntry(repo, w, o);
+    return this.updateEntry(repo, w, { ...o, updatedAt: new Date() });
   }
 }

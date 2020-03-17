@@ -1,6 +1,6 @@
 import { BaseMysqlService } from "./base.service";
-import { IPageListQueryOptions, IListQueryResult, IPageQueryOptions } from "#global/services/worker.service";
-import { Page } from "#database/entity/page.entity";
+import { Page } from "../entity/page.entity";
+import { IPageListQueryOptions, IListQueryResult, IPageQueryOptions } from "../typings";
 
 export interface ICreateOptions {
   name: string;
@@ -10,6 +10,7 @@ export interface ICreateOptions {
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
+  updatedAt: Date;
   versionId?: string;
 }
 
@@ -39,6 +40,6 @@ export class PageService extends BaseMysqlService {
     repo = this.repository,
   ): Promise<boolean> {
     const [w, o] = this.useSkipOmit(options, where);
-    return this.updateEntry(repo, w, o);
+    return this.updateEntry(repo, w, { ...o, updatedAt: new Date() });
   }
 }

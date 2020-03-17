@@ -1,11 +1,6 @@
 import { BaseMysqlService } from "./base.service";
-import {
-  IListQueryResult,
-  ITaskListQueryOptions,
-  ITaskQueryOptions,
-  TaskStatus,
-} from "#global/services/worker.service";
-import { CompileTask } from "#database/entity/compile-task.entity";
+import { CompileTask } from "../entity/compile-task.entity";
+import { TaskStatus, ITaskListQueryOptions, IListQueryResult, ITaskQueryOptions } from "../typings";
 
 export interface ICreateOptions {
   pageId: string | number;
@@ -17,6 +12,7 @@ export interface ICreateOptions {
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
+  updatedAt: Date;
   creator?: string;
 }
 
@@ -48,6 +44,6 @@ export class TaskService extends BaseMysqlService {
     repo = this.repository,
   ): Promise<boolean> {
     const [w, o] = this.useSkipOmit(options, where);
-    return this.updateEntry(repo, w, o);
+    return this.updateEntry(repo, w, { ...o, updatedAt: new Date() });
   }
 }

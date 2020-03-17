@@ -1,6 +1,3 @@
-import { Injectable } from "@nestjs/common";
-import { Observable } from "rxjs";
-
 export interface IPage {
   id: number | string;
   versionId: number | string;
@@ -80,6 +77,8 @@ export interface IPageCreateUpdateOptions {
   versionId?: string;
   name?: string;
   displayName?: string;
+  description?: string;
+  configs?: string;
   operator?: string;
 }
 
@@ -116,20 +115,4 @@ export interface IVersionCreateUpdateOptions {
 export interface IVersionQueryOptions {
   id: string | number;
   name?: string;
-}
-
-@Injectable()
-export abstract class TaskWorker {
-  public abstract active: Observable<boolean>;
-  public abstract id: any;
-  public abstract queryPageList(options: IPageListQueryOptions): Promise<IListQueryResult<IPage>>;
-  public abstract queryTaskList(options: ITaskListQueryOptions): Promise<IListQueryResult<ICompileTask>>;
-  public abstract queryVersionList(options: IVersionListQueryOptions): Promise<IListQueryResult<IPageVersion>>;
-  public abstract createUpdatePage(options: IPageCreateUpdateOptions): Promise<unknown>;
-  public abstract createUpdateVersion(options: IVersionCreateUpdateOptions): Promise<unknown>;
-  public abstract queryPage(options: IPageQueryOptions): Promise<IPage>;
-  public abstract queryVersion(options: IVersionQueryOptions): Promise<IPageVersion>;
-  public abstract startTask(options: ITaskStartOptions): Promise<string>;
-  public abstract queryTask(options: ITaskQueryOptions): Promise<ICompileTask>;
-  public abstract endTask(options: ITaskEndOptions): Promise<boolean>;
 }

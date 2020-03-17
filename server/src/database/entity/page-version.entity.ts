@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IPageVersion } from "#global/services/worker.service";
+import { IPageVersion } from "../typings";
 
 @Entity("ews_page_version")
 export class PageVersion implements IPageVersion {

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IPage } from "#global/services/worker.service";
+import { IPage } from "../typings";
 
 @Entity("ews_page")
 export class Page implements IPage {

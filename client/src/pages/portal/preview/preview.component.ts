@@ -86,6 +86,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     this.trackPreviewIfNeed();
   }
 
+  onPreviewSaveClick() {}
+
   onTextareaChange(value: string) {
     try {
       const newValue = yamljs.safeLoad(value);

@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Param } from "@nestjs/common";
 import { Compiler } from "#global/services/compile.service";
 import { User } from "#global/services/user.service";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
+import { MysqlWorker } from "#database/providers/worker.service";
 
 @Controller("api")
 @UseRolesAuthentication({ roles: ["admin"] })
 export class ApiController {
-  constructor(private readonly compiler: Compiler, private readonly user: User) {}
+  constructor(
+    private readonly compiler: Compiler,
+    private readonly database: MysqlWorker,
+    private readonly user: User,
+  ) {}
 
   @Get("user")
   @SetRoles("admin")
@@ -17,12 +22,16 @@ export class ApiController {
     };
   }
 
-  @Get("templates")
+  @Get("pages")
   @SetRoles("admin")
-  public queryTemplateGroup() {
+  public async queryPagelist(
+    @Query("current") current: string,
+    @Query("size") size: string,
+    @Query("name") name: string,
+  ) {
     return {
       code: 0,
-      data: this.compiler.getTemplateGroup(),
+      data: await this.database.queryPageList({ name, current: +current, size: +size }),
     };
   }
 
@@ -45,6 +54,42 @@ export class ApiController {
         dependencies,
         configs: data,
       },
+    };
+  }
+
+  @Get("page/:id")
+  @SetRoles("admin")
+  public async getPageDetails(@Param("id") id: string) {
+    const result = await this.database.queryPage({ id });
+    return {
+      code: 0,
+      data: result,
+    };
+  }
+
+  @Get("page-version/:id")
+  @SetRoles("admin")
+  public async getPageVersionDetails(@Param("id") id: string) {
+    const result = await this.database.queryVersion({ id });
+    return {
+      code: 0,
+      data: result,
+    };
+  }
+
+  @Post("page")
+  @SetRoles("super-admin")
+  public async createPage(@Body() data: any) {
+    const { name, displayName, description } = data;
+    const result = await this.database.createUpdatePage({
+      name,
+      displayName,
+      description,
+      operator: String(this.user.infos.id),
+    });
+    return {
+      code: 0,
+      data: result,
     };
   }
 

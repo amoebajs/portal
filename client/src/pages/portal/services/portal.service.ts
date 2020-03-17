@@ -28,22 +28,27 @@ export class PortalService {
 
   public menulist: IMenuGroup[] = [
     {
-      name: "Group01",
+      name: "配置化面板",
       icon: "user",
       selected: false,
       items: [
         {
-          name: "Portal",
+          name: "控制台",
           link: "/portal",
           selected: false,
         },
         {
-          name: "Preview",
-          link: "/portal/preview",
+          name: "页面管理",
+          link: "/portal/manage/pages",
           selected: false,
         },
         {
-          name: "Settings",
+          name: "预览",
+          link: "/portal/preview/create",
+          selected: false,
+        },
+        {
+          name: "设置",
           link: "/portal/settings",
           selected: false,
         },
@@ -53,10 +58,24 @@ export class PortalService {
 
   public userInfos: any = { logined: false, name: "" };
 
-  constructor(private readonly http: HttpService) {}
+  constructor(private readonly http: HttpService) {
+    this.fetchUserInfos();
+  }
 
-  public fetchTemplates() {
-    this.http.get("templates");
+  public fetchPageList(current: number, size: number) {
+    return this.http.get<any[]>("pages", { current, size });
+  }
+
+  public createPage(name: string, displayName?: string, desc?: string) {
+    return this.http.post<string>("page", { name, displayName, description: desc });
+  }
+
+  public fetchPageDetails(pageid: number | string) {
+    return this.http.get<any>(`page/${pageid}`);
+  }
+
+  public fetchPageVersionDetails(pageid: number | string) {
+    return this.http.get<any>(`page-version/${pageid}`);
   }
 
   public createSource(configs: any) {
@@ -65,9 +84,7 @@ export class PortalService {
 
   public async fetchUserInfos() {
     const userInfo: any = await this.http.get("user");
-    if (userInfo.code === 0) {
-      this.userInfos = { ...this.userInfos, ...userInfo.data };
-    }
+    this.userInfos = { ...this.userInfos, ...userInfo };
   }
 
   public toggleMenuCollapsed() {

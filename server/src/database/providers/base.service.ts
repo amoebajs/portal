@@ -1,10 +1,8 @@
 import pickFn from "lodash/pick";
 import omitFn from "lodash/omit";
-import { Injectable } from "@nestjs/common";
 import { Connection, Repository, SelectQueryBuilder } from "typeorm";
-import { IListQueryResult } from "#global/services/worker.service";
+import { IListQueryResult } from "../typings";
 
-@Injectable()
 export class BaseMysqlService {
   protected connection!: Connection;
 
@@ -22,11 +20,12 @@ export class BaseMysqlService {
     let builder = repo.createQueryBuilder();
     const entries = Object.entries(where);
     let useWhere: "where" | "andWhere" = "where";
-    for (const [key, entry] of entries) {
-      builder = builder[useWhere](`${key} = :${key}`, { [key]: entry });
+    for (const [k, v] of entries) {
+      if (v === void 0) continue;
+      builder = builder[useWhere](`${k} = :${k}`, { [k]: v });
       useWhere = "andWhere";
     }
-    return (!more ? builder : more(builder)).skip(+current * +size).take(+size);
+    return (!more ? builder : more(builder)).skip((+current - 1) * +size).take(+size);
   }
 
   protected createWhereBuilder<M>(repo: Repository<M>, where: Partial<M>) {
@@ -34,6 +33,7 @@ export class BaseMysqlService {
     const wheres = Object.entries(where);
     let fn: "where" | "andWhere" = "where";
     for (const [k, v] of wheres) {
+      if (v === void 0) continue;
       builder = builder[fn](`${k} = :${k}`, { [k]: v });
       fn = "andWhere";
     }
@@ -58,12 +58,13 @@ export class BaseMysqlService {
   }
 
   protected async updateEntry<M>(repo: Repository<M>, where: Partial<M>, updates: Partial<M>): Promise<boolean> {
-    let builder = this.createWhereBuilder(repo, where).update();
-    const entries = Object.entries(updates);
-    for (const [k, v] of entries) {
-      if (v !== void 0) builder = builder.update(<any>{ [k]: v });
-    }
-    const res = await builder.execute();
+    const res = await this.createWhereBuilder(repo, where)
+      .update(
+        Object.entries(updates)
+          .filter(([_, v]) => v !== void 0)
+          .reduce((p, c) => ({ ...p, [c[0]]: c[1] }), {}),
+      )
+      .execute();
     if (res.affected <= 0) {
       throw new Error("Update Entry Failed: affected is 0");
     }

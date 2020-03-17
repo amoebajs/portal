@@ -1,0 +1,26 @@
+<app-portal-layout>
+  <nz-table #basicTable [nzData]="(data && data.items) || []">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>DisplayName</th>
+        <th>Creator</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{ data.name }}</td>
+        <td>{{ data.displayName || '--' }}</td>
+        <td>{{ data.creator }}</td>
+        <td>
+          <a (click)="onPageClick(data.id)">详情</a>
+          <ng-container *ngIf="data.versionId">
+            <nz-divider nzType="vertical"></nz-divider>
+            <a (click)="onPageVersionClick(data.versionId)">版本</a>
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</app-portal-layout>
