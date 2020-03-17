@@ -18,8 +18,9 @@ configs:
     database: mysql
     user: root
     password: 2w3e4r5t
+    synchronize: true
   cluster:
     maxCpuNum: 1
   gzip:
     enabled: false
-  startMode: app
+  startMode: mysql

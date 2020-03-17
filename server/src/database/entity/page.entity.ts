@@ -1,44 +1,44 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { TaskStatus } from "#global/services/worker.service";
+import { IPage } from "#global/services/worker.service";
 
-@Entity("compile_task")
-export class CompileTask {
+@Entity("ews_page")
+export class Page implements IPage {
   @PrimaryGeneratedColumn({
     name: "id",
+    type: "bigint",
   })
-  id!: number;
+  id!: number | string;
+
+  @Column("varchar", {
+    nullable: true,
+    name: "version_id",
+  })
+  versionId!: string;
 
   @Column("varchar", {
     nullable: false,
-    name: "task_name",
-    length: 128,
+    name: "name",
   })
   name!: string;
 
-  @Column("integer", {
-    nullable: false,
-    name: "task_status",
+  @Column("varchar", {
+    nullable: true,
+    name: "display_name",
   })
-  status!: TaskStatus;
+  displayName!: string;
 
   @Column("varchar", {
-    nullable: false,
-    name: "task_creator",
-  })
-  creator!: string;
-
-  @Column("varchar", {
-    nullable: false,
-    name: "task_operator",
-  })
-  operator!: string;
-
-  @Column("varchar", {
-    nullable: false,
-    name: "task_data",
+    nullable: true,
+    name: "description",
     length: 256,
   })
-  data!: string;
+  description!: string;
+
+  @Column("varchar", {
+    nullable: false,
+    name: "creator",
+  })
+  creator!: string;
 
   @Column("datetime", {
     nullable: false,

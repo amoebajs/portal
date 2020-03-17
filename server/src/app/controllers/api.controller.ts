@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { TaskType, Compiler } from "#global/services/compile.service";
+import { Compiler } from "#global/services/compile.service";
 import { User } from "#global/services/user.service";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
 
@@ -54,12 +54,13 @@ export class ApiController {
     console.log("create task ==> ");
     console.log(data);
     const { name, configs: options } = data;
-    const id = await this.compiler.createTask(TaskType.CommonPageBuild, { name, options });
+    const id = await this.compiler.createTask({ name, options, creator: String(this.user.infos.id) });
     return {
       code: 0,
       data: {
         id,
-        configs: data,
+        creator: String(this.user.infos.id),
+        configs: options,
       },
     };
   }

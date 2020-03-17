@@ -8,7 +8,7 @@ process.env.START_MODE = "cluster";
 
 function bootstrap() {
   if (cluster.isMaster) {
-    Master.Create(cluster, { maxWorker: MAXCPU });
+    Master.Create(cluster, { maxWorker: MAXCPU, useTaskMgr: true });
     return;
   }
   require("./app");

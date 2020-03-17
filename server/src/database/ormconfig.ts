@@ -7,6 +7,7 @@ export function createOrmOptions(
   database: string,
   host: string,
   port: number,
+  synchronize: boolean,
 ): ConnectionOptions {
   return {
     username: user,
@@ -15,7 +16,7 @@ export function createOrmOptions(
     host,
     port,
     type: "mysql",
-    synchronize: false,
+    synchronize,
     logging: false,
     entities: [path.resolve(__dirname, "entity", "*{.ts,.js}")],
   };

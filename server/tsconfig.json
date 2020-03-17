@@ -19,6 +19,7 @@
       "#core/*": ["./src/core/*"],
       "#assets/*": ["./src/assets/*"],
       "#configs/*": ["./src/configs/*"],
+      "#database/*": ["./src/database/*"],
       "#utils/*": ["./src/utils/*"]
     }
   },
