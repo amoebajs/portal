@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild, TemplateRef } from "@angular/core";
 import { NzModalService } from "ng-zorro-antd";
 import { PortalService } from "../services/portal.service";
 
@@ -7,7 +7,15 @@ import { PortalService } from "../services/portal.service";
   templateUrl: "./manage.html",
 })
 export class PortalManageComponent implements OnInit {
-  private data!: any[];
+  @ViewChild("versionContent", { static: true })
+  private versionContent: TemplateRef<any>;
+
+  @ViewChild("detailsContent", { static: true })
+  private detailsContent: TemplateRef<any>;
+
+  public data!: any;
+  public details!: any;
+  public version!: any;
 
   constructor(private portal: PortalService, private modal: NzModalService) {}
 
@@ -21,17 +29,22 @@ export class PortalManageComponent implements OnInit {
 
   async onPageClick(id: number | string) {
     const details = await this.portal.fetchPageDetails(id);
+    this.details = JSON.stringify(details, null, "  ");
     this.modal.info({
       nzTitle: "页面详情",
-      nzContent: JSON.stringify(details, null, "  "),
+      nzWidth: 640,
+      nzContent: this.detailsContent,
     });
   }
 
   async onPageVersionClick(id: number | string) {
     const details = await this.portal.fetchPageVersionDetails(id);
+    this.version = details;
+    this.version.dist = JSON.stringify(JSON.parse(details.dist), null, "  ");
     this.modal.info({
       nzTitle: "页面版本信息",
-      nzContent: JSON.stringify(details, null, "  "),
+      nzWidth: 640,
+      nzContent: this.versionContent,
     });
   }
 }

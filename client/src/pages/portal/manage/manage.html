@@ -24,3 +24,16 @@
     </tbody>
   </nz-table>
 </app-portal-layout>
+
+<ng-template #detailsContent>
+  <pre>{{ details }}</pre>
+</ng-template>
+
+<ng-template #versionContent>
+  <div>ID: {{ version.id }}</div>
+  <div>Creator: {{ version.creator }}</div>
+  <div>Created: {{ version.createdAt }}</div>
+  <div>Updated: {{ version.updatedAt }}</div>
+  <div>Dist:</div>
+  <pre>{{ version.dist }}</pre>
+</ng-template>
