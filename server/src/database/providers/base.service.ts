@@ -4,10 +4,17 @@ import { Connection, Repository, SelectQueryBuilder } from "typeorm";
 import { IListQueryResult } from "../typings";
 
 export class BaseMysqlService {
-  protected connection!: Connection;
+  protected _connection!: Connection;
+
+  protected get connection() {
+    if (!this._connection) {
+      throw new Error("Invalid operation: mysql's connection is not ready");
+    }
+    return this._connection;
+  }
 
   public setConnection(connection: Connection) {
-    this.connection = connection;
+    this._connection = connection;
   }
 
   protected createListQueryBuilder<M>(
@@ -65,15 +72,15 @@ export class BaseMysqlService {
           .reduce((p, c) => ({ ...p, [c[0]]: c[1] }), {}),
       )
       .execute();
-    if (res.affected <= 0) {
+    if (res?.raw?.changedRows <= 0) {
       throw new Error("Update Entry Failed: affected is 0");
     }
-    return res.affected > 0;
+    return res?.raw?.changedRows > 0;
   }
 
-  protected async createEntry<M>(repo: Repository<M>, updates: Partial<M>): Promise<string> {
+  protected async createEntry<M>(repo: Repository<M>, updates: Partial<M>): Promise<string | number> {
     const res = await repo.insert(<any>{ ...updates });
-    return String(res.identifiers[0].id);
+    return res.identifiers[0].id;
   }
 
   protected useSkipOmit<O extends Record<string, any>>(options: O, where: (keyof O)[]): [Partial<O>, Partial<O>] {

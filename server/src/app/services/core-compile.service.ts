@@ -33,7 +33,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   public async queryPageUri(name: string) {
     let page = this.manager.getPage(name);
     if (!page) {
-      const pageR = await this.worker.queryPage({ name });
+      const pageR = await this.worker.query("PAGE", { name });
       this.manager.updatePage(name, { latest: String(pageR.versionId) });
       page = this.manager.getPage(name);
     }
@@ -41,7 +41,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return version && `website/${name}.${version}.html`;
   }
 
-  public async createTask(configs: ICommonBuildConfigs): Promise<string> {
+  public async createTask(configs: ICommonBuildConfigs): Promise<string | number> {
     if (!this._init) {
       throw new Error("core-compiler is not init");
     }
@@ -50,14 +50,23 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     }
     const { name, options } = configs;
     this._working = true;
-    const taskId = await this.worker.startTask({ name, operator: configs.creator, data: options });
-    const task = await this.worker.queryTask({ id: taskId });
-    this.runCustomTask(task);
+    const page = await this.worker.query("PAGE", { name });
+    const pageId = !page
+      ? await this.worker.createPage({ name, operator: configs.creator, configs: options })
+      : page.id;
+    const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
+    const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
+    if (success) {
+      const task = await this.worker.query("TASK", { id: taskId });
+      this.runCustomTask(task);
+    } else {
+      throw new Error("Task exist with status [pending]");
+    }
     return taskId;
   }
 
   public async queryTask(id: string): Promise<ICompileTask> {
-    return this.worker.queryTask({ id });
+    return this.worker.query("TASK", { id });
   }
 
   public async createSourceString(
@@ -83,25 +92,26 @@ export class CoreCompiler implements CompileService<ICompileTask> {
 
   protected async runCommonBuildWorkAsync(task: ICompileTask, srcDir: string, buildDir: string) {
     const stamp = new Date().getTime();
-    const page = await this.worker.queryPage({ id: task.pageId });
+    const page = await this.worker.query("PAGE", { id: task.pageId });
     let cache = this.manager.getPage(page.name);
     if (!cache) {
       const updates: Partial<IWebsitePageHash> = { latest: null };
-      const prever = await this.worker.queryVersion({ id: page.versionId });
+      const prever = await this.worker.query("VERSION", { id: page.versionId });
+      const preconf = await this.worker.query("CONFIG", { id: page.configId });
       if (prever) {
         updates.latest = String(prever.id);
-        updates.config = prever.data || "{}";
+        updates.config = preconf.data || "{}";
         updates.files = JSON.parse(prever.dist);
       }
       this.manager.updatePage(page.name, updates);
       cache = this.manager.getPage(page.name);
     }
-    const curver = await this.worker.queryVersion({ id: task.versionId });
+    const curconf = await this.worker.query("CONFIG", { id: task.configId });
     try {
       const targetFile = path.join(srcDir, "main.tsx");
       console.log(chalk.blue(`[COMPILE-TASK] task[${task.id}] is now running.`));
       const { sourceCode, dependencies } = await this.builder.createSource({
-        configs: JSON.parse(curver.data),
+        configs: JSON.parse(curconf.data),
       });
       await fs.writeFile(targetFile, sourceCode, { encoding: "utf8", flag: "w+" });
       console.log(chalk.blue(`[COMPILE-TASK] task[${task.id}] compile successfully.`));
@@ -116,7 +126,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
           dependencies,
         },
       });
-      let shouldMoveBundle = true;
+      let isHashChanged = true;
       await this.builder.htmlBundle.build({
         path: path.join(buildDir, "index.html"),
         outPath: path.join(buildDir, "index.bundle.html"),
@@ -133,32 +143,29 @@ export class CoreCompiler implements CompileService<ICompileTask> {
           return false;
         },
         shouldBundle: ps => {
-          if (ps.length > 0) {
-            return true;
-          }
-          console.log(`[COMPILE-TASK] task[${task.id}] find no file changed.`);
-          return (shouldMoveBundle = false);
+          isHashChanged = ps.length > 0;
+          // 无论如何都要输出chunk
+          return true;
         },
       });
-      if (shouldMoveBundle) {
-        await this.worker.createUpdateVersion({
-          id: curver.id,
-          dist: JSON.stringify(cache.files),
-        });
-        const version = String(curver.id);
-        // 后期要做成版本控制，暂时直接绑定新版本
-        await this.worker.createUpdatePage({ id: page.id, versionId: version });
-        this.manager.updatePage(page.name, { latest: version });
-        await this.moveHtmlBundle(page.name, version, buildDir);
+      if (!isHashChanged) {
+        console.log(`[COMPILE-TASK] task[${task.id}] find no file changed.`);
       }
-      await this.worker.endTask({ id: task.id, operator: task.creator });
-      console.log(JSON.stringify(cache, null, "  "));
+      await this.worker.endTask({
+        id: task.id,
+        operator: task.creator,
+        dist: JSON.stringify(cache.files),
+      });
+      const version = String(task.versionId);
+      this.manager.updatePage(page.name, { config: curconf.data, latest: version });
+      await this.moveHtmlBundle(page.name, version, buildDir);
+      console.log(JSON.stringify({ ...cache, config: "[hidden]" }, null, "  "));
       const cost = this.getSecondsCost(stamp);
       console.log(chalk.green(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}] in ${cost}s`));
       return true;
     } catch (error) {
       console.log(error);
-      await this.worker.endTask({ id: task.id, operator: task.creator, status: TaskStatus.Failed });
+      await this.worker.endTask({ id: task.id, operator: task.creator, status: TaskStatus.Failed, dist: "{}" });
       const cost = this.getSecondsCost(stamp);
       console.log(chalk.red(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}]  in ${cost}s`));
       console.log(chalk.yellow(`[COMPILE-TASK] task[${task.id}] failed.`));

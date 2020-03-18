@@ -9,13 +9,19 @@ export class CompileTask implements ICompileTask {
   })
   id!: number | string;
 
-  @Column("varchar", {
+  @Column("bigint", {
     nullable: true,
     name: "page_id",
   })
   pageId!: string | number;
 
-  @Column("varchar", {
+  @Column("bigint", {
+    nullable: true,
+    name: "config_id",
+  })
+  configId!: string | number;
+
+  @Column("bigint", {
     nullable: true,
     name: "version_id",
   })
@@ -38,6 +44,13 @@ export class CompileTask implements ICompileTask {
     name: "creator",
   })
   creator!: string;
+
+  @Column("varchar", {
+    nullable: true,
+    name: "description",
+    length: 256,
+  })
+  description!: string;
 
   @Column("datetime", {
     nullable: false,

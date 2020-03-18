@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IPageVersion } from "../typings";
+import { IPageConfig } from "../typings";
 
-@Entity("ews_page_version")
-export class PageVersion implements IPageVersion {
+@Entity("ews_page_config")
+export class PageConfig implements IPageConfig {
   @PrimaryGeneratedColumn({
     name: "id",
     type: "bigint",
@@ -10,16 +10,10 @@ export class PageVersion implements IPageVersion {
   id!: number | string;
 
   @Column("bigint", {
-    nullable: true,
-    name: "config_id",
-  })
-  configId!: number | string;
-
-  @Column("varchar", {
     nullable: false,
-    name: "name",
+    name: "page_id",
   })
-  name!: string;
+  pageId!: string | number;
 
   @Column("varchar", {
     nullable: false,
@@ -27,11 +21,11 @@ export class PageVersion implements IPageVersion {
   })
   creator!: string;
 
-  @Column("varchar", {
+  @Column("text", {
     nullable: true,
-    name: "dist",
+    name: "data",
   })
-  dist!: string;
+  data!: string;
 
   @Column("datetime", {
     nullable: false,

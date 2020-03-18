@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IPage } from "../typings";
+import { IPage, PageStatus } from "../typings";
 
 @Entity("ews_page")
 export class Page implements IPage {
@@ -9,11 +9,23 @@ export class Page implements IPage {
   })
   id!: number | string;
 
-  @Column("varchar", {
+  @Column("bigint", {
+    nullable: true,
+    name: "config_id",
+  })
+  configId!: string;
+
+  @Column("bigint", {
     nullable: true,
     name: "version_id",
   })
   versionId!: string;
+
+  @Column("int", {
+    nullable: false,
+    name: "status",
+  })
+  status!: PageStatus;
 
   @Column("varchar", {
     nullable: false,

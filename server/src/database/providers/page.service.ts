@@ -1,17 +1,32 @@
 import { BaseMysqlService } from "./base.service";
 import { Page } from "../entity/page.entity";
-import { IPageListQueryOptions, IListQueryResult, IPageQueryOptions } from "../typings";
+import { IListQueryResult, PageStatus } from "../typings";
+
+export interface IListQueryOptions {
+  name?: string;
+  creator?: string;
+  current: number;
+  size: number;
+}
+
+export interface IQueryOptions {
+  id?: number | string;
+  name?: string;
+}
 
 export interface ICreateOptions {
   name: string;
+  status: PageStatus;
   displayName?: string;
+  description?: string;
   creator: string;
 }
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
   updatedAt: Date;
-  versionId?: string;
+  versionId?: string | number;
+  configId?: string | number;
 }
 
 export class PageService extends BaseMysqlService {
@@ -19,22 +34,22 @@ export class PageService extends BaseMysqlService {
     return this.connection.getRepository(Page);
   }
 
-  public async queryPageList(options: IPageListQueryOptions, repo = this.repository): Promise<IListQueryResult<Page>> {
+  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<Page>> {
     return this.invokeListQuery(repo, options);
   }
 
-  public async queryPage(options: IPageQueryOptions, repo = this.repository): Promise<Page> {
+  public async query(options: IQueryOptions, repo = this.repository): Promise<Page> {
     const queries: Partial<Page> = {};
     if (options.id !== void 0) queries.id = options.id;
     if (options.name !== void 0) queries.name = options.name;
     return this.queryEntry(repo, queries);
   }
 
-  public async createPage(options: ICreateOptions, repo = this.repository): Promise<string> {
+  public async create(options: ICreateOptions, repo = this.repository): Promise<string | number> {
     return this.createEntry(repo, options);
   }
 
-  public async updatePage(
+  public async update(
     options: IUpdateOptions,
     where: (keyof IUpdateOptions)[],
     repo = this.repository,

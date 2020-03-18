@@ -22,7 +22,7 @@ export interface ISourceCreateResult {
 @Injectable()
 export abstract class CompileService<T> {
   public abstract async queryPageUri(name: string): Promise<string>;
-  public abstract createTask(configs: ICommonBuildConfigs): Promise<string>;
+  public abstract createTask(configs: ICommonBuildConfigs): Promise<string | number>;
   public abstract createSourceString(
     configs: IPageCreateOptions,
     transpile?: Partial<ISourceCreateTranspileOptions>,

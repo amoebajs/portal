@@ -1,10 +1,9 @@
 import { BaseMysqlService } from "./base.service";
-import { PageVersion } from "../entity/page-version.entity";
 import { IListQueryResult } from "../typings";
+import { PageConfig } from "../entity/page-config.entity";
 
 export interface IListQueryOptions {
-  name?: string;
-  pageId?: string;
+  pageId?: number | string;
   creator?: string;
   current: number;
   size: number;
@@ -12,13 +11,12 @@ export interface IListQueryOptions {
 
 export interface IQueryOptions {
   id: string | number;
-  name?: string;
+  pageId?: number | string;
 }
 
 export interface ICreateOptions {
-  name?: string;
-  configId?: string | number;
-  dist?: string;
+  pageId?: string | number;
+  data?: string;
   creator: string;
 }
 
@@ -27,19 +25,18 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
   updatedAt: Date;
 }
 
-export class VersionService extends BaseMysqlService {
+export class ConfigService extends BaseMysqlService {
   protected get repository() {
-    return this.connection.getRepository(PageVersion);
+    return this.connection.getRepository(PageConfig);
   }
 
-  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<PageVersion>> {
+  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<PageConfig>> {
     return this.invokeListQuery(repo, options);
   }
 
-  public async query(options: IQueryOptions, repo = this.repository): Promise<PageVersion> {
-    const queries: Partial<PageVersion> = {};
+  public async query(options: IQueryOptions, repo = this.repository): Promise<PageConfig> {
+    const queries: Partial<PageConfig> = {};
     if (options.id !== void 0) queries.id = options.id;
-    if (options.name !== void 0) queries.name = options.name;
     return this.queryEntry(repo, queries);
   }
 

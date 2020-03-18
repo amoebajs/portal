@@ -31,7 +31,7 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.database.queryPageList({ name, current: +current, size: +size }),
+      data: await this.database.queryList("PAGE", { name, current: +current, size: +size }),
     };
   }
 
@@ -60,7 +60,7 @@ export class ApiController {
   @Get("page/:id")
   @SetRoles("admin")
   public async getPageDetails(@Param("id") id: string) {
-    const result = await this.database.queryPage({ id });
+    const result = await this.database.query("PAGE", { id });
     return {
       code: 0,
       data: result,
@@ -70,7 +70,7 @@ export class ApiController {
   @Get("page-version/:id")
   @SetRoles("admin")
   public async getPageVersionDetails(@Param("id") id: string) {
-    const result = await this.database.queryVersion({ id });
+    const result = await this.database.query("VERSION", { id });
     return {
       code: 0,
       data: result,
@@ -81,7 +81,7 @@ export class ApiController {
   @SetRoles("super-admin")
   public async createPage(@Body() data: any) {
     const { name, displayName, description } = data;
-    const result = await this.database.createUpdatePage({
+    const result = await this.database.createPage({
       name,
       displayName,
       description,
