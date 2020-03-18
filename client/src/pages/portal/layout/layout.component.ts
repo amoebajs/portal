@@ -36,10 +36,7 @@ export class PortalLayoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    this.portal.fetchTemplates();
-    this.portal.fetchUserInfos();
-  }
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     if (this.routeSubp && !this.routeSubp.closed) {

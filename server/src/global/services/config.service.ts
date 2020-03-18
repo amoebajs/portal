@@ -12,7 +12,14 @@ export interface IServerConfigs {
   };
   startMode: "redis" | "mysql" | "cluster" | "app";
   redis: { host: string; port: number };
-  mysql: { host: string; port: number; database: string; user: string; password: number | string };
+  mysql: {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: number | string;
+    synchronize: boolean;
+  };
   cluster: { maxCpuNum: number | null };
   gzip: { enabled: boolean; options?: Partial<CompressionOptions> };
 }

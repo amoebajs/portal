@@ -8,6 +8,7 @@ import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
 import { ICompileContext, Builder } from "../services/builder.service";
 import { callContextValidation } from "../components/source-tree/source-tree.component";
+import { ActivatedRoute } from "@angular/router";
 
 const CommonDepts = {
   "@types/react": "^16.9.7",
@@ -22,6 +23,10 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   @ViewChild("previewRender", { static: false }) previewRender: ElementRef;
   @ViewChild("previewTpl", { static: false }) previewTpl: TemplateRef<HTMLDivElement>;
 
+  public isCreate = true;
+  public pageId!: string;
+  public details!: any;
+
   public showButton = false;
   public showEditor: "view" | "config" | "hide" = "view";
   public showPreview = {
@@ -30,8 +35,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   };
 
   public lastDepts: Record<string, string> = {};
-  public createContext = createDefaultConfigs();
-  public pageConfigs = yamljs.safeDump(this.createContext);
+  public createContext!: ICompileContext;
+  public pageConfigs!: string;
   public vm!: VM;
 
   private project: Project = {
@@ -58,12 +63,28 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   }
 
   constructor(
+    route: ActivatedRoute,
     private renderer: Renderer2,
     private portal: PortalService,
     private builder: Builder,
     private message: NzMessageService,
   ) {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
+    route.params.subscribe(async params => {
+      const url = route.snapshot.url.map(i => i.path).join("/");
+      if (url !== "preview/create" && !!params.id) {
+        this.isCreate = false;
+        this.pageId = params.id;
+        this.details = await this.portal.fetchPageDetails(this.pageId);
+        const config = await this.portal.fetchPageConfigDetails(this.pageId, this.details.configId);
+        this.createContext = JSON.parse(config.data);
+        this.pageConfigs = yamljs.safeDump(this.createContext);
+      } else {
+        this.isCreate = true;
+        this.createContext = createDEVConfigs();
+        this.pageConfigs = yamljs.safeDump(this.createContext);
+      }
+    });
   }
 
   ngOnInit() {
@@ -85,6 +106,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     this.showPreview[target] = !this.showPreview[target];
     this.trackPreviewIfNeed();
   }
+
+  onPreviewSaveClick() {}
 
   onTextareaChange(value: string) {
     try {
@@ -168,7 +191,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   }
 }
 
-function createDefaultConfigs(): ICompileContext {
+function createDEVConfigs(): ICompileContext {
   return {
     provider: "react",
     components: [
@@ -178,239 +201,239 @@ function createDefaultConfigs(): ICompileContext {
         module: "ambjs-layout-module",
         version: "0.0.1-beta.0",
       },
-      {
-        id: "ZentForm",
-        name: "universal-form",
-        module: "zent-module",
-        version: "0.0.1-beta.0",
-      },
+      // {
+      //   id: "ZentForm",
+      //   name: "universal-form",
+      //   module: "zent-module",
+      //   version: "0.0.1-beta.0",
+      // },
     ],
     directives: [
-      {
-        id: "ZentFormField",
-        name: "universal-form-field",
-        module: "zent-module",
-        version: "0.0.1-beta.0",
-      },
-      {
-        id: "ZentFormSubmit",
-        name: "universal-form-submit",
-        module: "zent-module",
-        version: "0.0.1-beta.0",
-      },
+      // {
+      //   id: "ZentFormField",
+      //   name: "universal-form-field",
+      //   module: "zent-module",
+      //   version: "0.0.1-beta.0",
+      // },
+      // {
+      //   id: "ZentFormSubmit",
+      //   name: "universal-form-submit",
+      //   module: "zent-module",
+      //   version: "0.0.1-beta.0",
+      // },
     ],
     page: {
       ref: "GridLayout",
       id: "App",
       slot: "app",
-      input: {
-        basic: {
-          padding: {
-            type: "literal",
-            expression: [
-              ["left", "24px"],
-              ["right", "24px"],
-              ["top", "36px"],
-            ],
-          },
-        },
-      },
-      children: [
-        {
-          ref: "ZentForm",
-          id: "AppInnerSection01",
-          directives: [
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance01",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "number",
-                },
-                required: {
-                  type: "literal",
-                  expression: true,
-                },
-                name: {
-                  type: "literal",
-                  expression: "field01",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段01：",
-                },
-                placeholder: {
-                  type: "literal",
-                  expression: "请输入内容",
-                },
-                value: {
-                  type: "literal",
-                  expression: 2345124351,
-                },
-              },
-            },
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance02",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "text",
-                },
-                name: {
-                  type: "literal",
-                  expression: "field02",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段02：",
-                },
-                placeholder: {
-                  type: "literal",
-                  expression: "请输入内容22222",
-                },
-                value: {
-                  type: "literal",
-                  expression: "evgbweshbestnb",
-                },
-              },
-            },
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance03",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "textarea",
-                },
-                name: {
-                  type: "literal",
-                  expression: "field03",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段03：",
-                },
-                placeholder: {
-                  type: "literal",
-                  expression: "xxx",
-                },
-                value: {
-                  type: "literal",
-                  expression: "wsvgqw77we7d27adscf873f8a7dtf",
-                },
-              },
-            },
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance04",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "checkbox",
-                },
-                name: {
-                  type: "literal",
-                  expression: "field04",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段04：",
-                },
-                value: {
-                  type: "literal",
-                  expression: ["abcd", "ijkl"],
-                },
-                options: {
-                  type: "literal",
-                  expression: [
-                    ["option01", "abcd"],
-                    ["option02", "efgh"],
-                    ["option03", "ijkl"],
-                    ["optionn4", "mnop"],
-                  ],
-                },
-              },
-            },
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance05",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "select",
-                },
-                name: {
-                  type: "literal",
-                  expression: "field05",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段05：",
-                },
-                placeholder: {
-                  type: "literal",
-                  expression: "select-placeholder",
-                },
-                value: {
-                  type: "literal",
-                  expression: "abcd",
-                },
-                options: {
-                  type: "literal",
-                  expression: [
-                    ["option01", "abcd"],
-                    ["option02", "efgh"],
-                    ["option03", "ijkl"],
-                    ["optionn4", "mnop"],
-                  ],
-                },
-              },
-            },
-            {
-              ref: "ZentFormField",
-              id: "FormFieldInstance06",
-              input: {
-                type: {
-                  type: "literal",
-                  expression: "switch",
-                },
-                name: {
-                  type: "literal",
-                  expression: "field06",
-                },
-                label: {
-                  type: "literal",
-                  expression: "字段06：",
-                },
-                value: {
-                  type: "literal",
-                  expression: true,
-                },
-              },
-            },
-            {
-              ref: "ZentFormSubmit",
-              id: "FormSubmitInstance",
-              input: {
-                showCancel: {
-                  type: "literal",
-                  expression: true,
-                },
-                submitText: {
-                  type: "literal",
-                  expression: "提交",
-                },
-                cancelText: {
-                  type: "literal",
-                  expression: "放弃",
-                },
-              },
-            },
-          ],
-        },
-      ],
+      // input: {
+      //   basic: {
+      //     padding: {
+      //       type: "literal",
+      //       expression: [
+      //         ["left", "24px"],
+      //         ["right", "24px"],
+      //         ["top", "36px"],
+      //       ],
+      //     },
+      //   },
+      // },
+      // children: [
+      //   {
+      //     ref: "ZentForm",
+      //     id: "AppInnerSection01",
+      //     directives: [
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance01",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "number",
+      //           },
+      //           required: {
+      //             type: "literal",
+      //             expression: true,
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field01",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段01：",
+      //           },
+      //           placeholder: {
+      //             type: "literal",
+      //             expression: "请输入内容",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: 2345124351,
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance02",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "text",
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field02",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段02：",
+      //           },
+      //           placeholder: {
+      //             type: "literal",
+      //             expression: "请输入内容22222",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: "evgbweshbestnb",
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance03",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "textarea",
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field03",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段03：",
+      //           },
+      //           placeholder: {
+      //             type: "literal",
+      //             expression: "xxx",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: "wsvgqw77we7d27adscf873f8a7dtf",
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance04",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "checkbox",
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field04",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段04：",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: ["abcd", "ijkl"],
+      //           },
+      //           options: {
+      //             type: "literal",
+      //             expression: [
+      //               ["option01", "abcd"],
+      //               ["option02", "efgh"],
+      //               ["option03", "ijkl"],
+      //               ["optionn4", "mnop"],
+      //             ],
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance05",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "select",
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field05",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段05：",
+      //           },
+      //           placeholder: {
+      //             type: "literal",
+      //             expression: "select-placeholder",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: "abcd",
+      //           },
+      //           options: {
+      //             type: "literal",
+      //             expression: [
+      //               ["option01", "abcd"],
+      //               ["option02", "efgh"],
+      //               ["option03", "ijkl"],
+      //               ["optionn4", "mnop"],
+      //             ],
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormField",
+      //         id: "FormFieldInstance06",
+      //         input: {
+      //           type: {
+      //             type: "literal",
+      //             expression: "switch",
+      //           },
+      //           name: {
+      //             type: "literal",
+      //             expression: "field06",
+      //           },
+      //           label: {
+      //             type: "literal",
+      //             expression: "字段06：",
+      //           },
+      //           value: {
+      //             type: "literal",
+      //             expression: true,
+      //           },
+      //         },
+      //       },
+      //       {
+      //         ref: "ZentFormSubmit",
+      //         id: "FormSubmitInstance",
+      //         input: {
+      //           showCancel: {
+      //             type: "literal",
+      //             expression: true,
+      //           },
+      //           submitText: {
+      //             type: "literal",
+      //             expression: "提交",
+      //           },
+      //           cancelText: {
+      //             type: "literal",
+      //             expression: "放弃",
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // ],
     },
   };
 }

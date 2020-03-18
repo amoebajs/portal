@@ -9,11 +9,12 @@ import {
   IWorkerSendMsg,
   IWorkerUpdateTaskReceiveMsg,
   IWorkerUpdateTaskSendMsg,
-} from "./message";
+} from "../../typings/message";
 import { Task, TaskManager } from "./task";
 
 export interface IMasterOptions {
   maxWorker?: number;
+  useTaskMgr?: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export class Master<T extends IWorkerSendMsg = IWorkerSendMsg> extends TaskManag
   }
 
   private _target = process;
+  private _useMgr = false;
   private _maxNum = os.cpus().length;
   private _workers: number[] = [];
 
@@ -51,9 +53,13 @@ export class Master<T extends IWorkerSendMsg = IWorkerSendMsg> extends TaskManag
     if (options.maxWorker !== void 0) {
       this._maxNum = options.maxWorker;
     }
+    if (options.useTaskMgr !== void 0) {
+      this._useMgr = options.useTaskMgr === true;
+    }
   }
 
   protected onWorkerMessagereceived() {
+    if (!this._useMgr) return;
     this._god.on("message", (worker, message: any = {}) => {
       this.onMessageReceived(message, worker);
     });
@@ -63,8 +69,10 @@ export class Master<T extends IWorkerSendMsg = IWorkerSendMsg> extends TaskManag
     this._god.on("exit", (worker, code, signal) => {
       const workerId = worker.process.pid;
       console.log("exit worker " + workerId + " died");
-      this._removeWorker(worker);
-      this._clearTasksForCurrentWorker(workerId);
+      if (this._useMgr) {
+        this._removeWorker(worker);
+        this._clearTasksForCurrentWorker(workerId);
+      }
       this._god.fork();
     });
   }

@@ -1,5 +1,5 @@
 import { ClusterStorage } from "./storage";
-import { IWorkerUpdateTaskSendMsg } from "./message";
+import { IWorkerUpdateTaskSendMsg } from "../../typings/message";
 
 export interface ITaskSnapshot<T extends { [prop: string]: any } = {}> {
   id: string;

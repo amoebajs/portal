@@ -1,43 +1,31 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { IPageConfig } from "../typings";
 
-@Entity("ews_compile_task")
-export class CompileTask {
+@Entity("ews_page_config")
+export class PageConfig implements IPageConfig {
   @PrimaryGeneratedColumn({
     name: "id",
+    type: "bigint",
   })
-  id!: number;
+  id!: number | string;
+
+  @Column("bigint", {
+    nullable: false,
+    name: "page_id",
+  })
+  pageId!: string | number;
 
   @Column("varchar", {
     nullable: false,
-    name: "task_id",
-    length: 128,
-  })
-  taskId!: string;
-
-  @Column("integer", {
-    nullable: false,
-    name: "task_locked",
-  })
-  locked!: 0 | 1;
-
-  @Column("varchar", {
-    nullable: false,
-    name: "task_creator",
+    name: "creator",
   })
   creator!: string;
 
-  @Column("varchar", {
-    nullable: false,
-    name: "task_operator",
+  @Column("text", {
+    nullable: true,
+    name: "data",
   })
-  operator!: string;
-
-  @Column("varchar", {
-    nullable: false,
-    name: "task_storage",
-    length: 256,
-  })
-  storage!: string;
+  data!: string;
 
   @Column("datetime", {
     nullable: false,

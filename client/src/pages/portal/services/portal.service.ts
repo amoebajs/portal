@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "../../../services/http.service";
+import { UseRouter } from "../router";
 
 export interface IMenuItem {
   name: string;
@@ -28,35 +29,51 @@ export class PortalService {
 
   public menulist: IMenuGroup[] = [
     {
-      name: "Group01",
+      name: "配置化面板",
       icon: "user",
       selected: false,
-      items: [
-        {
-          name: "Portal",
-          link: "/portal",
+      items: Object.entries(UseRouter.data)
+        .filter(i => !["page", "edit"].includes(i[0]))
+        .map(i => ({
+          name: i[1].data.title,
+          link: "/portal" + (i[1].path === "" ? "" : "/" + i[1].path),
           selected: false,
-        },
-        {
-          name: "Preview",
-          link: "/portal/preview",
-          selected: false,
-        },
-        {
-          name: "Settings",
-          link: "/portal/settings",
-          selected: false,
-        },
-      ],
+        })),
     },
   ];
 
   public userInfos: any = { logined: false, name: "" };
 
-  constructor(private readonly http: HttpService) {}
+  constructor(private readonly http: HttpService) {
+    this.fetchUserInfos();
+  }
 
-  public fetchTemplates() {
-    this.http.get("templates");
+  public fetchPageList(current: number, size: number) {
+    return this.http.get<any[]>("pages", { current, size });
+  }
+
+  public createPage(name: string, displayName?: string, desc?: string) {
+    return this.http.post<string>("page", { name, displayName, description: desc });
+  }
+
+  public fetchPageDetails(pageid: number | string) {
+    return this.http.get<any>(`page/${pageid}`);
+  }
+
+  public fetchPageVersionList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/versions`, { current, size });
+  }
+
+  public fetchPageVersionDetails(pageid: number | string, versionid: string | number) {
+    return this.http.get<any>(`page/${pageid}/version/${versionid}`);
+  }
+
+  public fetchPageConfigList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/configs`, { current, size });
+  }
+
+  public fetchPageConfigDetails(pageid: number | string, configid: string | number) {
+    return this.http.get<any>(`page/${pageid}/config/${configid}`);
   }
 
   public createSource(configs: any) {
@@ -65,9 +82,7 @@ export class PortalService {
 
   public async fetchUserInfos() {
     const userInfo: any = await this.http.get("user");
-    if (userInfo.code === 0) {
-      this.userInfos = { ...this.userInfos, ...userInfo.data };
-    }
+    this.userInfos = { ...this.userInfos, ...userInfo };
   }
 
   public toggleMenuCollapsed() {
