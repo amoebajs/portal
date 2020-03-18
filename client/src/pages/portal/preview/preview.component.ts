@@ -72,16 +72,16 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
     route.params.subscribe(async params => {
       const url = route.snapshot.url.map(i => i.path).join("/");
-      if (url === "preview/create") {
-        this.isCreate = true;
-        this.createContext = createDEVConfigs();
-        this.pageConfigs = yamljs.safeDump(this.createContext);
-      } else {
+      if (url !== "preview/create" && !!params.id) {
         this.isCreate = false;
         this.pageId = params.id;
         this.details = await this.portal.fetchPageDetails(this.pageId);
         const config = await this.portal.fetchPageConfigDetails(this.pageId, this.details.configId);
         this.createContext = JSON.parse(config.data);
+        this.pageConfigs = yamljs.safeDump(this.createContext);
+      } else {
+        this.isCreate = true;
+        this.createContext = createDEVConfigs();
         this.pageConfigs = yamljs.safeDump(this.createContext);
       }
     });
