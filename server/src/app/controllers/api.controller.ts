@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, Param } from "@nestjs/common";
+import { IPageCreateOptions } from "@amoebajs/builder";
 import { Compiler } from "#global/services/compile.service";
 import { User } from "#global/services/user.service";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
@@ -7,11 +8,7 @@ import { MysqlWorker } from "#database/providers/worker.service";
 @Controller("api")
 @UseRolesAuthentication({ roles: ["admin"] })
 export class ApiController {
-  constructor(
-    private readonly compiler: Compiler,
-    private readonly database: MysqlWorker,
-    private readonly user: User,
-  ) {}
+  constructor(private readonly compiler: Compiler, private readonly worker: MysqlWorker, private readonly user: User) {}
 
   @Get("user")
   @SetRoles("admin")
@@ -31,7 +28,62 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.database.queryList("PAGE", { name, current: +current, size: +size }),
+      data: await this.worker.queryList("PAGE", { name, current: +current, size: +size }),
+    };
+  }
+
+  @Get("page/:id/configs")
+  @SetRoles("admin")
+  public async queryPageConfiglist(
+    @Param("id") pageId: string,
+    @Query("current") current: string,
+    @Query("size") size: string,
+    @Query("name") name: string,
+  ) {
+    return {
+      code: 0,
+      data: await this.worker.queryList("VERSION", { name, pageId, current: +current, size: +size }),
+    };
+  }
+
+  @Get("page/:id/versions")
+  @SetRoles("admin")
+  public async queryPageVersionlist(
+    @Param("id") pageId: string,
+    @Query("current") current: string,
+    @Query("size") size: string,
+    @Query("name") name: string,
+  ) {
+    return {
+      code: 0,
+      data: await this.worker.queryList("VERSION", { name, current: +current, size: +size }),
+    };
+  }
+
+  @Get("page/:id")
+  @SetRoles("admin")
+  public async getPageDetails(@Param("id") id: string) {
+    return {
+      code: 0,
+      data: await this.worker.query("PAGE", { id }),
+    };
+  }
+
+  @Get("page/:id/version/:vid")
+  @SetRoles("admin")
+  public async getPageVersionDetails(@Param("id") _: string, @Param("vid") id: string) {
+    return {
+      code: 0,
+      data: await this.worker.query("VERSION", { id }),
+    };
+  }
+
+  @Get("page/:id/config/:cid")
+  @SetRoles("admin")
+  public async getPageConfigDetails(@Param("id") pageId: string, @Param("cid") id: string) {
+    return {
+      code: 0,
+      data: await this.worker.query("CONFIG", { id, pageId }),
     };
   }
 
@@ -57,65 +109,52 @@ export class ApiController {
     };
   }
 
-  @Get("page/:id")
-  @SetRoles("admin")
-  public async getPageDetails(@Param("id") id: string) {
-    const result = await this.database.query("PAGE", { id });
-    return {
-      code: 0,
-      data: result,
-    };
-  }
-
-  @Get("page-version/:id")
-  @SetRoles("admin")
-  public async getPageVersionDetails(@Param("id") id: string) {
-    const result = await this.database.query("VERSION", { id });
-    return {
-      code: 0,
-      data: result,
-    };
-  }
-
   @Post("page")
   @SetRoles("super-admin")
-  public async createPage(@Body() data: any) {
-    const { name, displayName, description } = data;
-    const result = await this.database.createPage({
-      name,
-      displayName,
-      description,
-      operator: String(this.user.infos.id),
-    });
+  public async createPage(
+    @Body("name") name?: string,
+    @Body("displayName") displayName?: string,
+    @Body("description") description?: string,
+  ) {
     return {
       code: 0,
-      data: result,
+      data: await this.worker.createPage({
+        name,
+        displayName,
+        description,
+        operator: String(this.user.infos.id),
+      }),
     };
   }
 
   @Post("task")
   @SetRoles("super-admin")
-  public async createtask(@Body() data: any) {
-    console.log("create task ==> ");
-    console.log(data);
-    const { name, configs: options } = data;
-    const id = await this.compiler.createTask({ name, options, creator: String(this.user.infos.id) });
+  public async createtask(
+    @Body("name") name: string,
+    @Body("configs") options: IPageCreateOptions,
+    @Body("displayName") displayName?: string,
+    @Body("description") description?: string,
+  ) {
     return {
       code: 0,
       data: {
-        id,
+        id: await this.compiler.createTask({
+          name,
+          displayName,
+          description,
+          options,
+          creator: String(this.user.infos.id),
+        }),
         creator: String(this.user.infos.id),
         configs: options,
       },
     };
   }
 
-  @Get("task")
+  @Get("task/:id")
   @SetRoles("admin")
-  public async gettask(@Query("id") id: string) {
-    console.log("query task ==> " + id);
+  public async gettask(@Param("id") id: string) {
     const result = await this.compiler.queryTask(id);
-    console.log(result);
     if (!result) {
       return {
         code: 404,

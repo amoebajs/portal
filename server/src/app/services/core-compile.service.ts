@@ -48,12 +48,26 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     if (this._working) {
       throw new Error("core-compiler is still on working for previous task");
     }
-    const { name, options } = configs;
+    const { name, displayName, description, options } = configs;
     this._working = true;
-    const page = await this.worker.query("PAGE", { name });
-    const pageId = !page
-      ? await this.worker.createPage({ name, operator: configs.creator, configs: options })
-      : page.id;
+    let page = await this.worker.query("PAGE", { name });
+    let pageId = page?.id;
+    if (!page) {
+      pageId = await this.worker.createPage({
+        name,
+        displayName,
+        description,
+        operator: configs.creator,
+        configs: options,
+      });
+    } else {
+      const success = await this.worker.updatePageDetails({ id: page.id, name, description, displayName });
+      if (success) {
+        page.name = name ?? page.name;
+        page.displayName = displayName ?? page.displayName;
+        page.description = description ?? page.description;
+      }
+    }
     const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
     const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
     if (success) {
@@ -116,7 +130,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       await fs.writeFile(targetFile, sourceCode, { encoding: "utf8", flag: "w+" });
       console.log(chalk.blue(`[COMPILE-TASK] task[${task.id}] compile successfully.`));
       await this.builder.buildSource({
-        template: { title: "测试" },
+        template: { title: page.displayName || "测试" },
         entry: { app: targetFile },
         output: { path: buildDir, filename: "[name].[hash].js" },
         plugins: [this.builder.webpackPlugins.createProgressPlugin()],
@@ -134,19 +148,21 @@ export class CoreCompiler implements CompileService<ICompileTask> {
           { match: /app\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
           { match: /vendor\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
         ],
+        //#region 这里处理hash变更的判断，暂时全部忽略，后续再考虑
         checkUnchange: (match, value) => {
-          if (cache.files[match as string] === value) {
-            return true;
+          if (cache.files[match as string] !== value) {
+            // return true;
+            console.log(`[COMPILE-TASK] task[${task.id}] find a change changed --> [${value}]`);
           }
           cache.files[match as string] = value;
-          console.log(`[COMPILE-TASK] task[${task.id}] find a change changed --> [${value}]`);
           return false;
         },
         shouldBundle: ps => {
           isHashChanged = ps.length > 0;
-          // 无论如何都要输出chunk
+          // return ps.length > 0;
           return true;
         },
+        //#endregion
       });
       if (!isHashChanged) {
         console.log(`[COMPILE-TASK] task[${task.id}] find no file changed.`);

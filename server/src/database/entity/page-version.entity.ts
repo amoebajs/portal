@@ -10,10 +10,16 @@ export class PageVersion implements IPageVersion {
   id!: number | string;
 
   @Column("bigint", {
-    nullable: true,
+    nullable: false,
     name: "config_id",
   })
   configId!: number | string;
+
+  @Column("bigint", {
+    nullable: false,
+    name: "page_id",
+  })
+  pageId!: string | number;
 
   @Column("varchar", {
     nullable: false,

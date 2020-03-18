@@ -27,6 +27,7 @@ export interface ICompileTask {
 export interface IPageVersion {
   id: number | string;
   configId: number | string;
+  pageId: number | string;
   creator: string;
   dist: string;
   createdAt: Date;

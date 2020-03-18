@@ -8,6 +8,7 @@ import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
 import { ICompileContext, Builder } from "../services/builder.service";
 import { callContextValidation } from "../components/source-tree/source-tree.component";
+import { ActivatedRoute } from "@angular/router";
 
 const CommonDepts = {
   "@types/react": "^16.9.7",
@@ -22,6 +23,10 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   @ViewChild("previewRender", { static: false }) previewRender: ElementRef;
   @ViewChild("previewTpl", { static: false }) previewTpl: TemplateRef<HTMLDivElement>;
 
+  public isCreate = true;
+  public pageId!: string;
+  public details!: any;
+
   public showButton = false;
   public showEditor: "view" | "config" | "hide" = "view";
   public showPreview = {
@@ -30,8 +35,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   };
 
   public lastDepts: Record<string, string> = {};
-  public createContext = createDefaultConfigs();
-  public pageConfigs = yamljs.safeDump(this.createContext);
+  public createContext!: ICompileContext;
+  public pageConfigs!: string;
   public vm!: VM;
 
   private project: Project = {
@@ -58,12 +63,28 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   }
 
   constructor(
+    route: ActivatedRoute,
     private renderer: Renderer2,
     private portal: PortalService,
     private builder: Builder,
     private message: NzMessageService,
   ) {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
+    route.params.subscribe(async params => {
+      const url = route.snapshot.url.map(i => i.path).join("/");
+      if (url === "preview/create") {
+        this.isCreate = true;
+        this.createContext = createDEVConfigs();
+        this.pageConfigs = yamljs.safeDump(this.createContext);
+      } else {
+        this.isCreate = false;
+        this.pageId = params.id;
+        this.details = await this.portal.fetchPageDetails(this.pageId);
+        const config = await this.portal.fetchPageConfigDetails(this.pageId, this.details.configId);
+        this.createContext = JSON.parse(config.data);
+        this.pageConfigs = yamljs.safeDump(this.createContext);
+      }
+    });
   }
 
   ngOnInit() {
@@ -170,7 +191,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   }
 }
 
-function createDefaultConfigs(): ICompileContext {
+function createDEVConfigs(): ICompileContext {
   return {
     provider: "react",
     components: [

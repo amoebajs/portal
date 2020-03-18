@@ -108,6 +108,7 @@ export class MysqlWorker extends BaseMysqlService {
   }
 
   private async initWorker() {
+    console.log("init ==== ");
     const configs = this.configs.getConfig();
     const mysql = configs.mysql;
     this.setConnection(
@@ -127,6 +128,14 @@ export class MysqlWorker extends BaseMysqlService {
     options: IListQueryOptions[K],
   ): Promise<IListQueryResult<IEntityType[K]>> {
     return (<any>this)[type].queryList(options);
+  }
+
+  public async querySelectList<K extends keyof IListQueryOptions>(
+    type: K,
+    options: IListQueryOptions[K],
+    select: (keyof IEntityType[K])[],
+  ): Promise<IListQueryResult<IEntityType[K]>> {
+    return (<any>this)[type].querySelectList(options, select);
   }
 
   public async query<K extends keyof IQueryOptions>(type: K, options: IQueryOptions[K]): Promise<IEntityType[K]> {
@@ -183,7 +192,7 @@ export class MysqlWorker extends BaseMysqlService {
       if (!page) {
         throw new Error("Page is not exist");
       }
-      if (name !== void 0) {
+      if (name !== void 0 && name !== page.name) {
         const duplicated = await this.PAGE.query({ name }, $pages);
         if (!!duplicated) {
           throw new Error("Page with same name is alread exist");
@@ -302,6 +311,7 @@ export class MysqlWorker extends BaseMysqlService {
         {
           name: taskname,
           configId: page.configId,
+          pageId: page.id,
           creator: operator,
           dist: "{}",
         },

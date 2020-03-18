@@ -34,6 +34,14 @@ export class ConfigService extends BaseMysqlService {
     return this.invokeListQuery(repo, options);
   }
 
+  public async querySelectList(
+    options: IListQueryOptions,
+    select: (keyof PageConfig)[],
+    repo = this.repository,
+  ): Promise<IListQueryResult<PageConfig>> {
+    return this.invokeListQuery(repo, options, select);
+  }
+
   public async query(options: IQueryOptions, repo = this.repository): Promise<PageConfig> {
     const queries: Partial<PageConfig> = {};
     if (options.id !== void 0) queries.id = options.id;

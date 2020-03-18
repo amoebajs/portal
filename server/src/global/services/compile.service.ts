@@ -10,6 +10,8 @@ export enum TaskType {
 
 export interface ICommonBuildConfigs {
   name: string;
+  displayName?: string;
+  description?: string;
   options: IPageCreateOptions;
   creator: string;
 }

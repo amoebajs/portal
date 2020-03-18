@@ -38,6 +38,14 @@ export class PageService extends BaseMysqlService {
     return this.invokeListQuery(repo, options);
   }
 
+  public async querySelectList(
+    options: IListQueryOptions,
+    select: (keyof Page)[],
+    repo = this.repository,
+  ): Promise<IListQueryResult<Page>> {
+    return this.invokeListQuery(repo, options, select);
+  }
+
   public async query(options: IQueryOptions, repo = this.repository): Promise<Page> {
     const queries: Partial<Page> = {};
     if (options.id !== void 0) queries.id = options.id;

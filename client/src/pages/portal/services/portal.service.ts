@@ -33,7 +33,7 @@ export class PortalService {
       icon: "user",
       selected: false,
       items: Object.entries(UseRouter.data)
-        .filter(i => i[0] !== "edit")
+        .filter(i => !["page", "edit"].includes(i[0]))
         .map(i => ({
           name: i[1].data.title,
           link: "/portal" + (i[1].path === "" ? "" : "/" + i[1].path),
@@ -45,7 +45,6 @@ export class PortalService {
   public userInfos: any = { logined: false, name: "" };
 
   constructor(private readonly http: HttpService) {
-    console.log(this.menulist);
     this.fetchUserInfos();
   }
 
@@ -61,8 +60,20 @@ export class PortalService {
     return this.http.get<any>(`page/${pageid}`);
   }
 
-  public fetchPageVersionDetails(pageid: number | string) {
-    return this.http.get<any>(`page-version/${pageid}`);
+  public fetchPageVersionList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/versions`, { current, size });
+  }
+
+  public fetchPageVersionDetails(pageid: number | string, versionid: string | number) {
+    return this.http.get<any>(`page/${pageid}/version/${versionid}`);
+  }
+
+  public fetchPageConfigList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/configs`, { current, size });
+  }
+
+  public fetchPageConfigDetails(pageid: number | string, configid: string | number) {
+    return this.http.get<any>(`page/${pageid}/config/${configid}`);
   }
 
   public createSource(configs: any) {

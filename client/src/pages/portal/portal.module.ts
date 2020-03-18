@@ -11,13 +11,15 @@ import { Builder } from "./services/builder.service";
 import { ModuleListComponent } from "./components/module-list/module-list.component";
 import { EntityEditComponent } from "./components/entity-edit/entity-edit.component";
 import { SourceTreeComponent } from "./components/source-tree/source-tree.component";
-import { PortalManageComponent } from "./manage/manage.component";
+import { ManagePagesComponent } from "./manage/pages/pages.component";
+import { ManagePageComponent } from "./manage/page/page.component";
 
 @NgModule({
   declarations: [
     PortalLayoutComponent,
     PortalRootComponent,
-    PortalManageComponent,
+    ManagePagesComponent,
+    ManagePageComponent,
     PortalSettingComponent,
     PortalPreviewComponent,
     ModuleListComponent,
@@ -29,7 +31,8 @@ import { PortalManageComponent } from "./manage/manage.component";
     RouterModule.forChild(
       UseRouter({
         index: PortalRootComponent,
-        pages: PortalManageComponent,
+        pages: ManagePagesComponent,
+        page: ManagePageComponent,
         create: PortalPreviewComponent,
         edit: PortalPreviewComponent,
         settings: PortalSettingComponent,

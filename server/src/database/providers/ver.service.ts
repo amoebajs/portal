@@ -4,7 +4,7 @@ import { IListQueryResult } from "../typings";
 
 export interface IListQueryOptions {
   name?: string;
-  pageId?: string;
+  pageId?: string | number;
   creator?: string;
   current: number;
   size: number;
@@ -17,7 +17,8 @@ export interface IQueryOptions {
 
 export interface ICreateOptions {
   name?: string;
-  configId?: string | number;
+  configId: string | number;
+  pageId: string | number;
   dist?: string;
   creator: string;
 }
@@ -34,6 +35,14 @@ export class VersionService extends BaseMysqlService {
 
   public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<PageVersion>> {
     return this.invokeListQuery(repo, options);
+  }
+
+  public async querySelectList(
+    options: IListQueryOptions,
+    select: (keyof PageVersion)[],
+    repo = this.repository,
+  ): Promise<IListQueryResult<PageVersion>> {
+    return this.invokeListQuery(repo, options, select);
   }
 
   public async query(options: IQueryOptions, repo = this.repository): Promise<PageVersion> {

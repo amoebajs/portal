@@ -38,6 +38,14 @@ export class TaskService extends BaseMysqlService {
     return this.invokeListQuery(repo, options);
   }
 
+  public async querySelectList(
+    options: IListQueryOptions,
+    select: (keyof CompileTask)[],
+    repo = this.repository,
+  ): Promise<IListQueryResult<CompileTask>> {
+    return this.invokeListQuery(repo, options, select);
+  }
+
   public async query(options: IQueryOptions, repo = this.repository): Promise<CompileTask> {
     const queries: Partial<CompileTask> = {};
     if (options.id !== void 0) queries.id = options.id;

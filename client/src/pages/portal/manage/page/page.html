@@ -1,0 +1,41 @@
+<app-portal-layout>
+  <ng-container *ngIf="!!details">
+    <h2>页面：{{ details.name }}</h2>
+    <h3>标题：{{ details.displayName || '--' }}</h3>
+    <h4>创建者：{{ details.creator }}</h4>
+    <h4>创建时间：{{ details.createdAt }}</h4>
+    <h4>修改时间：{{ details.updatedAt }}</h4>
+    <br />
+    <nz-table #basicTable [nzData]="(versions && versions.items) || []">
+      <thead>
+        <tr>
+          <th>版本名</th>
+          <th>创建者</th>
+          <th>产物</th>
+          <th>完成时间</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td>{{ data.name }}</td>
+          <td>{{ data.creator }}</td>
+          <td>{{ data.dist }}</td>
+          <td>{{ data.updatedAt }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </ng-container>
+</app-portal-layout>
+
+<ng-template #detailsContent>
+  <pre>{{ details }}</pre>
+</ng-template>
+
+<ng-template #versionContent>
+  <div>ID: {{ version.id }}</div>
+  <div>Creator: {{ version.creator }}</div>
+  <div>Created: {{ version.createdAt }}</div>
+  <div>Updated: {{ version.updatedAt }}</div>
+  <div>Dist:</div>
+  <pre>{{ version.dist }}</pre>
+</ng-template>

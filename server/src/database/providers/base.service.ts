@@ -50,8 +50,15 @@ export class BaseMysqlService {
   protected async invokeListQuery<M>(
     repo: Repository<M>,
     { current = 1, size = 20, ...where }: Record<string, any> & { current: number; size: number },
+    select?: (keyof M)[],
   ): Promise<IListQueryResult<M>> {
-    const [list, count] = await this.createListQueryBuilder(repo, current, size, where).getManyAndCount();
+    const [list, count] = await this.createListQueryBuilder(
+      repo,
+      current,
+      size,
+      where,
+      select && (builder => builder.select(<any[]>select)),
+    ).getManyAndCount();
     return {
       items: list,
       current: +current,
