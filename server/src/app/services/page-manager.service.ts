@@ -1,7 +1,7 @@
 import { Injectable, Scope } from "@nestjs/common";
 import { PageManageService, IWebsitePageHash } from "#global/services/page.service";
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class CorePageManager extends PageManageService {
   public getPage(pageName: string) {
     return this.pageCache[pageName];

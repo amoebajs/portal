@@ -2,40 +2,60 @@
   <ng-container *ngIf="!!details">
     <h2>页面：{{ details.name }}</h2>
     <h3>标题：{{ details.displayName || '--' }}</h3>
-    <h4>创建者：{{ details.creator }}</h4>
-    <h4>创建时间：{{ details.createdAt }}</h4>
-    <h4>修改时间：{{ details.updatedAt }}</h4>
+    <h4>创建时间：{{ details.createdAt | datetime }}</h4>
+    <h4>修改时间：{{ details.updatedAt | datetime }}</h4>
     <br />
-    <nz-table #basicTable [nzData]="(versions && versions.items) || []">
+    <nz-table
+      #basicTable
+      [nzFrontPagination]="false"
+      [nzData]="versions || []"
+      [nzTotal]="pagination.total"
+      [(nzPageIndex)]="pagination.current"
+      [(nzPageSize)]="pagination.size"
+      (nzPageIndexChange)="queryVersionList()"
+      [nzScroll]="{ x: '1000px' }"
+    >
       <thead>
         <tr>
-          <th>版本名</th>
-          <th>创建者</th>
-          <th>产物</th>
-          <th>完成时间</th>
+          <th nzWidth="140px" nzLeft="0px">版本名</th>
+          <th nzWidth="120px">创建者</th>
+          <th nzWidth="120px">产物</th>
+          <th nzWidth="120px">完成时间</th>
+          <th nzWidth="160px" nzRight="0px">操作</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let data of basicTable.data">
-          <td>{{ data.name }}</td>
-          <td>{{ data.creator }}</td>
-          <td>{{ data.dist }}</td>
-          <td>{{ data.updatedAt }}</td>
+          <td nzWidth="140px" nzLeft="0px">{{ data.name }}</td>
+          <td nzWidth="120px">{{ data.creator }}</td>
+          <td nzWidth="120px">
+            <a (click)="showVersionDist(data.id)">查看构建产物列表</a>
+          </td>
+          <td nzWidth="120px">{{ data.updatedAt | datetime }}</td>
+          <td nzWidth="160px" nzRight="0px">
+            <a *ngIf="data.taskId" (click)="showVersionTaskLog(data.taskId)">查看日志</a>
+          </td>
         </tr>
       </tbody>
     </nz-table>
   </ng-container>
 </app-portal-layout>
 
-<ng-template #detailsContent>
-  <pre>{{ details }}</pre>
+<ng-template #versionDistContent>
+  <pre>{{ dist }}</pre>
+</ng-template>
+
+<ng-template #taskLogContent>
+  <div style="max-height: 600px; overflow-y: auto;">
+    <pre style="background-color: #383838; color: #55ee77; padding: 12px;">{{ logs }}</pre>
+  </div>
 </ng-template>
 
 <ng-template #versionContent>
   <div>ID: {{ version.id }}</div>
   <div>Creator: {{ version.creator }}</div>
-  <div>Created: {{ version.createdAt }}</div>
-  <div>Updated: {{ version.updatedAt }}</div>
+  <div>Created: {{ version.createdAt | datetime }}</div>
+  <div>Updated: {{ version.updatedAt | datetime }}</div>
   <div>Dist:</div>
   <pre>{{ version.dist }}</pre>
 </ng-template>

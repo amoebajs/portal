@@ -1,5 +1,6 @@
 configs:
   name: ews-server
+  envMode: prod
   uriGroup:
     portal:
       uri: index

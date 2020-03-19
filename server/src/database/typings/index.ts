@@ -19,6 +19,7 @@ export interface ICompileTask {
   status: TaskStatus;
   name: string;
   description: string;
+  logs: string;
   creator: string;
   createdAt: Date;
   updatedAt: Date;
@@ -28,6 +29,7 @@ export interface IPageVersion {
   id: number | string;
   configId: number | string;
   pageId: number | string;
+  taskId: number | string;
   creator: string;
   dist: string;
   createdAt: Date;

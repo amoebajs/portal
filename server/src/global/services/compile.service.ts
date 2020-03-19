@@ -24,12 +24,13 @@ export interface ISourceCreateResult {
 @Injectable()
 export abstract class CompileService<T> {
   public abstract async queryPageUri(name: string): Promise<string>;
-  public abstract createTask(configs: ICommonBuildConfigs): Promise<string | number>;
-  public abstract createSourceString(
+  public abstract async createCompileTask(configs: ICommonBuildConfigs): Promise<string | number>;
+  public abstract async createSourceString(
     configs: IPageCreateOptions,
     transpile?: Partial<ISourceCreateTranspileOptions>,
   ): Promise<ISourceCreateResult>;
-  public abstract queryTask(id: string): Promise<T | null>;
+  public abstract async queryCompileTask(id: string | number): Promise<T>;
+  public abstract async queryCompileTaskLogs(id: string | number): Promise<string>;
 }
 
 export type Compiler = CompileService<ICompileTask>;

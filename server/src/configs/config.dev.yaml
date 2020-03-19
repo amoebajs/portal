@@ -1,5 +1,6 @@
 extends: ./config.yaml
 configs:
+  envMode: dev
   uriGroup:
     portal:
       uri: http://localhost:4200/portal

@@ -11,13 +11,24 @@ export class ManagePageComponent implements OnInit {
   @ViewChild("versionContent", { static: true })
   private versionContent: TemplateRef<any>;
 
-  @ViewChild("detailsContent", { static: true })
-  private detailsContent: TemplateRef<any>;
+  @ViewChild("versionDistContent", { static: true })
+  private distTpl: TemplateRef<any>;
+
+  @ViewChild("taskLogContent", { static: true })
+  private taskLogTpl: TemplateRef<any>;
 
   public id!: string;
   public details!: any;
   public version!: any;
   public versions!: any;
+  public dist!: string;
+  public logs!: string;
+
+  public pagination = {
+    current: 1,
+    size: 10,
+    total: 0,
+  };
 
   constructor(route: ActivatedRoute, private portal: PortalService, private modal: NzModalService) {
     route.params.subscribe(async params => {
@@ -40,17 +51,39 @@ export class ManagePageComponent implements OnInit {
   }
 
   async queryVersionList() {
-    this.versions = await this.portal.fetchPageVersionList(this.id, 1, 50);
+    const { items, current, size, total } = await this.portal.fetchPageVersionList(
+      this.id,
+      this.pagination.current,
+      this.pagination.size,
+    );
+    this.versions = items;
+    this.pagination.current = current;
+    this.pagination.size = size;
+    this.pagination.total = total;
   }
 
   async queryVersion(id: number | string) {
     const details = await this.portal.fetchPageVersionDetails(this.id, id);
     this.version = details;
     this.version.dist = JSON.stringify(JSON.parse(details.dist), null, "  ");
-    // this.modal.info({
-    //   nzTitle: "页面版本信息",
-    //   nzWidth: 640,
-    //   nzContent: this.versionContent,
-    // });
+  }
+
+  async showVersionTaskLog(id: string | number) {
+    this.logs = await this.portal.fetchTaskLogs(id);
+    this.modal.info({
+      nzTitle: "构建信息",
+      nzWidth: 800,
+      nzContent: this.taskLogTpl,
+    });
+  }
+
+  showVersionDist(id: string | number) {
+    const dist = this.versions.find((i: any) => i.id === id)!.dist;
+    this.dist = JSON.stringify(JSON.parse(dist), null, "  ");
+    this.modal.info({
+      nzTitle: "产物信息",
+      nzWidth: 640,
+      nzContent: this.distTpl,
+    });
   }
 }

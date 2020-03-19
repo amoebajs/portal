@@ -26,6 +26,7 @@ export interface ICreateOptions {
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
   updatedAt: Date;
+  logs?: string;
   creator?: string;
 }
 

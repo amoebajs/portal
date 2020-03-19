@@ -1,4 +1,4 @@
-import { Global, Module } from "@nestjs/common";
+import { Global, Module, Scope } from "@nestjs/common";
 import { FakeAuthService } from "#app/services/fake-auth.service";
 import { CoreCompiler } from "#app/services/core-compile.service";
 import { CorePageManager } from "#app/services/page-manager.service";
@@ -20,7 +20,7 @@ import { Authentication } from "./services/auth.service";
     { provide: User, useClass: User },
     { provide: Authentication, useClass: FakeAuthService },
     { provide: PageManager, useClass: CorePageManager },
-    { provide: Compiler, useClass: CoreCompiler },
+    { provide: Compiler, useClass: CoreCompiler, scope: Scope.DEFAULT },
   ],
   exports: [ConfigService, Authentication, User, Compiler, MysqlWorker, PageManager],
 })

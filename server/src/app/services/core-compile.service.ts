@@ -1,31 +1,45 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import chalk from "chalk";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Scope } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#global/services/compile.service";
+import { ConfigService } from "#global/services/config.service";
 import { BuilderFactory } from "#core/index";
 import { PageManager, IWebsitePageHash } from "#global/services/page.service";
 import { MysqlWorker } from "#database/providers/worker.service";
 import { ICompileTask, TaskStatus } from "#database/typings";
+import { Page } from "#database/entity/page.entity";
+import { PageConfig } from "#database/entity/page-config.entity";
 
 const ASSETS_DIR = path.resolve(__dirname, "..", "..", "assets");
 
 @Injectable()
 export class CoreCompiler implements CompileService<ICompileTask> {
-  private _factory = new BuilderFactory();
-
-  private _init = false;
-  private _working = false;
+  protected _factory = new BuilderFactory();
+  protected _init = false;
+  protected _working = false;
+  protected _isProd = true;
+  protected _taskLogs: Record<string | number, string[]> = {};
 
   private get builder() {
     return this._factory.builder;
   }
 
-  constructor(protected readonly worker: MysqlWorker, protected readonly manager: PageManager) {
+  constructor(
+    protected readonly configs: ConfigService,
+    protected readonly worker: MysqlWorker,
+    protected readonly manager: PageManager,
+  ) {
+    console.log("init CoreCompiler");
     worker.active.subscribe(async active => {
       if (active) {
         this._init = true;
+      }
+    });
+    configs.onConfigLoad.subscribe(loaded => {
+      if (loaded) {
+        this._isProd = this.configs.getConfig().envMode === "prod";
       }
     });
   }
@@ -41,7 +55,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return version && `website/${name}.${version}.html`;
   }
 
-  public async createTask(configs: ICommonBuildConfigs): Promise<string | number> {
+  public async createCompileTask(configs: ICommonBuildConfigs): Promise<string | number> {
     if (!this._init) {
       throw new Error("core-compiler is not init");
     }
@@ -50,6 +64,32 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     }
     const { name, displayName, description, options } = configs;
     this._working = true;
+    const pageId = await this.createUpdatePage(name, displayName, description, configs, options);
+    const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
+    const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
+    if (success) {
+      const task = await this.worker.query("TASK", { id: taskId });
+      this.runCustomTask(task).finally(async () => {
+        await this.worker.updateTask({
+          id: task.id,
+          operator: configs.creator,
+          logs: (this._taskLogs[task.id] ?? []).join("\n"),
+        });
+        this._working = false;
+      });
+    } else {
+      throw new Error("Task exist with status [pending]");
+    }
+    return taskId;
+  }
+
+  private async createUpdatePage(
+    name: string,
+    displayName: string,
+    description: string,
+    configs: ICommonBuildConfigs,
+    options: IPageCreateOptions,
+  ) {
     let page = await this.worker.query("PAGE", { name });
     let pageId = page?.id;
     if (!page) {
@@ -68,19 +108,20 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         page.description = description ?? page.description;
       }
     }
-    const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
-    const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
-    if (success) {
-      const task = await this.worker.query("TASK", { id: taskId });
-      this.runCustomTask(task);
-    } else {
-      throw new Error("Task exist with status [pending]");
-    }
-    return taskId;
+    return pageId;
   }
 
-  public async queryTask(id: string): Promise<ICompileTask> {
+  public async queryCompileTask(id: string | number): Promise<ICompileTask> {
     return this.worker.query("TASK", { id });
+  }
+
+  public async queryCompileTaskLogs(id: string | number): Promise<string> {
+    if (this._taskLogs[id] !== void 0) {
+      return this._taskLogs[id].join("\n");
+    }
+    const task = await this.worker.query("TASK", { id });
+    this._taskLogs[id] = [task.logs];
+    return task.logs;
   }
 
   public async createSourceString(
@@ -94,19 +135,128 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return { source: sourceCode, dependencies };
   }
 
-  private async runCustomTask(task: ICompileTask) {
+  protected async runCustomTask(task: ICompileTask) {
     const tempSrcDir = getSrcDir(String(task.id));
     const tempBuildDir = getBuildDir(String(task.id));
     const exist = await fs.pathExists(tempSrcDir);
     if (!exist) {
       fs.mkdirSync(tempSrcDir, { recursive: true });
     }
-    await this.runCommonBuildWorkAsync(task, tempSrcDir, tempBuildDir);
+    return this.runCommonBuildWorkAsync(task, tempSrcDir, tempBuildDir);
   }
 
   protected async runCommonBuildWorkAsync(task: ICompileTask, srcDir: string, buildDir: string) {
     const stamp = new Date().getTime();
-    const page = await this.worker.query("PAGE", { id: task.pageId });
+    try {
+      this.pushTaskLog(task.id, "task is now running.", "blue");
+      const page = await this.worker.query("PAGE", { id: task.pageId });
+      const cache = await this.getPageManagerCache(page);
+      const config = await this.worker.query("CONFIG", { id: task.configId });
+      const entry = path.join(srcDir, "main.tsx");
+      this.pushTaskLog(task.id, "task is now running.", "blue");
+      const result = await this.generateAndEmitCode(config, entry);
+      this.pushTaskLog(task.id, "task source code compiled successfully.", "blue");
+      await this.buildAppDist(task.id, page, entry, buildDir, result.dependencies);
+      await this.bundleAppDist(buildDir, cache, task);
+      await this.worker.endTask({
+        id: task.id,
+        operator: task.creator,
+        dist: JSON.stringify(cache.files),
+      });
+      const version = String(task.versionId);
+      this.manager.updatePage(page.name, { config: config.data, latest: version });
+      await this.moveHtmlBundle(page.name, version, buildDir);
+      console.log(JSON.stringify({ ...cache, config: "[hidden]" }, null, "  "));
+      const cost = this.getSecondsCost(stamp);
+      this.pushTaskLog(task.id, `task end with status [${task.status}] in ${cost}s.`, "green");
+      return true;
+    } catch (error) {
+      console.log(error);
+      await this.worker.endTask({ id: task.id, operator: task.creator, status: TaskStatus.Failed, dist: "{}" });
+      const cost = this.getSecondsCost(stamp);
+      this.pushTaskLog(task.id, `task end with status [${task.status}] in ${cost}s.`, "red");
+      this.pushTaskLog(task.id, `task is failed.`, "yellow");
+      return error;
+    }
+  }
+
+  protected async bundleAppDist(buildDir: string, cache: IWebsitePageHash, task: ICompileTask) {
+    let isHashChanged = true;
+    await this.builder.htmlBundle.build({
+      path: path.join(buildDir, "index.html"),
+      outPath: path.join(buildDir, "index.bundle.html"),
+      scripts: [
+        { match: /app\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
+        { match: /vendor\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
+      ],
+      //#region 这里处理hash变更的判断，暂时全部忽略，后续再考虑
+      checkUnchange: (match, value) => {
+        if (cache.files[match as string] !== value) {
+          // return true;
+          this.pushTaskLog(task.id, `find a change changed --> [${value}]`, "gray");
+        }
+        cache.files[match as string] = value;
+        return false;
+      },
+      shouldBundle: ps => {
+        isHashChanged = ps.length > 0;
+        // return ps.length > 0;
+        return true;
+      },
+    });
+    if (!isHashChanged) {
+      this.pushTaskLog(task.id, "find no file changed.", "gray");
+    }
+    return isHashChanged;
+  }
+
+  protected async buildAppDist(
+    id: string | number,
+    page: Page,
+    entry: string,
+    buildDir: string,
+    dependencies: Record<string, any>,
+  ) {
+    await this.builder.buildSource({
+      template: { title: page.displayName || "测试" },
+      entry: { app: entry },
+      output: { path: buildDir, filename: "[name].[hash].js" },
+      plugins: [
+        this.builder.webpackPlugins.createProgressPlugin({
+          type: "trigger",
+          trigger: data => this.pushTaskLog(id, data, "gray"),
+        }),
+      ],
+      typescript: { compilerOptions: { outDir: "temp-dist" } },
+      sandbox: {
+        rootPath: getNpmSandbox(),
+        dependencies,
+      },
+    });
+  }
+
+  protected async generateAndEmitCode(config: PageConfig, targetFile: string) {
+    const result = await this.builder.createSource({ configs: JSON.parse(config.data) });
+    await fs.writeFile(targetFile, result.sourceCode, { encoding: "utf8", flag: "w+" });
+    return result;
+  }
+
+  protected pushTaskLog(
+    id: number | string,
+    content: string,
+    color: "green" | "blue" | "yellow" | "red" | "gray" = "green",
+  ) {
+    if (this._taskLogs[id] === void 0) {
+      this._taskLogs[id] = [];
+    }
+    const msg = `[${new Date().toTimeString()}] [task:${id}] ${content}`;
+    this._taskLogs[id].push(msg);
+    if (!this._isProd) {
+      console.log(chalk[color](msg));
+    }
+  }
+
+  protected async getPageManagerCache(page: Page) {
     let cache = this.manager.getPage(page.name);
     if (!cache) {
       const updates: Partial<IWebsitePageHash> = { latest: null };
@@ -120,81 +270,15 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       this.manager.updatePage(page.name, updates);
       cache = this.manager.getPage(page.name);
     }
-    const curconf = await this.worker.query("CONFIG", { id: task.configId });
-    try {
-      const targetFile = path.join(srcDir, "main.tsx");
-      console.log(chalk.blue(`[COMPILE-TASK] task[${task.id}] is now running.`));
-      const { sourceCode, dependencies } = await this.builder.createSource({
-        configs: JSON.parse(curconf.data),
-      });
-      await fs.writeFile(targetFile, sourceCode, { encoding: "utf8", flag: "w+" });
-      console.log(chalk.blue(`[COMPILE-TASK] task[${task.id}] compile successfully.`));
-      await this.builder.buildSource({
-        template: { title: page.displayName || "测试" },
-        entry: { app: targetFile },
-        output: { path: buildDir, filename: "[name].[hash].js" },
-        plugins: [this.builder.webpackPlugins.createProgressPlugin()],
-        typescript: { compilerOptions: { outDir: "temp-dist" } },
-        sandbox: {
-          rootPath: getNpmSandbox(),
-          dependencies,
-        },
-      });
-      let isHashChanged = true;
-      await this.builder.htmlBundle.build({
-        path: path.join(buildDir, "index.html"),
-        outPath: path.join(buildDir, "index.bundle.html"),
-        scripts: [
-          { match: /app\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
-          { match: /vendor\.[a-z0-9]+\.js/, path: n => path.join(buildDir, n) },
-        ],
-        //#region 这里处理hash变更的判断，暂时全部忽略，后续再考虑
-        checkUnchange: (match, value) => {
-          if (cache.files[match as string] !== value) {
-            // return true;
-            console.log(`[COMPILE-TASK] task[${task.id}] find a change changed --> [${value}]`);
-          }
-          cache.files[match as string] = value;
-          return false;
-        },
-        shouldBundle: ps => {
-          isHashChanged = ps.length > 0;
-          // return ps.length > 0;
-          return true;
-        },
-        //#endregion
-      });
-      if (!isHashChanged) {
-        console.log(`[COMPILE-TASK] task[${task.id}] find no file changed.`);
-      }
-      await this.worker.endTask({
-        id: task.id,
-        operator: task.creator,
-        dist: JSON.stringify(cache.files),
-      });
-      const version = String(task.versionId);
-      this.manager.updatePage(page.name, { config: curconf.data, latest: version });
-      await this.moveHtmlBundle(page.name, version, buildDir);
-      console.log(JSON.stringify({ ...cache, config: "[hidden]" }, null, "  "));
-      const cost = this.getSecondsCost(stamp);
-      console.log(chalk.green(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}] in ${cost}s`));
-      return true;
-    } catch (error) {
-      console.log(error);
-      await this.worker.endTask({ id: task.id, operator: task.creator, status: TaskStatus.Failed, dist: "{}" });
-      const cost = this.getSecondsCost(stamp);
-      console.log(chalk.red(`[COMPILE-TASK] task[${task.id}] end with status [${task.status}]  in ${cost}s`));
-      console.log(chalk.yellow(`[COMPILE-TASK] task[${task.id}] failed.`));
-      return error;
-    }
+    return cache;
   }
 
   protected delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
   }
 
-  protected getSecondsCost(stamp: number) {
-    return (new Date().getTime() - stamp) / 1000;
+  protected getSecondsCost(start: number) {
+    return (new Date().getTime() - start) / 1000;
   }
 
   protected async moveHtmlBundle(name: string, id: string, buildDir: string) {

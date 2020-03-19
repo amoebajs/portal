@@ -76,6 +76,10 @@ export class PortalService {
     return this.http.get<any>(`page/${pageid}/config/${configid}`);
   }
 
+  public fetchTaskLogs(taskid: number | string) {
+    return this.http.get<any>(`task/${taskid}/logs`);
+  }
+
   public createSource(configs: any) {
     return this.http.post<IPreviewApiResult>("preview", { configs });
   }

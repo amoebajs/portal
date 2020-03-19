@@ -52,6 +52,12 @@ export interface ITaskStartOptions {
   operator: string;
 }
 
+export interface ITaskUpdateOptions {
+  id: number | string;
+  operator: string;
+  logs?: string;
+}
+
 export interface ITaskEndOptions {
   id: number | string;
   operator: string;
@@ -108,7 +114,6 @@ export class MysqlWorker extends BaseMysqlService {
   }
 
   private async initWorker() {
-    console.log("init ==== ");
     const configs = this.configs.getConfig();
     const mysql = configs.mysql;
     this.setConnection(
@@ -328,6 +333,15 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $tasks,
       );
+      await this.VERSION.update(
+        {
+          id: newverid,
+          taskId: newtaskid,
+          updatedAt: new Date(),
+        },
+        ["id"],
+        $versions,
+      );
       taskid = newtaskid;
     });
     return taskid;
@@ -340,6 +354,19 @@ export class MysqlWorker extends BaseMysqlService {
         id,
         creator: operator,
         status: TaskStatus.Running,
+        updatedAt: new Date(),
+      },
+      ["id", "creator"],
+    );
+  }
+
+  public async updateTask(options: ITaskUpdateOptions): Promise<boolean> {
+    const { id, logs, operator } = options;
+    return this.TASK.update(
+      {
+        id,
+        creator: operator,
+        logs,
         updatedAt: new Date(),
       },
       ["id", "creator"],

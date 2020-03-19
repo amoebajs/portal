@@ -16,6 +16,12 @@ export class PageVersion implements IPageVersion {
   configId!: number | string;
 
   @Column("bigint", {
+    nullable: true,
+    name: "task_id",
+  })
+  taskId!: number | string;
+
+  @Column("bigint", {
     nullable: false,
     name: "page_id",
   })

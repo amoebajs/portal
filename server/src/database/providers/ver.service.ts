@@ -25,6 +25,7 @@ export interface ICreateOptions {
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
+  taskId?: string | number;
   updatedAt: Date;
 }
 

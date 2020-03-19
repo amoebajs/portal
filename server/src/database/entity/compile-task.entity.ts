@@ -52,6 +52,12 @@ export class CompileTask implements ICompileTask {
   })
   description!: string;
 
+  @Column("text", {
+    nullable: true,
+    name: "logs",
+  })
+  logs!: string;
+
   @Column("datetime", {
     nullable: false,
     default: () => "CURRENT_TIMESTAMP",

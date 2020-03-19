@@ -135,26 +135,52 @@ export class ApiController {
     @Body("displayName") displayName?: string,
     @Body("description") description?: string,
   ) {
-    return {
-      code: 0,
-      data: {
-        id: await this.compiler.createTask({
-          name,
-          displayName,
-          description,
-          options,
+    try {
+      return {
+        code: 0,
+        data: {
+          id: await this.compiler.createCompileTask({
+            name,
+            displayName,
+            description,
+            options,
+            creator: String(this.user.infos.id),
+          }),
           creator: String(this.user.infos.id),
-        }),
-        creator: String(this.user.infos.id),
-        configs: options,
-      },
-    };
+          configs: options,
+        },
+      };
+    } catch (error) {
+      return {
+        code: 500,
+        data: {
+          id: -1,
+          errorMsg: error.message,
+        },
+      };
+    }
   }
 
   @Get("task/:id")
   @SetRoles("admin")
   public async gettask(@Param("id") id: string) {
-    const result = await this.compiler.queryTask(id);
+    const result = await this.compiler.queryCompileTask(id);
+    if (!result) {
+      return {
+        code: 404,
+        data: {
+          id: -1,
+          errorMsg: `task[${id}] not found`,
+        },
+      };
+    }
+    return { code: 0, data: result };
+  }
+
+  @Get("task/:id/logs")
+  @SetRoles("admin")
+  public async getTaskLogs(@Param("id") id: string) {
+    const result = await this.compiler.queryCompileTaskLogs(id);
     if (!result) {
       return {
         code: 404,
