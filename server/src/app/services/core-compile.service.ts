@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs-extra";
 import chalk from "chalk";
+import moment from "moment";
 import { Injectable, Scope } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#global/services/compile.service";
@@ -153,9 +154,9 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       const cache = await this.getPageManagerCache(page);
       const config = await this.worker.query("CONFIG", { id: task.configId });
       const entry = path.join(srcDir, "main.tsx");
-      this.pushTaskLog(task.id, "task is now running.", "blue");
+      this.pushTaskLog(task.id, "starting to compile source code...", "blue");
       const result = await this.generateAndEmitCode(config, entry);
-      this.pushTaskLog(task.id, "task source code compiled successfully.", "blue");
+      this.pushTaskLog(task.id, "source code compiled successfully.", "blue");
       await this.buildAppDist(task.id, page, entry, buildDir, result.dependencies);
       await this.bundleAppDist(buildDir, cache, task);
       await this.worker.endTask({
@@ -231,6 +232,10 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       sandbox: {
         rootPath: getNpmSandbox(),
         dependencies,
+        install: {
+          type: "trigger",
+          trigger: data => this.pushTaskLog(id, data, "gray"),
+        },
       },
     });
   }
@@ -249,7 +254,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     if (this._taskLogs[id] === void 0) {
       this._taskLogs[id] = [];
     }
-    const msg = `[${new Date().toTimeString()}] [task:${id}] ${content}`;
+    const msg = `[${moment(new Date()).format("YYYY-MM-DD HH:mm:ss")}] [task:${id}] ${content}`;
     this._taskLogs[id].push(msg);
     if (!this._isProd) {
       console.log(chalk[color](msg));

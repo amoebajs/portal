@@ -7,10 +7,10 @@
   resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1584002557229.tgz#beeb62ec4ae0e723e4762664ba1eb9bd5bda78a2"
   integrity sha512-hO1zJg5YTOw0VCrrAYplxs88K5Q0O/onbkJEY7RT1RqWU8aBEn6ZMi4baLH6MMEJnR12Ks5u7QiNpX+wtN4eiw==
 
-"@amoebajs/builder@^0.0.2-alpha.1584601273669":
-  version "0.0.2-alpha.1584601273669"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1584601273669.tgz#f5b8fee80fdbc382087aa7e6044b122f0d742f15"
-  integrity sha512-qe3syohSiDjfhcXqY/Z7Dtl1pZJb9d6pNJ47bptOniVh2PZZwqqwZn8PDWpFbSC7GAYKfp6+utKCX/Ok23rXAg==
+"@amoebajs/builder@^0.0.2-alpha.1584621901829":
+  version "0.0.2-alpha.1584621901829"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1584621901829.tgz#f29343f8058bd890a729eb9edb56da000a7cf753"
+  integrity sha512-AamAdomCIAirUYnd04zwSpQXq4RtEH7OCJQN+jvYw5GmwCTopjHT964OdL5N71ZLL4jJ+6Mc84xWSKaxsprrgg==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -5084,6 +5084,11 @@ mkdirp@0.x, mkdirp@^0.5.1:
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   dependencies:
     minimist "0.0.8"
+
+moment@^2.24.0:
+  version "2.24.0"
+  resolved "https://registry.npm.taobao.org/moment/download/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
+  integrity sha1-DQVdU/UFKqZTyfbraLtdEr9cK1s=
 
 move-concurrently@^1.0.1:
   version "1.0.1"
