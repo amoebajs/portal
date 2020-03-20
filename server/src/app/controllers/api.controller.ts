@@ -38,11 +38,16 @@ export class ApiController {
     @Param("id") pageId: string,
     @Query("current") current: string,
     @Query("size") size: string,
-    @Query("name") name: string,
   ) {
     return {
       code: 0,
-      data: await this.worker.queryList("VERSION", { name, pageId, current: +current, size: +size }),
+      data: await this.worker.querySelectList("CONFIG", { pageId, current: +current, size: +size }, [
+        "id",
+        "pageId",
+        "createdAt",
+        "updatedAt",
+        "creator",
+      ]),
     };
   }
 
@@ -56,7 +61,16 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.worker.queryList("VERSION", { name, current: +current, size: +size }),
+      data: await this.worker.querySelectList("VERSION", { name, current: +current, size: +size }, [
+        "id",
+        "name",
+        "pageId",
+        "configId",
+        "taskId",
+        "creator",
+        "createdAt",
+        "updatedAt",
+      ]),
     };
   }
 

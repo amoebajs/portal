@@ -24,24 +24,17 @@ export class BaseMysqlService {
     where: Record<string, any>,
     more?: (builder: SelectQueryBuilder<M>) => SelectQueryBuilder<M>,
   ) {
-    let builder = repo.createQueryBuilder();
-    const entries = Object.entries(where);
-    let useWhere: "where" | "andWhere" = "where";
-    for (const [k, v] of entries) {
-      if (v === void 0) continue;
-      builder = builder[useWhere](`${k} = :${k}`, { [k]: v });
-      useWhere = "andWhere";
-    }
+    const builder = this.createWhereBuilder(repo, <any>where);
     return (!more ? builder : more(builder)).skip((+current - 1) * +size).take(+size);
   }
 
   protected createWhereBuilder<M>(repo: Repository<M>, where: Partial<M>) {
-    let builder = repo.createQueryBuilder();
+    let builder = repo.createQueryBuilder("entry");
     const wheres = Object.entries(where);
     let fn: "where" | "andWhere" = "where";
     for (const [k, v] of wheres) {
       if (v === void 0) continue;
-      builder = builder[fn](`${k} = :${k}`, { [k]: v });
+      builder = builder[fn](`entry.${k} = :${k}`, { [k]: v });
       fn = "andWhere";
     }
     return builder;
@@ -57,7 +50,7 @@ export class BaseMysqlService {
       current,
       size,
       where,
-      select && (builder => builder.select(<any[]>select)),
+      select && (builder => builder.select(<any[]>select.map(i => "entry." + i))),
     ).getManyAndCount();
     return {
       items: list,
