@@ -99,18 +99,23 @@
 </ng-template>
 
 <ng-template #configDataContent>
-  <div style="max-height: 600px; overflow: auto;">
+  <div class="command-group">
     <pre class="command-line">{{ modalContent.config }}</pre>
   </div>
 </ng-template>
 
 <ng-template #taskLogContent>
-  <div style="max-height: 600px; overflow: auto;">
+  <div class="command-group">
     <pre class="command-line">{{ logs }}</pre>
   </div>
 </ng-template>
 
 <style>
+  .command-group {
+    max-height: 600px;
+    overflow: auto;
+  }
+
   .command-line {
     background-color: #383838;
     color: #55ee77;
