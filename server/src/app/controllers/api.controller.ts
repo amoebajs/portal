@@ -77,6 +77,15 @@ export class ApiController {
   @Get("page/:id")
   @SetRoles("admin")
   public async getPageDetails(@Param("id") id: string) {
+    const page = await this.worker.query("PAGE", { id });
+    if (!page) {
+      return {
+        code: 404,
+        data: {
+          errorMsg: `Page[${id}] not found`,
+        },
+      };
+    }
     return {
       code: 0,
       data: await this.worker.query("PAGE", { id }),
@@ -130,15 +139,25 @@ export class ApiController {
     @Body("displayName") displayName?: string,
     @Body("description") description?: string,
   ) {
-    return {
-      code: 0,
-      data: await this.worker.createPage({
-        name,
-        displayName,
-        description,
-        operator: String(this.user.infos.id),
-      }),
-    };
+    try {
+      return {
+        code: 0,
+        data: await this.worker.createPage({
+          name,
+          displayName,
+          description,
+          operator: String(this.user.infos.id),
+        }),
+      };
+    } catch (error) {
+      return {
+        code: 500,
+        data: {
+          id: -1,
+          errorMsg: error.message,
+        },
+      };
+    }
   }
 
   @Post("task")
@@ -184,7 +203,7 @@ export class ApiController {
         code: 404,
         data: {
           id: -1,
-          errorMsg: `task[${id}] not found`,
+          errorMsg: `Task[${id}] not found`,
         },
       };
     }
