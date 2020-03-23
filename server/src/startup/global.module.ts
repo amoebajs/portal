@@ -4,6 +4,7 @@ import { DatabaseModule } from "#database/db.module";
 import { Authentication, User, FakeAuthService } from "#services/authentication";
 import { PageManager, CorePageManager } from "#services/page-manager";
 import { MysqlWorker } from "#services/database";
+import { DbConnection } from "#services/database/connection";
 import { Compiler, CoreCompiler } from "#services/compiler";
 import { Configs } from "#services/configs";
 
@@ -13,6 +14,7 @@ import { Configs } from "#services/configs";
   controllers: [],
   providers: [
     { provide: Configs, useClass: Configs },
+    { provide: DbConnection, useClass: DbConnection },
     { provide: MysqlWorker, useClass: MysqlWorker },
     { provide: User, useClass: User },
     { provide: Authentication, useClass: FakeAuthService },

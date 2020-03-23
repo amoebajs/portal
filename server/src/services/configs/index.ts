@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BehaviorSubject } from "rxjs";
+import { Subject } from "rxjs";
 import { cloneDeep } from "lodash";
 import { CompressionOptions } from "compression";
 
@@ -28,20 +28,20 @@ export interface IServerConfigs {
 @Injectable()
 export class Configs {
   private _config!: IServerConfigs;
-  private _env: { [prop: string]: string } = {};
+  private _env: Record<string, string> = {};
 
-  public readonly onEnvLoad = new BehaviorSubject(false);
-  public readonly onConfigLoad = new BehaviorSubject(false);
+  public readonly env = new Subject<Record<string, string>>();
+  public readonly config = new Subject<IServerConfigs>();
 
   public setConfig(config: IServerConfigs) {
     this._config = cloneDeep(config);
-    this.onConfigLoad.next(true);
+    this.config.next(this._config);
     return this;
   }
 
-  public setEnv(env: { [prop: string]: string }) {
-    this._env = env;
-    this.onEnvLoad.next(true);
+  public setEnv(env: Record<string, string>) {
+    this._env = { ...env };
+    this.env.next(this._env);
     return this;
   }
 

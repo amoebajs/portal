@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
-import { PageConfigRepo } from "./providers/page-config.repo";
-import { PageRepo } from "./providers/page.repo";
-import { CompileTaskRepo } from "./providers/compile-task.repo";
-import { PageVersionRepo } from "./providers/page-version.repo";
+import { PageConfigRepo } from "./repos/page-config.repo";
+import { PageRepo } from "./repos/page.repo";
+import { CompileTaskRepo } from "./repos/compile-task.repo";
+import { PageVersionRepo } from "./repos/page-version.repo";
 
 @Module({
   imports: [],

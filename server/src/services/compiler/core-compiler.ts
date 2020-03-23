@@ -32,16 +32,11 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     protected readonly worker: MysqlWorker,
     protected readonly manager: PageManager,
   ) {
-    console.log("init CoreCompiler");
-    worker.active.subscribe(async active => {
-      if (active) {
-        this._init = true;
-      }
+    worker.active.subscribe(() => {
+      this._init = true;
     });
-    configs.onConfigLoad.subscribe(loaded => {
-      if (loaded) {
-        this._isProd = this.configs.getConfig().envMode === "prod";
-      }
+    configs.config.subscribe(configs => {
+      this._isProd = configs.envMode === "prod";
     });
   }
 

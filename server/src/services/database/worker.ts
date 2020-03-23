@@ -1,18 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { createConnection } from "typeorm";
-import { BehaviorSubject } from "rxjs";
-import { Configs } from "#services/configs";
-import { createOrmOptions } from "#database/ormconfig";
+import { Subject } from "rxjs";
 import { CompileTask } from "#database/entity/compile-task.entity";
 import { Page } from "#database/entity/page.entity";
 import { PageConfig } from "#database/entity/page-config.entity";
 import { PageVersion } from "#database/entity/page-version.entity";
-import { BaseMysqlService } from "#database/providers/base";
-import { PageRepo } from "#database/providers/page.repo";
-import { PageVersionRepo } from "#database/providers/page-version.repo";
-import { CompileTaskRepo } from "#database/providers/compile-task.repo";
-import { PageConfigRepo } from "#database/providers/page-config.repo";
+import { BaseMysqlService } from "#database/repos/base";
+import { PageRepo } from "#database/repos/page.repo";
+import { PageVersionRepo } from "#database/repos/page-version.repo";
+import { CompileTaskRepo } from "#database/repos/compile-task.repo";
+import { PageConfigRepo } from "#database/repos/page-config.repo";
 import { TaskStatus, PageStatus, IListQueryResult } from "#database/typings";
+import { DbConnection } from "./connection";
 
 export interface IPageCreateOptions {
   name?: string;
@@ -80,17 +78,17 @@ interface IEntityType {
 }
 
 interface IListQueryOptions {
-  VERSION: import("#database/providers/page-version.repo").IListQueryOptions;
-  CONFIG: import("#database/providers/page-config.repo").IListQueryOptions;
-  TASK: import("#database/providers/compile-task.repo").IListQueryOptions;
-  PAGE: import("#database/providers/page.repo").IListQueryOptions;
+  VERSION: import("#database/repos/page-version.repo").IListQueryOptions;
+  CONFIG: import("#database/repos/page-config.repo").IListQueryOptions;
+  TASK: import("#database/repos/compile-task.repo").IListQueryOptions;
+  PAGE: import("#database/repos/page.repo").IListQueryOptions;
 }
 
 interface IQueryOptions {
-  VERSION: import("#database/providers/page-version.repo").IQueryOptions;
-  CONFIG: import("#database/providers/page-config.repo").IQueryOptions;
-  TASK: import("#database/providers/compile-task.repo").IQueryOptions;
-  PAGE: import("#database/providers/page.repo").IQueryOptions;
+  VERSION: import("#database/repos/page-version.repo").IQueryOptions;
+  CONFIG: import("#database/repos/page-config.repo").IQueryOptions;
+  TASK: import("#database/repos/compile-task.repo").IQueryOptions;
+  PAGE: import("#database/repos/page.repo").IQueryOptions;
 }
 
 const ProviderMap = {
@@ -106,34 +104,26 @@ export class MysqlWorker extends BaseMysqlService {
     return process.pid;
   }
 
-  public readonly active = new BehaviorSubject(false);
+  public readonly active = new Subject<void>();
 
   constructor(
-    private readonly configs: Configs,
+    dbc: DbConnection,
     private readonly $pages: PageRepo,
     private readonly $versions: PageVersionRepo,
     private readonly $configs: PageConfigRepo,
     private readonly $tasks: CompileTaskRepo,
   ) {
     super();
-    this.configs.onConfigLoad.subscribe(loaded => {
-      if (loaded) this.initWorker();
+    dbc.connected.subscribe(connection => {
+      if (!!connection) {
+        this.setConnection(connection);
+        this.$tasks.setConnection(this.connection);
+        this.$pages.setConnection(this.connection);
+        this.$versions.setConnection(this.connection);
+        this.$configs.setConnection(this.connection);
+        this.active.next();
+      }
     });
-  }
-
-  private async initWorker() {
-    const configs = this.configs.getConfig();
-    const mysql = configs.mysql;
-    this.setConnection(
-      await createConnection(
-        createOrmOptions(mysql.user, mysql.password, mysql.database, mysql.host, mysql.port, mysql.synchronize),
-      ),
-    );
-    this.$tasks.setConnection(this.connection);
-    this.$pages.setConnection(this.connection);
-    this.$versions.setConnection(this.connection);
-    this.$configs.setConnection(this.connection);
-    this.active.next(true);
   }
 
   public async queryList<K extends keyof IListQueryOptions>(
