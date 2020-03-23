@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { GlobalModule } from "#global/global.module";
+import { GlobalModule } from "./global.module";
 
 @Module({
   imports: [GlobalModule],

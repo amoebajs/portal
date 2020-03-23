@@ -1,4 +1,4 @@
-import { Global, Module, Scope } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { FakeAuthService } from "#services/authentication/fake-auth.service";
 import { CoreCompiler } from "#services/compiler/core-compile.service";
 import { CorePageManager } from "#services/page-manager/page-manager.service";

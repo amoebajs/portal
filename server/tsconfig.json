@@ -16,6 +16,8 @@
     "paths": {
       "#global/*": ["./src/global/*"],
       "#services/*": ["./src/services/*"],
+      "#filters/*": ["./src/filters/*"],
+      "#guards/*": ["./src/guards/*"],
       "#app/*": ["./src/app/*"],
       "#core/*": ["./src/core/*"],
       "#assets/*": ["./src/assets/*"],
