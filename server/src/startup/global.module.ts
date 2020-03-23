@@ -2,7 +2,7 @@ import { Global, Module } from "@nestjs/common";
 import { AppModule } from "#app/app.module";
 import { DatabaseModule } from "#database/db.module";
 import { Authentication, User, FakeAuthService } from "#services/authentication";
-import { PageManager, CorePageManager } from "#services/page-manager";
+import { PageManager, CorePageManager } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { DbConnection } from "#services/database/connection";
 import { Compiler, CoreCompiler } from "#services/compiler";

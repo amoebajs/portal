@@ -45,6 +45,13 @@ export interface IPageConfig {
   updatedAt: Date;
 }
 
+export interface IDistStorage {
+  id: number | string;
+  data: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export enum TaskStatus {
   Pending = 0,
   Running = 1,

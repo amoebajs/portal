@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PageManageService, IWebsitePageHash } from "./page";
+import { PageManageService, IWebsitePageHash } from "./contract";
 
 @Injectable()
 export class CorePageManager extends PageManageService {

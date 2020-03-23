@@ -5,7 +5,7 @@ import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { Configs } from "#services/configs";
-import { PageManager, IWebsitePageHash } from "#services/page-manager";
+import { PageManager, IWebsitePageHash } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { ICompileTask, TaskStatus } from "#database/typings";
 import { Page } from "#database/entity/page.entity";
