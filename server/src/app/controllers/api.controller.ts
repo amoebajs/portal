@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, Param } from "@nestjs/common";
 import { IPageCreateOptions } from "@amoebajs/builder";
-import { Compiler } from "#global/services/compile.service";
-import { User } from "#global/services/user.service";
+import { Compiler } from "#services/compiler/compile.service";
+import { User } from "#services/authentication/user.service";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
 import { MysqlWorker } from "#database/providers/worker.service";
 

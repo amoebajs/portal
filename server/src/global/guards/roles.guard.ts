@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, Scope } from "@nestjs/common
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
 import { ROLES_GUARD__CLASS_ROLES, ROLES_GUARD__ROLES } from "#utils/roles";
-import { Authentication } from "../services/auth.service";
+import { Authentication } from "#services/authentication/auth.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class RolesGuard implements CanActivate {

@@ -1,5 +1,5 @@
-import { Injectable, Scope } from "@nestjs/common";
-import { PageManageService, IWebsitePageHash } from "#global/services/page.service";
+import { Injectable } from "@nestjs/common";
+import { PageManageService, IWebsitePageHash } from "#services/page-manager/page.service";
 
 @Injectable()
 export class CorePageManager extends PageManageService {

@@ -15,6 +15,7 @@
     "skipLibCheck": true,
     "paths": {
       "#global/*": ["./src/global/*"],
+      "#services/*": ["./src/services/*"],
       "#app/*": ["./src/app/*"],
       "#core/*": ["./src/core/*"],
       "#assets/*": ["./src/assets/*"],

@@ -1,7 +1,7 @@
 import { Injectable, Scope } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { AuthService } from "#global/services/auth.service";
-import { getUserDelegate, User } from "#global/services/user.service";
+import { AuthService } from "#services/authentication/auth.service";
+import { getUserDelegate, User } from "#services/authentication/user.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class FakeAuthService extends AuthService<string> {

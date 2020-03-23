@@ -1,7 +1,7 @@
 import { Response as Resp } from "express";
 import { Controller, Get, Response } from "@nestjs/common";
-import { ConfigService } from "#global/services/config.service";
-import { User } from "#global/services/user.service";
+import { ConfigService } from "#services/configs/config.service";
+import { User } from "#services/authentication/user.service";
 import { UseRolesAuthentication } from "#utils/roles";
 
 @Controller("portal")
