@@ -4,7 +4,6 @@ import chalk from "chalk";
 import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
-import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#services/compiler";
 import { ConfigService } from "#services/configs";
 import { PageManager, IWebsitePageHash } from "#services/page-manager";
 import { MysqlWorker } from "#services/database";
@@ -12,6 +11,7 @@ import { ICompileTask, TaskStatus } from "#database/typings";
 import { Page } from "#database/entity/page.entity";
 import { PageConfig } from "#database/entity/page-config.entity";
 import { BuilderFactory } from "./core";
+import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "./compiler";
 
 const ASSETS_DIR = path.resolve(__dirname, "..", "..", "assets");
 
