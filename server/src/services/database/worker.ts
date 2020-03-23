@@ -100,10 +100,6 @@ const ProviderMap = {
 
 @Injectable()
 export class MysqlWorker extends BaseMysqlService {
-  public get id() {
-    return process.pid;
-  }
-
   public readonly active = new Subject<void>();
 
   constructor(
