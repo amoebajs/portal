@@ -1,6 +1,6 @@
 import path from "path";
 import { resolveYamlFile } from "#utils/yaml";
-import { IServerConfigs } from "#services/configs/config.service";
+import { IServerConfigs } from "#services/configs";
 
 const ENV = process.env.NODE_ENV === "production" ? "prod" : "dev";
 

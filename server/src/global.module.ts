@@ -1,13 +1,9 @@
 import { Global, Module } from "@nestjs/common";
-import { FakeAuthService } from "#services/authentication/fake-auth.service";
-import { CoreCompiler } from "#services/compiler/core-compile.service";
-import { CorePageManager } from "#services/page-manager/page-manager.service";
+import { Authentication, User, FakeAuthService } from "#services/authentication";
+import { PageManager, CorePageManager } from "#services/page-manager";
 import { MysqlWorker } from "#database/providers/worker.service";
-import { User } from "#services/authentication/user.service";
-import { PageManager } from "#services/page-manager/page.service";
-import { Compiler } from "#services/compiler/compile.service";
-import { ConfigService } from "#services/configs/config.service";
-import { Authentication } from "#services/authentication/auth.service";
+import { Compiler, CoreCompiler } from "#services/compiler";
+import { ConfigService } from "#services/configs";
 import { AppModule } from "#app/app.module";
 
 @Global()

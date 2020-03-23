@@ -5,7 +5,7 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
-import { ConfigService, IServerConfigs } from "#services/configs/config.service";
+import { ConfigService, IServerConfigs } from "#services/configs";
 import { MysqlWorker } from "#database/providers/worker.service";
 import { MainModule } from "./main.module";
 

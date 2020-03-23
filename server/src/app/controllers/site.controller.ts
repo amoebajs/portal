@@ -1,7 +1,7 @@
 import { Response as Resp } from "express";
 import { Controller, Get, Param, Response } from "@nestjs/common";
-import { ConfigService } from "#services/configs/config.service";
-import { Compiler } from "#services/compiler/compile.service";
+import { ConfigService } from "#services/configs";
+import { Compiler } from "#services/compiler";
 
 @Controller("site")
 export class SiteController {

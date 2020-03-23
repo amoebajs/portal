@@ -3,17 +3,27 @@ import * as fs from "fs-extra";
 import chalk from "chalk";
 import moment from "moment";
 import { Injectable } from "@nestjs/common";
-import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
-import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#services/compiler/compile.service";
-import { ConfigService } from "#services/configs/config.service";
-import { BuilderFactory } from "#core/index";
-import { PageManager, IWebsitePageHash } from "#services/page-manager/page.service";
+import { IPageCreateOptions, ISourceCreateTranspileOptions, Factory } from "@amoebajs/builder";
+import { CommonModule, LayoutModule, ZentModule, CompositionModule } from "@amoebajs/basic-modules";
+import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "#services/compiler";
+import { ConfigService } from "#services/configs";
+import { PageManager, IWebsitePageHash } from "#services/page-manager";
 import { MysqlWorker } from "#database/providers/worker.service";
 import { ICompileTask, TaskStatus } from "#database/typings";
 import { Page } from "#database/entity/page.entity";
 import { PageConfig } from "#database/entity/page-config.entity";
 
 const ASSETS_DIR = path.resolve(__dirname, "..", "..", "assets");
+
+export class BuilderFactory extends Factory {
+  protected initModules() {
+    super.initModules();
+    this.useModule(CommonModule);
+    this.useModule(LayoutModule);
+    this.useModule(CompositionModule);
+    this.useModule(ZentModule);
+  }
+}
 
 @Injectable()
 export class CoreCompiler implements CompileService<ICompileTask> {

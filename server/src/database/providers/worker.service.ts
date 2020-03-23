@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { createConnection } from "typeorm";
 import { BehaviorSubject } from "rxjs";
-import { ConfigService as Configs } from "#services/configs/config.service";
+import { ConfigService as Configs } from "#services/configs";
 import { createOrmOptions } from "../ormconfig";
 import { CompileTask } from "../entity/compile-task.entity";
 import { Page } from "../entity/page.entity";
