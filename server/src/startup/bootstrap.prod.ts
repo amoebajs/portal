@@ -7,7 +7,7 @@ import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-st
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { ConfigService, IServerConfigs } from "#services/configs";
 import { MysqlWorker } from "#services/database";
-import { MainModule } from "./main.module";
+import { MainModule } from "../main.module";
 
 export const BUILD_ROOT = path.join(__dirname, "..", "build");
 export const ASSETS_ROOT = path.join(__dirname, "assets");

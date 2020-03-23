@@ -1,5 +1,5 @@
 import cluster from "cluster";
-import { Master } from "./clusters/core";
+import { Master } from "../clusters/core";
 
 const MAXCPU_ENV = Number(process.env.MAX_CPU_NUM);
 const MAXCPU = Number.isNaN(MAXCPU_ENV) ? void 0 : MAXCPU_ENV;
