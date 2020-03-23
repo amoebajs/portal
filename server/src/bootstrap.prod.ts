@@ -6,7 +6,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { ConfigService, IServerConfigs } from "#services/configs";
-import { MysqlWorker } from "#database/providers/worker.service";
+import { MysqlWorker } from "#services/database";
 import { MainModule } from "./main.module";
 
 export const BUILD_ROOT = path.join(__dirname, "..", "build");

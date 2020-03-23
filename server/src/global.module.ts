@@ -1,7 +1,7 @@
 import { Global, Module } from "@nestjs/common";
 import { Authentication, User, FakeAuthService } from "#services/authentication";
 import { PageManager, CorePageManager } from "#services/page-manager";
-import { MysqlWorker } from "#database/providers/worker.service";
+import { MysqlWorker } from "#services/database";
 import { Compiler, CoreCompiler } from "#services/compiler";
 import { ConfigService } from "#services/configs";
 import { AppModule } from "#app/app.module";

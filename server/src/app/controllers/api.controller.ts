@@ -3,7 +3,7 @@ import { IPageCreateOptions } from "@amoebajs/builder";
 import { Compiler } from "#services/compiler";
 import { User } from "#services/authentication";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
-import { MysqlWorker } from "#database/providers/worker.service";
+import { MysqlWorker } from "#services/database";
 
 @Controller("api")
 @UseRolesAuthentication({ roles: ["admin"] })

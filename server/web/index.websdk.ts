@@ -1,6 +1,6 @@
 import * as BuilderSdk from "@amoebajs/builder";
 import { CommonModule, LayoutModule, ZentModule } from "@amoebajs/basic-modules";
-import { BuilderFactory } from "../src/services/compiler";
+import { BuilderFactory } from "../src/services/compiler/core";
 
 declare global {
   interface Window {

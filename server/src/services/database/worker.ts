@@ -2,17 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { createConnection } from "typeorm";
 import { BehaviorSubject } from "rxjs";
 import { ConfigService as Configs } from "#services/configs";
-import { createOrmOptions } from "../ormconfig";
-import { CompileTask } from "../entity/compile-task.entity";
-import { Page } from "../entity/page.entity";
-import { PageConfig } from "../entity/page-config.entity";
-import { PageVersion } from "../entity/page-version.entity";
-import { BaseMysqlService } from "./base.service";
-import { PageService } from "./page.service";
-import { VersionService } from "./ver.service";
-import { TaskService } from "./task.service";
-import { ConfigService } from "./conf.service";
-import { TaskStatus, PageStatus, IListQueryResult } from "../typings";
+import { createOrmOptions } from "#database/ormconfig";
+import { CompileTask } from "#database/entity/compile-task.entity";
+import { Page } from "#database/entity/page.entity";
+import { PageConfig } from "#database/entity/page-config.entity";
+import { PageVersion } from "#database/entity/page-version.entity";
+import { BaseMysqlService } from "#database/providers/base.service";
+import { PageService } from "#database/providers/page.service";
+import { VersionService } from "#database/providers/ver.service";
+import { TaskService } from "#database/providers/task.service";
+import { ConfigService } from "#database/providers/conf.service";
+import { TaskStatus, PageStatus, IListQueryResult } from "#database/typings";
 
 export interface IPageCreateOptions {
   name?: string;
@@ -80,17 +80,17 @@ interface IEntityType {
 }
 
 interface IListQueryOptions {
-  VERSION: import("./ver.service").IListQueryOptions;
-  CONFIG: import("./conf.service").IListQueryOptions;
-  TASK: import("./task.service").IListQueryOptions;
-  PAGE: import("./page.service").IListQueryOptions;
+  VERSION: import("#database/providers/ver.service").IListQueryOptions;
+  CONFIG: import("#database/providers/conf.service").IListQueryOptions;
+  TASK: import("#database/providers/task.service").IListQueryOptions;
+  PAGE: import("#database/providers/page.service").IListQueryOptions;
 }
 
 interface IQueryOptions {
-  VERSION: import("./ver.service").IQueryOptions;
-  CONFIG: import("./conf.service").IQueryOptions;
-  TASK: import("./task.service").IQueryOptions;
-  PAGE: import("./page.service").IQueryOptions;
+  VERSION: import("#database/providers/ver.service").IQueryOptions;
+  CONFIG: import("#database/providers/conf.service").IQueryOptions;
+  TASK: import("#database/providers/task.service").IQueryOptions;
+  PAGE: import("#database/providers/page.service").IQueryOptions;
 }
 
 @Injectable()

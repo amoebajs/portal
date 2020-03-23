@@ -1,2 +1,3 @@
 export * from "./compiler";
-export { CoreCompiler, BuilderFactory } from "./core-compiler";
+export { BuilderFactory } from "./core";
+export { CoreCompiler } from "./core-compiler";
