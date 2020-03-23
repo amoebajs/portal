@@ -4,7 +4,7 @@ import chalk from "chalk";
 import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
-import { ConfigService } from "#services/configs";
+import { Configs } from "#services/configs";
 import { PageManager, IWebsitePageHash } from "#services/page-manager";
 import { MysqlWorker } from "#services/database";
 import { ICompileTask, TaskStatus } from "#database/typings";
@@ -28,7 +28,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   }
 
   constructor(
-    protected readonly configs: ConfigService,
+    protected readonly configs: Configs,
     protected readonly worker: MysqlWorker,
     protected readonly manager: PageManager,
   ) {

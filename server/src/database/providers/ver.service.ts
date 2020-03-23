@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { BaseMysqlService } from "./base.service";
 import { PageVersion } from "../entity/page-version.entity";
 import { IListQueryResult } from "../typings";
@@ -29,6 +30,7 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
   updatedAt: Date;
 }
 
+@Injectable()
 export class VersionService extends BaseMysqlService {
   protected get repository() {
     return this.connection.getRepository(PageVersion);

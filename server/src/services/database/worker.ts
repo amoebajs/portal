@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { createConnection } from "typeorm";
 import { BehaviorSubject } from "rxjs";
-import { ConfigService as Configs } from "#services/configs";
+import { Configs } from "#services/configs";
 import { createOrmOptions } from "#database/ormconfig";
 import { CompileTask } from "#database/entity/compile-task.entity";
 import { Page } from "#database/entity/page.entity";
@@ -93,20 +93,28 @@ interface IQueryOptions {
   PAGE: import("#database/providers/page.service").IQueryOptions;
 }
 
+const ProviderMap = {
+  PAGE: "$pages",
+  CONFIG: "$configs",
+  VERSION: "$versions",
+  TASK: "$tasks",
+};
+
 @Injectable()
 export class MysqlWorker extends BaseMysqlService {
   public get id() {
     return process.pid;
   }
 
-  private PAGE = new PageService();
-  private VERSION = new VersionService();
-  private TASK = new TaskService();
-  private CONFIG = new ConfigService();
-
   public readonly active = new BehaviorSubject(false);
 
-  constructor(private configs: Configs) {
+  constructor(
+    private readonly configs: Configs,
+    private readonly $pages: PageService,
+    private readonly $versions: VersionService,
+    private readonly $configs: ConfigService,
+    private readonly $tasks: TaskService,
+  ) {
     super();
     this.configs.onConfigLoad.subscribe(loaded => {
       if (loaded) this.initWorker();
@@ -121,10 +129,10 @@ export class MysqlWorker extends BaseMysqlService {
         createOrmOptions(mysql.user, mysql.password, mysql.database, mysql.host, mysql.port, mysql.synchronize),
       ),
     );
-    this.TASK.setConnection(this.connection);
-    this.PAGE.setConnection(this.connection);
-    this.VERSION.setConnection(this.connection);
-    this.CONFIG.setConnection(this.connection);
+    this.$tasks.setConnection(this.connection);
+    this.$pages.setConnection(this.connection);
+    this.$versions.setConnection(this.connection);
+    this.$configs.setConnection(this.connection);
     this.active.next(true);
   }
 
@@ -132,7 +140,7 @@ export class MysqlWorker extends BaseMysqlService {
     type: K,
     options: IListQueryOptions[K],
   ): Promise<IListQueryResult<IEntityType[K]>> {
-    return (<any>this)[type].queryList(options);
+    return (<any>this)[ProviderMap[type]].queryList(options);
   }
 
   public async querySelectList<K extends keyof IListQueryOptions>(
@@ -140,11 +148,11 @@ export class MysqlWorker extends BaseMysqlService {
     options: IListQueryOptions[K],
     select: (keyof IEntityType[K])[],
   ): Promise<IListQueryResult<IEntityType[K]>> {
-    return (<any>this)[type].querySelectList(options, select);
+    return (<any>this)[ProviderMap[type]].querySelectList(options, select);
   }
 
   public async query<K extends keyof IQueryOptions>(type: K, options: IQueryOptions[K]): Promise<IEntityType[K]> {
-    return (<any>this)[type].query(options);
+    return (<any>this)[ProviderMap[type]].query(options);
   }
 
   public async createPage(options: IPageCreateOptions): Promise<number | string> {
@@ -153,11 +161,11 @@ export class MysqlWorker extends BaseMysqlService {
       const { name, displayName, description, operator, configs } = options;
       const $pages = manager.getRepository(Page);
       const $configs = manager.getRepository(PageConfig);
-      const duplicated = await this.PAGE.query({ name }, $pages);
+      const duplicated = await this.$pages.query({ name }, $pages);
       if (!!duplicated) {
         throw new Error("Page with same name is alread exist");
       }
-      const pageid = await this.PAGE.create(
+      const pageid = await this.$pages.create(
         {
           name,
           displayName,
@@ -167,7 +175,7 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $pages,
       );
-      const confid = await this.CONFIG.create(
+      const confid = await this.$configs.create(
         {
           pageId: pageid,
           creator: operator,
@@ -175,7 +183,7 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $configs,
       );
-      await this.PAGE.update(
+      await this.$pages.update(
         {
           id: pageid,
           configId: confid,
@@ -193,17 +201,17 @@ export class MysqlWorker extends BaseMysqlService {
     const { id, name, displayName, description } = options;
     await this.connection.transaction(async manager => {
       const $pages = manager.getRepository(Page);
-      const page = await this.PAGE.query({ id }, $pages);
+      const page = await this.$pages.query({ id }, $pages);
       if (!page) {
         throw new Error("Page is not exist");
       }
       if (name !== void 0 && name !== page.name) {
-        const duplicated = await this.PAGE.query({ name }, $pages);
+        const duplicated = await this.$pages.query({ name }, $pages);
         if (!!duplicated) {
           throw new Error("Page with same name is alread exist");
         }
       }
-      const success = await this.PAGE.update(
+      const success = await this.$pages.update(
         {
           id: page.id,
           name: name,
@@ -226,12 +234,12 @@ export class MysqlWorker extends BaseMysqlService {
     await this.connection.transaction(async manager => {
       const $configs = manager.getRepository(PageConfig);
       const $pages = manager.getRepository(Page);
-      const page = await this.PAGE.query({ id }, $pages);
+      const page = await this.$pages.query({ id }, $pages);
       if (!page) {
         throw new Error("Page is not exist");
       }
       if (page.status === PageStatus.Normal) {
-        const newconfid = await this.CONFIG.create(
+        const newconfid = await this.$configs.create(
           {
             pageId: page.id,
             data: JSON.stringify(config || {}),
@@ -239,7 +247,7 @@ export class MysqlWorker extends BaseMysqlService {
           },
           $configs,
         );
-        const pageSuccess = await this.PAGE.update(
+        const pageSuccess = await this.$pages.update(
           {
             id: page.id,
             status: PageStatus.Changed,
@@ -253,7 +261,7 @@ export class MysqlWorker extends BaseMysqlService {
           throw new Error("Page update failed");
         }
       } else {
-        const confSuccess = await this.CONFIG.update(
+        const confSuccess = await this.$configs.update(
           {
             id: page.configId,
             data: JSON.stringify(config || {}),
@@ -275,11 +283,11 @@ export class MysqlWorker extends BaseMysqlService {
     await this.connection.transaction(async manager => {
       const $versions = manager.getRepository(PageVersion);
       const $pages = manager.getRepository(Page);
-      const page = await this.PAGE.query({ id }, $pages);
+      const page = await this.$pages.query({ id }, $pages);
       if (!page) {
         throw new Error("Page is not exist");
       }
-      const version = await this.VERSION.query({ id: versionId }, $versions);
+      const version = await this.$versions.query({ id: versionId }, $versions);
       if (!version) {
         throw new Error("Page version is not exist");
       }
@@ -287,7 +295,7 @@ export class MysqlWorker extends BaseMysqlService {
       if (version.configId !== page.configId) {
         status = PageStatus.Changed;
       }
-      const success = await this.PAGE.update(
+      const success = await this.$pages.update(
         {
           id,
           versionId,
@@ -310,9 +318,9 @@ export class MysqlWorker extends BaseMysqlService {
     await this.connection.transaction(async manager => {
       const $versions = manager.getRepository(PageVersion);
       const $tasks = manager.getRepository(CompileTask);
-      const page = await this.PAGE.query({ id: pageId, name: pageName });
+      const page = await this.$pages.query({ id: pageId, name: pageName });
       const taskname = versionName || "AutoCreate_" + new Date().getTime();
-      const newverid = await this.VERSION.create(
+      const newverid = await this.$versions.create(
         {
           name: taskname,
           configId: page.configId,
@@ -322,7 +330,7 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $versions,
       );
-      const newtaskid = await this.TASK.create(
+      const newtaskid = await this.$tasks.create(
         {
           name: taskname,
           pageId: page.id,
@@ -333,7 +341,7 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $tasks,
       );
-      await this.VERSION.update(
+      await this.$versions.update(
         {
           id: newverid,
           taskId: newtaskid,
@@ -349,7 +357,7 @@ export class MysqlWorker extends BaseMysqlService {
 
   public async startTask(options: ITaskStartOptions): Promise<boolean> {
     const { id, operator } = options;
-    return this.TASK.update(
+    return this.$tasks.update(
       {
         id,
         creator: operator,
@@ -362,7 +370,7 @@ export class MysqlWorker extends BaseMysqlService {
 
   public async updateTask(options: ITaskUpdateOptions): Promise<boolean> {
     const { id, logs, operator } = options;
-    return this.TASK.update(
+    return this.$tasks.update(
       {
         id,
         creator: operator,
@@ -379,10 +387,10 @@ export class MysqlWorker extends BaseMysqlService {
       const $versions = manager.getRepository(PageVersion);
       const $pages = manager.getRepository(Page);
       const $tasks = manager.getRepository(CompileTask);
-      const task = await this.TASK.query({ id }, $tasks);
-      const page = await this.PAGE.query({ id: task.pageId }, $pages);
-      const version = await this.VERSION.query({ id: task.versionId }, $versions);
-      const verSuccess = await this.VERSION.update(
+      const task = await this.$tasks.query({ id }, $tasks);
+      const page = await this.$pages.query({ id: task.pageId }, $pages);
+      const version = await this.$versions.query({ id: task.versionId }, $versions);
+      const verSuccess = await this.$versions.update(
         {
           id: task.versionId,
           dist,
@@ -396,7 +404,7 @@ export class MysqlWorker extends BaseMysqlService {
       }
       // 暂时这么处理，任务执行完毕，自动更新成当前页面的最新版本
       // 后续考虑拆解这个步骤，可以实现版本控制
-      const pageSuccess = await this.PAGE.update(
+      const pageSuccess = await this.$pages.update(
         {
           id: task.pageId,
           versionId: task.versionId,
@@ -410,7 +418,7 @@ export class MysqlWorker extends BaseMysqlService {
       if (!pageSuccess) {
         throw new Error("Page update failed");
       }
-      const taskSuccess = await this.TASK.update(
+      const taskSuccess = await this.$tasks.update(
         {
           id,
           creator: operator,

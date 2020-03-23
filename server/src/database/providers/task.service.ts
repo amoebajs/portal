@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { BaseMysqlService } from "./base.service";
 import { CompileTask } from "../entity/compile-task.entity";
 import { TaskStatus, IListQueryResult } from "../typings";
@@ -30,6 +31,7 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
   creator?: string;
 }
 
+@Injectable()
 export class TaskService extends BaseMysqlService {
   protected get repository() {
     return this.connection.getRepository(CompileTask);

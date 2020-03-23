@@ -26,7 +26,7 @@ export interface IServerConfigs {
 }
 
 @Injectable()
-export class ConfigService {
+export class Configs {
   private _config!: IServerConfigs;
   private _env: { [prop: string]: string } = {};
 

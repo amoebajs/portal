@@ -5,7 +5,7 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
-import { ConfigService, IServerConfigs } from "#services/configs";
+import { Configs, IServerConfigs } from "#services/configs";
 import { MysqlWorker } from "#services/database";
 import { MainModule } from "./main.module";
 
@@ -30,7 +30,7 @@ export async function bootstrap({
 }: Partial<IBootstrapOptions> = {}) {
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
   app
-    .get(ConfigService)
+    .get(Configs)
     .setConfig(configs)
     .setEnv(ewsEnvs);
   app.get(MysqlWorker);

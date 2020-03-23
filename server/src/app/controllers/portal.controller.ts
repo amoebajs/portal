@@ -1,13 +1,13 @@
 import { Response as Resp } from "express";
 import { Controller, Get, Response } from "@nestjs/common";
-import { ConfigService } from "#services/configs";
+import { Configs } from "#services/configs";
 import { User } from "#services/authentication";
 import { UseRolesAuthentication } from "#utils/roles";
 
 @Controller("portal")
 @UseRolesAuthentication({ roles: ["admin"] })
 export class PortalController {
-  constructor(private readonly configs: ConfigService, private readonly user: User) {}
+  constructor(private readonly configs: Configs, private readonly user: User) {}
 
   @Get(["", "/*", "/**/*"])
   getIndex(@Response() resp: Resp) {
