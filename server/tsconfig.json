@@ -26,5 +26,5 @@
       "#utils/*": ["./src/utils/*"]
     }
   },
-  "exclude": ["node_modules", "dist", "web"]
+  "exclude": ["node_modules", "dist", "sdk"]
 }

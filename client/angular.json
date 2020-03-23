@@ -35,7 +35,7 @@
             "styles": ["src/styles.scss", "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css"],
             "scripts": [
               {
-                "input": "../websdk/index.js",
+                "input": "../websdk/sdk/index.js",
                 "lazy": true,
                 "inject": false,
                 "bundleName": "ews-server-websdk"

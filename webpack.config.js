@@ -3,9 +3,9 @@ const TsImportPlugin = require("ts-import-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
-  entry: ["./server/web/index.websdk.ts"],
+  entry: ["./server/sdk/index.websdk.ts"],
   output: {
-    path: path.resolve(__dirname, "websdk"),
+    path: path.resolve(__dirname, "websdk/sdk"),
     filename: "index.js",
   },
   mode: "production",

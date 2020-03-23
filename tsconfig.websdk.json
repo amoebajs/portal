@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "outDir": "websdk"
   },
-  "include": ["server/web/index.websdk.ts"]
+  "include": ["server/sdk/index.websdk.ts"]
 }
