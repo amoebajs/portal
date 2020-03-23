@@ -7,11 +7,11 @@ import { CompileTask } from "#database/entity/compile-task.entity";
 import { Page } from "#database/entity/page.entity";
 import { PageConfig } from "#database/entity/page-config.entity";
 import { PageVersion } from "#database/entity/page-version.entity";
-import { BaseMysqlService } from "#database/providers/base.service";
-import { PageService } from "#database/providers/page.service";
-import { VersionService } from "#database/providers/ver.service";
-import { TaskService } from "#database/providers/task.service";
-import { ConfigService } from "#database/providers/conf.service";
+import { BaseMysqlService } from "#database/providers/base";
+import { PageRepo } from "#database/providers/page.repo";
+import { PageVersionRepo } from "#database/providers/page-version.repo";
+import { CompileTaskRepo } from "#database/providers/compile-task.repo";
+import { PageConfigRepo } from "#database/providers/page-config.repo";
 import { TaskStatus, PageStatus, IListQueryResult } from "#database/typings";
 
 export interface IPageCreateOptions {
@@ -80,17 +80,17 @@ interface IEntityType {
 }
 
 interface IListQueryOptions {
-  VERSION: import("#database/providers/ver.service").IListQueryOptions;
-  CONFIG: import("#database/providers/conf.service").IListQueryOptions;
-  TASK: import("#database/providers/task.service").IListQueryOptions;
-  PAGE: import("#database/providers/page.service").IListQueryOptions;
+  VERSION: import("#database/providers/page-version.repo").IListQueryOptions;
+  CONFIG: import("#database/providers/page-config.repo").IListQueryOptions;
+  TASK: import("#database/providers/compile-task.repo").IListQueryOptions;
+  PAGE: import("#database/providers/page.repo").IListQueryOptions;
 }
 
 interface IQueryOptions {
-  VERSION: import("#database/providers/ver.service").IQueryOptions;
-  CONFIG: import("#database/providers/conf.service").IQueryOptions;
-  TASK: import("#database/providers/task.service").IQueryOptions;
-  PAGE: import("#database/providers/page.service").IQueryOptions;
+  VERSION: import("#database/providers/page-version.repo").IQueryOptions;
+  CONFIG: import("#database/providers/page-config.repo").IQueryOptions;
+  TASK: import("#database/providers/compile-task.repo").IQueryOptions;
+  PAGE: import("#database/providers/page.repo").IQueryOptions;
 }
 
 const ProviderMap = {
@@ -110,10 +110,10 @@ export class MysqlWorker extends BaseMysqlService {
 
   constructor(
     private readonly configs: Configs,
-    private readonly $pages: PageService,
-    private readonly $versions: VersionService,
-    private readonly $configs: ConfigService,
-    private readonly $tasks: TaskService,
+    private readonly $pages: PageRepo,
+    private readonly $versions: PageVersionRepo,
+    private readonly $configs: PageConfigRepo,
+    private readonly $tasks: CompileTaskRepo,
   ) {
     super();
     this.configs.onConfigLoad.subscribe(loaded => {

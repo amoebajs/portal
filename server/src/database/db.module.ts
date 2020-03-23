@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
-import { ConfigService } from "./providers/conf.service";
-import { PageService } from "./providers/page.service";
-import { TaskService } from "./providers/task.service";
-import { VersionService } from "./providers/ver.service";
+import { PageConfigRepo } from "./providers/page-config.repo";
+import { PageRepo } from "./providers/page.repo";
+import { CompileTaskRepo } from "./providers/compile-task.repo";
+import { PageVersionRepo } from "./providers/page-version.repo";
 
 @Module({
   imports: [],
   controllers: [],
-  providers: [ConfigService, PageService, TaskService, VersionService],
-  exports: [ConfigService, PageService, TaskService, VersionService],
+  providers: [PageConfigRepo, PageRepo, CompileTaskRepo, PageVersionRepo],
+  exports: [PageConfigRepo, PageRepo, CompileTaskRepo, PageVersionRepo],
 })
 export class DatabaseModule {}

@@ -1,56 +1,51 @@
 import { Injectable } from "@nestjs/common";
-import { BaseMysqlService } from "./base.service";
-import { CompileTask } from "../entity/compile-task.entity";
-import { TaskStatus, IListQueryResult } from "../typings";
+import { BaseMysqlService } from "./base";
+import { IListQueryResult } from "../typings";
+import { PageConfig } from "../entity/page-config.entity";
 
 export interface IListQueryOptions {
-  name?: string;
-  pageId?: string;
+  pageId?: number | string;
   creator?: string;
   current: number;
   size: number;
 }
 
 export interface IQueryOptions {
-  id: number | string;
+  id: string | number;
+  pageId?: number | string;
 }
 
 export interface ICreateOptions {
-  pageId: string | number;
-  configId: string | number;
-  versionId: string | number;
-  status: TaskStatus;
-  name: string;
+  pageId?: string | number;
+  data?: string;
   creator: string;
 }
 
 export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
   id: number | string;
   updatedAt: Date;
-  logs?: string;
-  creator?: string;
 }
 
 @Injectable()
-export class TaskService extends BaseMysqlService {
+export class PageConfigRepo extends BaseMysqlService {
   protected get repository() {
-    return this.connection.getRepository(CompileTask);
+    return this.connection.getRepository(PageConfig);
   }
 
-  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<CompileTask>> {
+  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<PageConfig>> {
     return this.invokeListQuery(repo, options);
   }
 
   public async querySelectList(
     options: IListQueryOptions,
-    select: (keyof CompileTask)[],
+    select: (keyof PageConfig)[],
     repo = this.repository,
-  ): Promise<IListQueryResult<CompileTask>> {
+  ): Promise<IListQueryResult<PageConfig>> {
     return this.invokeListQuery(repo, options, select);
   }
 
-  public async query(options: IQueryOptions, repo = this.repository): Promise<CompileTask> {
-    const queries: Partial<CompileTask> = {};
+  public async query(options: IQueryOptions, repo = this.repository): Promise<PageConfig> {
+    const queries: Partial<PageConfig> = {};
     if (options.id !== void 0) queries.id = options.id;
     return this.queryEntry(repo, queries);
   }

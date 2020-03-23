@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BaseMysqlService } from "./base.service";
+import { BaseMysqlService } from "./base";
 import { Page } from "../entity/page.entity";
 import { IListQueryResult, PageStatus } from "../typings";
 
@@ -31,7 +31,7 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
 }
 
 @Injectable()
-export class PageService extends BaseMysqlService {
+export class PageRepo extends BaseMysqlService {
   protected get repository() {
     return this.connection.getRepository(Page);
   }
