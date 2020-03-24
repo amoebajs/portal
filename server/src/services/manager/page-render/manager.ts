@@ -12,9 +12,11 @@ export class CorePageManager extends PageManageService {
     if (page) {
       page.files = updates.files || page.files;
       page.config = updates.config || page.config;
+      page.status = updates.status || page.status;
       page.latest = updates.latest!;
     } else {
       this.pageCache[pageName] = {
+        status: "default",
         files: updates.files || {},
         config: "{}",
         latest: updates.latest!,

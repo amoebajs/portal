@@ -150,6 +150,7 @@ export class ApiController {
         }),
       };
     } catch (error) {
+      console.log(error);
       return {
         code: 500,
         data: {
@@ -184,6 +185,7 @@ export class ApiController {
         },
       };
     } catch (error) {
+      console.log(error);
       return {
         code: 500,
         data: {

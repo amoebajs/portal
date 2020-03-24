@@ -13,6 +13,7 @@ export class SiteController {
     if (!template) {
       throw new Error(`page[${name}] is not found`);
     }
+    console.log(template);
     return resp.render(template);
   }
 }

@@ -11,7 +11,7 @@
     "start:dev": "yarn start --watch",
     "start:prod": "cross-env NODE_ENV=production node -r ./scripts/paths dist/main",
     "start": "yarn copy:dev && cross-env NODE_ENV=dev nest start",
-    "copy:assets": "npx copy src/assets/**/*.* dist/assets",
+    "copy:assets": "npx copy src/assets/**/*.* dist/src/assets",
     "copy:configs": "npx copy configs/**/*.yaml dist/configs",
     "copy:dev": "yarn prebuild && yarn copy:prod",
     "copy:prod": "yarn copy:assets && yarn copy:configs",

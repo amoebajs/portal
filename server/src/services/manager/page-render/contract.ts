@@ -4,6 +4,7 @@ import { createToken } from "#utils/di";
 export interface IWebsitePageHash {
   latest: string | null;
   config: string;
+  status: "loaded" | "loading" | "default";
   files: {
     [key: string]: string;
   };

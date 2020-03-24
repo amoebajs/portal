@@ -2,7 +2,7 @@ import { Global, Module } from "@nestjs/common";
 import { AppModule } from "#app/app.module";
 import { DatabaseModule } from "#database/db.module";
 import { Authentication, User, FakeAuthService } from "#services/authentication";
-import { PageManager, CorePageManager } from "#services/manager";
+import { PageManager, CorePageManager, PagePersistence, PagePersistenceDbStorage } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { DbConnection } from "#services/database/connection";
 import { Compiler, CoreCompiler } from "#services/compiler";
@@ -15,6 +15,7 @@ import { Configs } from "#services/configs";
   providers: [
     { provide: Configs, useClass: Configs },
     { provide: DbConnection, useClass: DbConnection },
+    { provide: PagePersistence, useClass: PagePersistenceDbStorage },
     { provide: MysqlWorker, useClass: MysqlWorker },
     { provide: User, useClass: User },
     { provide: Authentication, useClass: FakeAuthService },

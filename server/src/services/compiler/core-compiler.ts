@@ -5,7 +5,7 @@ import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { Configs } from "#services/configs";
-import { PageManager, IWebsitePageHash } from "#services/manager";
+import { PageManager, PagePersistence, IWebsitePageHash } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { ICompileTask, TaskStatus } from "#database/typings";
 import { Page } from "#database/entity/page.entity";
@@ -31,6 +31,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     protected readonly configs: Configs,
     protected readonly worker: MysqlWorker,
     protected readonly manager: PageManager,
+    protected readonly persistence: PagePersistence,
   ) {
     worker.active.subscribe(() => {
       this._init = true;
@@ -38,17 +39,33 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     configs.config.subscribe(configs => {
       this._isProd = configs.envMode === "prod";
     });
+    this.init();
+  }
+
+  private async init() {
+    const websites = path.join(ASSETS_DIR, "website");
+    if (!(await fs.pathExists(websites))) {
+      await fs.mkdir(websites);
+    }
   }
 
   public async queryPageUri(name: string) {
-    let page = this.manager.getPage(name);
-    if (!page) {
-      const pageR = await this.worker.query("PAGE", { name });
-      this.manager.updatePage(name, { latest: String(pageR.versionId) });
-      page = this.manager.getPage(name);
+    try {
+      let page = this.manager.getPage(name);
+      if (!page) {
+        const pageR = await this.worker.query("PAGE", { name });
+        this.manager.updatePage(name, { latest: String(pageR.versionId) });
+        page = this.manager.getPage(name);
+      }
+      const version = page?.latest;
+      if (page?.status !== "loaded") {
+        await this.saveHtmlBundle(name, version);
+      }
+      return version && `website/${name}.${version}.html`;
+    } catch (error) {
+      console.log(error);
+      throw new Error(`query page uri failed: ${error.message.slice(0, 50)}`);
     }
-    const version = page?.latest;
-    return version && `website/${name}.${version}.html`;
   }
 
   public async createCompileTask(configs: ICommonBuildConfigs): Promise<string | number> {
@@ -154,14 +171,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       this.pushTaskLog(task.id, "source code compiled successfully.", "blue");
       await this.buildAppDist(task.id, page, entry, buildDir, result.dependencies);
       await this.bundleAppDist(buildDir, cache, task);
-      await this.worker.endTask({
-        id: task.id,
-        operator: task.creator,
-        dist: JSON.stringify(cache.files),
-      });
-      const version = String(task.versionId);
-      this.manager.updatePage(page.name, { config: config.data, latest: version });
-      await this.moveHtmlBundle(page.name, version, buildDir);
+      await this.handletaskEnd(task, cache, page, buildDir, config);
       console.log(JSON.stringify({ ...cache, config: "[hidden]" }, null, "  "));
       const cost = this.getSecondsCost(stamp);
       this.pushTaskLog(task.id, `task end with status [${task.status}] in ${cost}s.`, "green");
@@ -173,6 +183,27 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       this.pushTaskLog(task.id, `task end with status [${task.status}] in ${cost}s.`, "red");
       this.pushTaskLog(task.id, `task is failed.`, "yellow");
       return error;
+    }
+  }
+
+  private async handletaskEnd(
+    task: ICompileTask,
+    cache: IWebsitePageHash,
+    page: Page,
+    buildDir: string,
+    config: PageConfig,
+  ) {
+    try {
+      await this.worker.endTask({
+        id: task.id,
+        operator: task.creator,
+        dist: JSON.stringify(cache.files),
+      });
+      const version = String(task.versionId);
+      await this.moveHtmlBundle(page.name, version, buildDir);
+      this.manager.updatePage(page.name, { config: config.data, latest: version, status: "loaded" });
+    } catch (error) {
+      throw new Error(`end task failed: ${error.message}`);
     }
   }
 
@@ -259,7 +290,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   protected async getPageManagerCache(page: Page) {
     let cache = this.manager.getPage(page.name);
     if (!cache) {
-      const updates: Partial<IWebsitePageHash> = { latest: null };
+      const updates: Partial<IWebsitePageHash> = { latest: null, status: "loading" };
       const prever = await this.worker.query("VERSION", { id: page.versionId });
       const preconf = await this.worker.query("CONFIG", { id: page.configId });
       if (prever) {
@@ -281,9 +312,27 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return (new Date().getTime() - start) / 1000;
   }
 
-  protected async moveHtmlBundle(name: string, id: string, buildDir: string) {
-    return fs.copy(path.join(buildDir, "index.bundle.html"), path.join(ASSETS_DIR, "website", `${name}.${id}.html`), {
-      overwrite: true,
+  protected async moveHtmlBundle(name: string, id: string | number, buildDir: string) {
+    const filepath = path.join(buildDir, "index.bundle.html");
+    await this.persistence.setFile(id, filepath);
+    return fs.copy(filepath, path.join(ASSETS_DIR, "website", `${name}.${id}.html`), { overwrite: true });
+  }
+
+  protected async saveHtmlBundle(name: string, id: string | number) {
+    const stream = await this.persistence.getFile(id);
+    const emitfile = path.join(ASSETS_DIR, "website", `${name}.${id}.html`);
+    await fs.writeFile(emitfile, "", { encoding: "utf8", flag: "w+" });
+    return new Promise<void>(resolve => {
+      const output = fs.createWriteStream(emitfile, { flags: "w+" });
+      stream.on("data", e => {
+        output.write(e.data.toString());
+      });
+      stream.on("end", function() {
+        output.end();
+      });
+      output.on("close", () => {
+        resolve();
+      });
     });
   }
 }

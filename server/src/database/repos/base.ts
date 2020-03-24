@@ -24,17 +24,18 @@ export class BaseMysqlService {
     where: Record<string, any>,
     more?: (builder: SelectQueryBuilder<M>) => SelectQueryBuilder<M>,
   ) {
-    const builder = this.createWhereBuilder(repo, <any>where);
+    const builder = this.createWhereBuilder(repo, <any>where, "entry");
     return (!more ? builder : more(builder)).skip((+current - 1) * +size).take(+size);
   }
 
-  protected createWhereBuilder<M>(repo: Repository<M>, where: Partial<M>) {
-    let builder = repo.createQueryBuilder("entry");
+  protected createWhereBuilder<M>(repo: Repository<M>, where: Partial<M>, alias?: string) {
+    const prefix = (alias && `${alias}.`) ?? "";
+    let builder = repo.createQueryBuilder(alias);
     const wheres = Object.entries(where);
     let fn: "where" | "andWhere" = "where";
     for (const [k, v] of wheres) {
       if (v === void 0) continue;
-      builder = builder[fn](`entry.${k} = :${k}`, { [k]: v });
+      builder = builder[fn](prefix + `${k} = :${k}`, { [k]: v });
       fn = "andWhere";
     }
     return builder;
@@ -61,7 +62,7 @@ export class BaseMysqlService {
   }
 
   protected async queryEntry<M>(repo: Repository<M>, where: Partial<M>) {
-    return this.createWhereBuilder(repo, where).getOne();
+    return this.createWhereBuilder(repo, where, "entry").getOne();
   }
 
   protected async updateEntry<M>(repo: Repository<M>, where: Partial<M>, updates: Partial<M>): Promise<boolean> {

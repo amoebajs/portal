@@ -9,7 +9,12 @@ export class DistStorage implements IDistStorage {
   })
   id!: number | string;
 
-  @Column("blob", {
+  @Column("bigint", {
+    name: "version_id",
+  })
+  versionId!: number | string;
+
+  @Column("mediumblob", {
     nullable: true,
     name: "data",
   })
