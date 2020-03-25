@@ -23,6 +23,7 @@
     "build:server": "cd server && yarn build",
     "build:client": "cd client && yarn build",
     "build": "yarn build:client && yarn build:server",
+    "postinstall": "node scripts/postinstall.js",
     "postbuild": "npx rimraf server/build && npx copy client/dist/**/*.* server/build && node scripts/use-websdk.js",
     "docker:build": "node scripts/docker.js"
   },
