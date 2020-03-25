@@ -17,11 +17,8 @@ async function load() {
     case "mysql":
       import("./startup/app.mysql");
       break;
-    case "cluster":
-      require("./startup/app.cluster");
-      break;
     default:
-      require("./startup/app");
+      import("./startup/app");
       break;
   }
 }

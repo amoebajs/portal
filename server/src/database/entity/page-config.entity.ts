@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IPageConfig } from "../typings";
+import { IPageConfig } from "#typings/page";
 
 @Entity("ews_page_config")
 export class PageConfig implements IPageConfig {
@@ -14,6 +14,12 @@ export class PageConfig implements IPageConfig {
     name: "page_id",
   })
   pageId!: string | number;
+
+  @Column("varchar", {
+    nullable: false,
+    name: "name",
+  })
+  name!: string;
 
   @Column("varchar", {
     nullable: false,

@@ -5,9 +5,9 @@ import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { Configs } from "#services/configs";
-import { PageManager, PagePersistence, IWebsitePageHash } from "#services/manager";
+import { PageVersionManager, PagePersistenceManager, IWebsitePageHash } from "#services/manager";
 import { MysqlWorker } from "#services/database";
-import { ICompileTask, TaskStatus } from "#database/typings";
+import { ICompileTask, TaskStatus } from "#typings/page";
 import { Page } from "#database/entity/page.entity";
 import { PageConfig } from "#database/entity/page-config.entity";
 import { BuilderFactory } from "./core";
@@ -30,8 +30,8 @@ export class CoreCompiler implements CompileService<ICompileTask> {
   constructor(
     protected readonly configs: Configs,
     protected readonly worker: MysqlWorker,
-    protected readonly manager: PageManager,
-    protected readonly persistence: PagePersistence,
+    protected readonly manager: PageVersionManager,
+    protected readonly persistence: PagePersistenceManager,
   ) {
     worker.active.subscribe(() => {
       this._init = true;
@@ -245,7 +245,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     dependencies: Record<string, any>,
   ) {
     await this.builder.buildSource({
-      template: { title: page.displayName || "测试" },
+      template: { title: page.displayName ?? "测试" },
       entry: { app: entry },
       output: { path: buildDir, filename: "[name].[hash].js" },
       plugins: [
@@ -295,7 +295,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       const preconf = await this.worker.query("CONFIG", { id: page.configId });
       if (prever) {
         updates.latest = String(prever.id);
-        updates.config = preconf.data || "{}";
+        updates.config = preconf.data ?? "{}";
         updates.files = JSON.parse(prever.dist);
       }
       this.manager.updatePage(page.name, updates);

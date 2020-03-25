@@ -18,6 +18,7 @@
       "#services/*": ["./src/services/*"],
       "#filters/*": ["./src/filters/*"],
       "#guards/*": ["./src/guards/*"],
+      "#typings/*": ["./src/typings/*"],
       "#app/*": ["./src/app/*"],
       "#core/*": ["./src/core/*"],
       "#assets/*": ["./src/assets/*"],

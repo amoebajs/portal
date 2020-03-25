@@ -1,27 +1,33 @@
-import { Global, Module } from "@nestjs/common";
+import { Global } from "@nestjs/common";
 import { AppModule } from "#app/app.module";
+import { ProvidersModule } from "#utils/base";
 import { DatabaseModule } from "#database/db.module";
 import { Authentication, User, FakeAuthService } from "#services/authentication";
-import { PageManager, CorePageManager, PagePersistence, PagePersistenceDbStorage } from "#services/manager";
+import {
+  PageVersionManager,
+  CorePageVersionManager,
+  PagePersistenceManager,
+  PagePersistenceDbStorage,
+} from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { DbConnection } from "#services/database/connection";
 import { Compiler, CoreCompiler } from "#services/compiler";
 import { Configs } from "#services/configs";
 
 @Global()
-@Module({
+@ProvidersModule({
   imports: [DatabaseModule, AppModule],
   controllers: [],
   providers: [
-    { provide: Configs, useClass: Configs },
-    { provide: DbConnection, useClass: DbConnection },
-    { provide: PagePersistence, useClass: PagePersistenceDbStorage },
-    { provide: MysqlWorker, useClass: MysqlWorker },
     { provide: User, useClass: User },
-    { provide: Authentication, useClass: FakeAuthService },
-    { provide: PageManager, useClass: CorePageManager },
+    { provide: Configs, useClass: Configs },
     { provide: Compiler, useClass: CoreCompiler },
+    { provide: DbConnection, useClass: DbConnection },
+    { provide: MysqlWorker, useClass: MysqlWorker },
+    { provide: Authentication, useClass: FakeAuthService },
+    { provide: PageVersionManager, useClass: CorePageVersionManager },
+    { provide: PagePersistenceManager, useClass: PagePersistenceDbStorage },
   ],
-  exports: [Configs, Authentication, User, Compiler, MysqlWorker, PageManager],
+  exports: [],
 })
 export class GlobalModule {}

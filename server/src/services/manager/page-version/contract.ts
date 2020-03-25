@@ -11,11 +11,11 @@ export interface IWebsitePageHash {
 }
 
 @Injectable()
-export abstract class PageManageService<T = IWebsitePageHash> {
+export abstract class PageVersionService<T = IWebsitePageHash> {
   protected readonly pageCache: Record<string, T> = {};
   public abstract getPage(pageName: string): T;
   public abstract updatePage(pageName: string, updates: Partial<T>): void;
 }
 
-export type PageManager = PageManageService<IWebsitePageHash>;
-export const PageManager = createToken<PageManager>(PageManageService);
+export type PageVersionManager = PageVersionService<IWebsitePageHash>;
+export const PageVersionManager = createToken<PageVersionManager>(PageVersionService);

@@ -1,23 +1,26 @@
 import { Injectable } from "@nestjs/common";
-import { BaseMysqlService } from "./base";
-import { IListQueryResult } from "../typings";
+import { IListQueryResult } from "#typings/page";
 import { PageConfig } from "../entity/page-config.entity";
+import { BaseMysqlService } from "./base";
 
 export interface IListQueryOptions {
   pageId?: number | string;
   creator?: string;
   current: number;
+  name?: string;
   size: number;
 }
 
 export interface IQueryOptions {
   id: string | number;
+  name?: string;
   pageId?: number | string;
 }
 
 export interface ICreateOptions {
   pageId?: string | number;
   data?: string;
+  name: string;
   creator: string;
 }
 
@@ -47,6 +50,7 @@ export class PageConfigRepo extends BaseMysqlService {
   public async query(options: IQueryOptions, repo = this.repository): Promise<PageConfig> {
     const queries: Partial<PageConfig> = {};
     if (options.id !== void 0) queries.id = options.id;
+    if (options.name !== void 0) queries.name = options.name;
     return this.queryEntry(repo, queries);
   }
 

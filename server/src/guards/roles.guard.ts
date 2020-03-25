@@ -11,7 +11,7 @@ export class RolesGuard implements CanActivate {
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<any[]>(ROLES_GUARD__ROLES, context.getHandler());
     const classRoles = this.reflector.get<any[]>(ROLES_GUARD__CLASS_ROLES, context.getClass());
-    const hasAccess = this.auth.hasAccess(context.switchToHttp(), classRoles || roles || []);
+    const hasAccess = this.auth.hasAccess(context.switchToHttp(), classRoles ?? roles ?? []);
     return typeof hasAccess === "boolean"
       ? Promise.resolve(hasAccess)
       : hasAccess instanceof Observable

@@ -1,4 +1,4 @@
-export * from "./page-render/contract";
+export * from "./page-version/contract";
 export * from "./page-persistence/contract";
-export { CorePageManager } from "./page-render/manager";
+export { CorePageVersionManager } from "./page-version/core-version";
 export { PagePersistenceDbStorage } from "./page-persistence/db-storage";

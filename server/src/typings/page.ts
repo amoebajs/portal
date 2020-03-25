@@ -38,6 +38,7 @@ export interface IPageVersion {
 
 export interface IPageConfig {
   id: number | string;
+  name: string;
   pageId: number | string;
   creator: string;
   data: string;

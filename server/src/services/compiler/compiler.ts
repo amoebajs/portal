@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
 import { createToken } from "#utils/di";
-import { ICompileTask } from "#database/typings";
+import { ICompileTask } from "#typings/page";
 
 export enum TaskType {
   CommonPageBuild = 1,

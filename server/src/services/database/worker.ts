@@ -9,11 +9,12 @@ import { PageRepo } from "#database/repos/page.repo";
 import { PageVersionRepo } from "#database/repos/page-version.repo";
 import { CompileTaskRepo } from "#database/repos/compile-task.repo";
 import { PageConfigRepo } from "#database/repos/page-config.repo";
-import { TaskStatus, PageStatus, IListQueryResult } from "#database/typings";
+import { TaskStatus, PageStatus, IListQueryResult } from "#typings/page";
 import { DbConnection } from "./connection";
 
 export interface IPageCreateOptions {
   name?: string;
+  configName?: string;
   displayName?: string;
   description?: string;
   configs?: Record<string, any>;
@@ -29,6 +30,7 @@ export interface IPageDetailsUpdateOptions {
 
 export interface IPageConfigUpdateOptions {
   id: number | string;
+  configName?: string;
   config: Record<string, any>;
   operator: string;
 }
@@ -144,7 +146,7 @@ export class MysqlWorker extends BaseMysqlService {
   public async createPage(options: IPageCreateOptions): Promise<number | string> {
     let pageId: string | number;
     await this.connection.transaction(async manager => {
-      const { name, displayName, description, operator, configs } = options;
+      const { name, displayName, configName, description, operator, configs } = options;
       const $pages = manager.getRepository(Page);
       const $configs = manager.getRepository(PageConfig);
       const duplicated = await this.$pages.query({ name }, $pages);
@@ -161,11 +163,13 @@ export class MysqlWorker extends BaseMysqlService {
         },
         $pages,
       );
+      const confname = configName ?? "AutoCreate_" + new Date().getTime();
       const confid = await this.$configs.create(
         {
           pageId: pageid,
           creator: operator,
-          data: JSON.stringify(configs || {}),
+          name: confname,
+          data: JSON.stringify(configs ?? {}),
         },
         $configs,
       );
@@ -216,7 +220,7 @@ export class MysqlWorker extends BaseMysqlService {
   }
 
   public async updatePageConfig(options: IPageConfigUpdateOptions): Promise<boolean> {
-    const { id, operator, config } = options;
+    const { id, operator, configName, config } = options;
     await this.connection.transaction(async manager => {
       const $configs = manager.getRepository(PageConfig);
       const $pages = manager.getRepository(Page);
@@ -225,10 +229,12 @@ export class MysqlWorker extends BaseMysqlService {
         throw new Error("Page is not exist");
       }
       if (page.status === PageStatus.Normal) {
+        const confname = configName ?? "AutoCreate_" + new Date().getTime();
         const newconfid = await this.$configs.create(
           {
             pageId: page.id,
-            data: JSON.stringify(config || {}),
+            data: JSON.stringify(config ?? {}),
+            name: confname,
             creator: operator,
           },
           $configs,
@@ -250,7 +256,7 @@ export class MysqlWorker extends BaseMysqlService {
         const confSuccess = await this.$configs.update(
           {
             id: page.configId,
-            data: JSON.stringify(config || {}),
+            data: JSON.stringify(config ?? {}),
             updatedAt: new Date(),
           },
           ["id"],
@@ -305,7 +311,7 @@ export class MysqlWorker extends BaseMysqlService {
       const $versions = manager.getRepository(PageVersion);
       const $tasks = manager.getRepository(CompileTask);
       const page = await this.$pages.query({ id: pageId, name: pageName });
-      const taskname = versionName || "AutoCreate_" + new Date().getTime();
+      const taskname = versionName ?? "AutoCreate_" + new Date().getTime();
       const newverid = await this.$versions.create(
         {
           name: taskname,
@@ -408,7 +414,7 @@ export class MysqlWorker extends BaseMysqlService {
         {
           id,
           creator: operator,
-          status: status || TaskStatus.Done,
+          status: status ?? TaskStatus.Done,
           updatedAt: new Date(),
         },
         ["id", "creator"],

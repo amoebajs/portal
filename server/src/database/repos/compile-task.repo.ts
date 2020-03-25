@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import { TaskStatus, IListQueryResult } from "#typings/page";
 import { BaseMysqlService } from "./base";
 import { CompileTask } from "../entity/compile-task.entity";
-import { TaskStatus, IListQueryResult } from "../typings";
 
 export interface IListQueryOptions {
   name?: string;

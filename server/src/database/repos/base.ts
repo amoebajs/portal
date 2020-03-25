@@ -1,7 +1,7 @@
 import pickFn from "lodash/pick";
 import omitFn from "lodash/omit";
 import { Connection, Repository, SelectQueryBuilder } from "typeorm";
-import { IListQueryResult } from "../typings";
+import { IListQueryResult } from "#typings/page";
 
 export class BaseMysqlService {
   protected _connection!: Connection;

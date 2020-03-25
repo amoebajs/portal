@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { IDistStorage } from "../typings";
+import { IDistStorage } from "#typings/page";
 
 @Entity("ews_dist_storage")
 export class DistStorage implements IDistStorage {
