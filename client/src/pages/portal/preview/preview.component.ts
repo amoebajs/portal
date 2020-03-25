@@ -15,8 +15,8 @@ import { callContextValidation } from "../components/source-tree/source-tree.com
   templateUrl: "./preview.html",
 })
 export class PortalPreviewComponent implements OnInit, AfterViewInit {
-  @ViewChild("previewRender", { static: false }) previewRender: ElementRef;
-  @ViewChild("previewTpl", { static: false }) previewTpl: TemplateRef<HTMLDivElement>;
+  @ViewChild("previewRender") previewRender: ElementRef;
+  @ViewChild("previewTpl") previewTpl: TemplateRef<HTMLDivElement>;
 
   public isCreate = true;
   public pageId!: string;

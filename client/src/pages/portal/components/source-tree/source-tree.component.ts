@@ -64,13 +64,13 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   @Output()
   onContextChange = new EventEmitter<ICompileContext>();
 
-  @ViewChild("createModalContent", { static: false })
+  @ViewChild("createModalContent")
   private createModalContent: TemplateRef<any>;
 
-  @ViewChild("editModalContent", { static: false })
+  @ViewChild("editModalContent")
   private editModalContent: TemplateRef<any>;
 
-  @ViewChild("deleteModalContext", { static: false })
+  @ViewChild("deleteModalContext")
   private deleteModalContext: TemplateRef<any>;
 
   public tree: ISourceTree;
