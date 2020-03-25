@@ -65,6 +65,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       const version = page?.latest;
       if (page?.status !== "loaded") {
         await this.saveHtmlBundle(name, version);
+        this.manager.updatePage(name, { status: "loaded" });
       }
       return version && `website/${name}.${version}.html`;
     } catch (error) {
