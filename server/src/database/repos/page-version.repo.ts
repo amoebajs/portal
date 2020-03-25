@@ -21,6 +21,7 @@ export interface ICreateOptions {
   configId: string | number;
   pageId: string | number;
   dist?: string;
+  metadata?: string;
   creator: string;
 }
 

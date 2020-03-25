@@ -43,6 +43,7 @@ export class ApiController {
       code: 0,
       data: await this.worker.querySelectList("CONFIG", { pageId, current: +current, size: +size }, [
         "id",
+        "name",
         "pageId",
         "createdAt",
         "updatedAt",
@@ -168,6 +169,7 @@ export class ApiController {
     @Body("configs") options: IPageCreateOptions,
     @Body("displayName") displayName?: string,
     @Body("description") description?: string,
+    @Body("configName") configName?: string,
   ) {
     try {
       return {
@@ -177,6 +179,7 @@ export class ApiController {
             name,
             displayName,
             description,
+            configName,
             options,
             creator: String(this.user.infos.id),
           }),

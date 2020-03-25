@@ -32,6 +32,7 @@ export interface IPageVersion {
   taskId: number | string;
   creator: string;
   dist: string;
+  metadata: string;
   createdAt: Date;
   updatedAt: Date;
 }

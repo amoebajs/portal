@@ -11,12 +11,14 @@ export class CorePageVersionManager extends PageVersionService {
     const page = this.pageCache[pageName];
     if (page) {
       page.files = updates.files ?? page.files;
+      page.metadata = updates.metadata ?? page.metadata;
       page.config = updates.config ?? page.config;
       page.status = updates.status ?? page.status;
       page.latest = updates.latest!;
     } else {
       this.pageCache[pageName] = {
         status: "default",
+        metadata: "{}",
         files: updates.files ?? {},
         config: "{}",
         latest: updates.latest!,

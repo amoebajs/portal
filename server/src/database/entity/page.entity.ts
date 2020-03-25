@@ -13,13 +13,13 @@ export class Page implements IPage {
     nullable: true,
     name: "config_id",
   })
-  configId!: string;
+  configId!: string | number;
 
   @Column("bigint", {
     nullable: true,
     name: "version_id",
   })
-  versionId!: string;
+  versionId!: string | number;
 
   @Column("int", {
     nullable: false,

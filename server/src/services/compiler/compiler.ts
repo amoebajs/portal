@@ -12,6 +12,7 @@ export interface ICommonBuildConfigs {
   name: string;
   displayName?: string;
   description?: string;
+  configName?: string;
   options: IPageCreateOptions;
   creator: string;
 }

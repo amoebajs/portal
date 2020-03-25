@@ -12,7 +12,7 @@ export interface IListQueryOptions {
 }
 
 export interface IQueryOptions {
-  id: string | number;
+  id?: string | number;
   name?: string;
   pageId?: number | string;
 }

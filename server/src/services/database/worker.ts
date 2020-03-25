@@ -219,8 +219,9 @@ export class MysqlWorker extends BaseMysqlService {
     return true;
   }
 
-  public async updatePageConfig(options: IPageConfigUpdateOptions): Promise<boolean> {
+  public async updatePageConfig(options: IPageConfigUpdateOptions): Promise<number | string> {
     const { id, operator, configName, config } = options;
+    let configId!: number | string;
     await this.connection.transaction(async manager => {
       const $configs = manager.getRepository(PageConfig);
       const $pages = manager.getRepository(Page);
@@ -228,12 +229,19 @@ export class MysqlWorker extends BaseMysqlService {
       if (!page) {
         throw new Error("Page is not exist");
       }
+      configId = page.configId;
       if (page.status === PageStatus.Normal) {
+        const preconf = await this.$configs.query({ id: page.configId });
+        const newdata = JSON.stringify(config ?? {});
+        if (preconf.data === newdata) {
+          // no changes found
+          return;
+        }
         const confname = configName ?? "AutoCreate_" + new Date().getTime();
         const newconfid = await this.$configs.create(
           {
             pageId: page.id,
-            data: JSON.stringify(config ?? {}),
+            data: newdata,
             name: confname,
             creator: operator,
           },
@@ -252,11 +260,13 @@ export class MysqlWorker extends BaseMysqlService {
         if (!pageSuccess) {
           throw new Error("Page update failed");
         }
+        configId = newconfid;
       } else {
         const confSuccess = await this.$configs.update(
           {
             id: page.configId,
             data: JSON.stringify(config ?? {}),
+            name: configName,
             updatedAt: new Date(),
           },
           ["id"],
@@ -267,7 +277,7 @@ export class MysqlWorker extends BaseMysqlService {
         }
       }
     });
-    return true;
+    return configId;
   }
 
   public async updatePageVersion(options: IPageVersionUpdateOptions): Promise<boolean> {
@@ -310,7 +320,8 @@ export class MysqlWorker extends BaseMysqlService {
     await this.connection.transaction(async manager => {
       const $versions = manager.getRepository(PageVersion);
       const $tasks = manager.getRepository(CompileTask);
-      const page = await this.$pages.query({ id: pageId, name: pageName });
+      const $pages = manager.getRepository(Page);
+      const page = await this.$pages.query({ id: pageId, name: pageName }, $pages);
       const taskname = versionName ?? "AutoCreate_" + new Date().getTime();
       const newverid = await this.$versions.create(
         {
@@ -386,6 +397,11 @@ export class MysqlWorker extends BaseMysqlService {
         {
           id: task.versionId,
           dist,
+          metadata: JSON.stringify({
+            name: page.name,
+            displayName: page.displayName,
+            description: page.description,
+          }),
           updatedAt: new Date(),
         },
         ["id"],

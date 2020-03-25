@@ -73,10 +73,7 @@ export class BaseMysqlService {
           .reduce((p, c) => ({ ...p, [c[0]]: c[1] }), {}),
       )
       .execute();
-    if (res?.raw?.changedRows <= 0) {
-      throw new Error("Update Entry Failed: affected is 0");
-    }
-    return res?.raw?.changedRows > 0;
+    return res?.raw?.affectedRows > 0;
   }
 
   protected async createEntry<M>(repo: Repository<M>, updates: Partial<M>): Promise<string | number> {

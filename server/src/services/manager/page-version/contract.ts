@@ -5,6 +5,7 @@ export interface IWebsitePageHash {
   latest: string | null;
   config: string;
   status: "loaded" | "loading" | "default";
+  metadata: string;
   files: {
     [key: string]: string;
   };

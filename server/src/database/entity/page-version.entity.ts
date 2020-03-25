@@ -39,7 +39,13 @@ export class PageVersion implements IPageVersion {
   })
   creator!: string;
 
-  @Column("varchar", {
+  @Column("text", {
+    nullable: true,
+    name: "metadata",
+  })
+  metadata!: string;
+
+  @Column("text", {
     nullable: true,
     name: "dist",
   })

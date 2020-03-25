@@ -15,6 +15,11 @@ import { CompileService, ICommonBuildConfigs, ISourceCreateResult } from "./comp
 
 const ASSETS_DIR = path.resolve(__dirname, "..", "..", "assets");
 
+interface ICUPageOption {
+  configs: ICommonBuildConfigs;
+  operator: string;
+}
+
 @Injectable()
 export class CoreCompiler implements CompileService<ICompileTask> {
   protected _factory = new BuilderFactory();
@@ -75,9 +80,8 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     if (this._working) {
       throw new Error("core-compiler is still on working for previous task");
     }
-    const { name, displayName, description, options } = configs;
     this._working = true;
-    const pageId = await this.createUpdatePage(name, displayName, description, configs, options);
+    const pageId = await this.createUpdatePage(configs, configs.creator);
     const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
     const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
     if (success) {
@@ -96,30 +100,22 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     return taskId;
   }
 
-  private async createUpdatePage(
-    name: string,
-    displayName: string,
-    description: string,
-    configs: ICommonBuildConfigs,
-    options: IPageCreateOptions,
-  ) {
+  private async createUpdatePage(configs: ICommonBuildConfigs, operator: string) {
+    const { name, displayName, description, configName, options } = configs;
     let page = await this.worker.query("PAGE", { name });
     let pageId = page?.id;
-    if (!page) {
+    if (page === void 0) {
       pageId = await this.worker.createPage({
         name,
         displayName,
         description,
+        configName,
         operator: configs.creator,
         configs: options,
       });
     } else {
-      const success = await this.worker.updatePageDetails({ id: page.id, name, description, displayName });
-      if (success) {
-        page.name = name ?? page.name;
-        page.displayName = displayName ?? page.displayName;
-        page.description = description ?? page.description;
-      }
+      await this.worker.updatePageConfig({ id: page.id, configName, config: options, operator });
+      await this.worker.updatePageDetails({ id: page.id, name, description, displayName });
     }
     return pageId;
   }
@@ -200,8 +196,22 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         dist: JSON.stringify(cache.files),
       });
       const version = String(task.versionId);
-      await this.moveHtmlBundle(page.name, version, buildDir);
-      this.manager.updatePage(page.name, { config: config.data, latest: version, status: "loaded" });
+      const verdata = await this.worker.query("VERSION", { id: task.versionId });
+      if (verdata.dist !== JSON.stringify(cache.files) || verdata.metadata !== cache.metadata) {
+        // dist changed
+        await this.moveHtmlBundle(page.name, version, buildDir);
+        this.manager.updatePage(page.name, {
+          config: config.data,
+          metadata: verdata.metadata,
+          latest: version,
+          status: "loaded",
+        });
+        return;
+      }
+      this.manager.updatePage(page.name, {
+        config: config.data,
+        status: "loaded",
+      });
     } catch (error) {
       throw new Error(`end task failed: ${error.message}`);
     }
