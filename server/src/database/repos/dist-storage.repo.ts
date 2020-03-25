@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import { Transform, Readable } from "stream";
 import { DistStorage } from "#database/entity/dist-storage.entity";
 import { BaseMysqlService } from "./base";
-import { ReadStream } from "fs-extra";
 
 export interface IQueryOptions {
   versionId: string | number;
@@ -18,14 +18,22 @@ export class DistStorageRepo extends BaseMysqlService {
     return this.connection.getRepository(DistStorage);
   }
 
-  public async queryStream(options: IQueryOptions, repo = this.repository): Promise<ReadStream> {
-    let stream: ReadStream;
-    await this.connection.transaction(async manager => {
-      stream = await manager.queryRunner.stream(
-        `select data from ews_dist_storage where version_id = ${options.versionId};`,
-      );
-    });
-    return stream.setEncoding("utf8");
+  public async queryStream(options: IQueryOptions, repo = this.repository): Promise<Readable> {
+    return (
+      await repo
+        .createQueryBuilder("entry")
+        .where(`entry.versionId = :id`, { id: options.versionId })
+        .select("data")
+        .stream()
+    ).pipe(
+      new Transform({
+        readableObjectMode: true,
+        writableObjectMode: true,
+        transform(this: Transform, chunk: any, encoding: string, callback: Function) {
+          callback(null, chunk.data.toString());
+        },
+      }),
+    );
   }
 
   public async create(options: ICreateOptions, repo = this.repository): Promise<string | number> {

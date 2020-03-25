@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { DistStorageRepo } from "#database/repos/dist-storage.repo";
 import { PagePersistenceManager } from "./contract";
 import { DbConnection } from "#services/database/connection";
-import { ReadStream } from "fs-extra";
+import { Readable } from "stream";
 
 @Injectable()
 export class PagePersistenceDbStorage implements PagePersistenceManager {
@@ -13,7 +13,7 @@ export class PagePersistenceDbStorage implements PagePersistenceManager {
     });
   }
 
-  public async getFile(id: string | number): Promise<ReadStream> {
+  public async getFile(id: string | number): Promise<Readable> {
     return await this.storage.queryStream({ versionId: id });
   }
 

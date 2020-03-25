@@ -334,15 +334,9 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     await fs.writeFile(emitfile, "", { encoding: "utf8", flag: "w+" });
     return new Promise<void>(resolve => {
       const output = fs.createWriteStream(emitfile, { flags: "w+" });
-      stream.on("data", e => {
-        output.write(e.data.toString());
-      });
-      stream.on("end", function() {
-        output.end();
-      });
-      output.on("close", () => {
-        resolve();
-      });
+      stream.pipe(output);
+      stream.on("end", () => output.end());
+      output.on("close", resolve);
     });
   }
 }
