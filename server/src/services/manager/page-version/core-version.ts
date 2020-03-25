@@ -14,7 +14,7 @@ export class CorePageVersionManager extends PageVersionService {
       page.metadata = updates.metadata ?? page.metadata;
       page.config = updates.config ?? page.config;
       page.status = updates.status ?? page.status;
-      page.latest = updates.latest!;
+      page.latest = updates.latest ?? page.latest;
     } else {
       this.pageCache[pageName] = {
         status: "default",
