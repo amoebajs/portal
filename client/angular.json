@@ -62,8 +62,8 @@
                 {
                   "type": "bundle",
                   "name": "main",
-                  "maximumWarning": "100k",
-                  "maximumError": "400k"
+                  "maximumWarning": "0.1mb",
+                  "maximumError": "0.4mb"
                 },
                 {
                   "type": "bundle",
@@ -73,8 +73,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+                  "maximumWarning": "0.006mb",
+                  "maximumError": "0.01mb"
                 }
               ]
             }
