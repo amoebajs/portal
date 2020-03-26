@@ -1,1 +1,1 @@
-console.log("nothing to do on [postinstall].");
+console.log("[postinstall] nothing to do.");

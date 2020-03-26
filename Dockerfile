@@ -4,26 +4,28 @@ RUN mkdir -p /app
 RUN mkdir -p /app/client
 RUN mkdir -p /app/server
 
-RUN npm install yarn --global
+RUN npm install yarn@1.22 --global
 
 ADD package.json /app/package.json
 ADD yarn.lock /app/yarn.lock
-RUN cd /app && yarn install
+
+ADD client/package.json /app/client/package.json
+ADD client/yarn.lock /app/client/yarn.lock
 
 ADD server/package.json /app/server/package.json
 ADD server/yarn.lock /app/server/yarn.lock
-RUN cd /app/server && yarn install
+
+RUN cd /app && yarn install
 
 ADD server /app/server
 RUN cd /app/server && yarn build
 
+RUN cd /app/client && yarn build
 ADD client/dist /app/client/dist
 
 WORKDIR /app
 
 RUN yarn postbuild
-
-RUN npx rimraf client
 
 EXPOSE 3000
 

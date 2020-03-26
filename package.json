@@ -31,9 +31,8 @@
   "sideEffects": false,
   "private": true,
   "scripts": {
-    "install:client": "cd client && yarn install",
-    "install:server": "cd server && yarn install",
-    "install:all": "yarn && yarn install:client && yarn install:server && yarn build:websdk",
+    "preinstall": "node scripts/pre-install.js",
+    "install:all": "yarn && yarn build:websdk",
     "update:core": "cd server && yarn update:core && cd .. && yarn install:all",
     "start": "cd server && yarn start",
     "start:watch": "cd server && yarn start --watch",
