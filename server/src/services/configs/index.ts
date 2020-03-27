@@ -12,7 +12,7 @@ export interface IServerConfigs {
     site: { uri: string; token: string; type: string };
     api: { uri: string; token: string; type: string };
   };
-  startMode: "redis" | "mysql" | "cluster" | "app";
+  startMode: "redis" | "mysql" | "app";
   redis: { host: string; port: number };
   mysql: {
     host: string;

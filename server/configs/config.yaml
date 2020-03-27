@@ -29,4 +29,4 @@ configs:
     maxCpuNum: null
   gzip:
     enabled: true
-  startMode: cluster
+  startMode: app
