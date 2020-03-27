@@ -7,6 +7,7 @@ import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-st
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { Configs, IServerConfigs } from "#services/configs";
 import { MysqlWorker } from "#services/database";
+import { useMiddlewares } from "./app.middlewares";
 import { MainModule } from "./main.module";
 
 export const ASSETS_ROOT = path.join(__dirname, "..", "assets");
@@ -36,6 +37,7 @@ export async function bootstrap({
   useStaticAssets(app, staticOptions);
   useGzip(app, configs);
   useTemplateEngine(app);
+  useMiddlewares(app);
   await onInit(app);
   await app.listen(configs.port);
 }

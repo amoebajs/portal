@@ -15,6 +15,7 @@
     "skipLibCheck": true,
     "paths": {
       "#global/*": ["./src/global/*"],
+      "#middlewares/*": ["./src/middlewares/*"],
       "#services/*": ["./src/services/*"],
       "#filters/*": ["./src/filters/*"],
       "#guards/*": ["./src/guards/*"],
