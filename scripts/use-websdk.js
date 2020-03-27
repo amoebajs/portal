@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
-const statsJson = require("../server/build/stats-es2015.json");
+const statsJson = require("../server/dist/src/assets/stats-es2015.json");
 
 function resolvePath(pathname) {
-  return path.resolve(__dirname, "..", "server", "build", pathname);
+  return path.resolve(__dirname, "..", "server", "dist", "src", "assets", pathname);
 }
 
 const context = {

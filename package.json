@@ -43,7 +43,7 @@
     "build:client": "cd client && yarn build",
     "build": "yarn build:client && yarn build:server",
     "postinstall": "node scripts/post-install.js",
-    "postbuild": "npx rimraf server/build && npx copy client/dist/**/*.* server/build && node scripts/use-websdk.js",
+    "postbuild": "npx copy client/dist/**/*.* server/dist/src/assets && node scripts/use-websdk.js",
     "docker:build": "node scripts/docker.js"
   },
   "dependencies": {

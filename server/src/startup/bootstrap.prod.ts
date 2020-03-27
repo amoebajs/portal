@@ -9,7 +9,6 @@ import { Configs, IServerConfigs } from "#services/configs";
 import { MysqlWorker } from "#services/database";
 import { MainModule } from "./main.module";
 
-export const BUILD_ROOT = path.join(__dirname, "..", "..", "..", "build");
 export const ASSETS_ROOT = path.join(__dirname, "..", "assets");
 const noopPromise = (app: any) => Promise.resolve(app);
 
@@ -47,7 +46,7 @@ export function useTemplateEngine(app: NestExpressApplication, options: Partial<
 }
 
 export function useStaticAssets(app: NestExpressApplication, options: ServeStaticOptions) {
-  app.useStaticAssets(BUILD_ROOT, { maxAge: "30d", ...options });
+  app.useStaticAssets(ASSETS_ROOT, { maxAge: "30d", ...options });
 }
 
 export function useGzip(app: NestExpressApplication, configs: IServerConfigs) {
@@ -62,7 +61,7 @@ export function useCORS(app: NestExpressApplication, options: Partial<CorsOption
 }
 
 export function useNunjucks(app: NestExpressApplication, { noCache = false }: { noCache?: boolean } = {}) {
-  return nunjucks.configure([BUILD_ROOT, ASSETS_ROOT], {
+  return nunjucks.configure([ASSETS_ROOT], {
     autoescape: true,
     express: app,
     noCache,
