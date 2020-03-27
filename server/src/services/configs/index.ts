@@ -6,6 +6,7 @@ import { CompressionOptions } from "compression";
 export interface IServerConfigs {
   name: string;
   envMode: "dev" | "prod";
+  port: number;
   uriGroup: {
     portal: { uri: string; token: string; type: string };
     site: { uri: string; token: string; type: string };

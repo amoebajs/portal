@@ -38,7 +38,7 @@ export async function bootstrap({
   useGzip(app, configs);
   useTemplateEngine(app);
   await onInit(app);
-  await app.listen(3000);
+  await app.listen(configs.port);
 }
 
 export function useTemplateEngine(app: NestExpressApplication, options: Partial<{ noCache: boolean }> = {}) {
