@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
 const cheerio = require("cheerio");
 const statsJson = require("../server/dist/src/assets/stats-es2015.json");
@@ -24,14 +24,17 @@ const contextList = [
   "\t\t</script>",
 ];
 
-fs.rename(source, copied, err => {
-  if (err) throw err;
-  fs.readFile(template, { encoding: "utf8" }, (error, data) => {
-    if (error) throw error;
+async function useWebSDK() {
+  try {
+    await fs.rename(source, copied);
+    const data = await fs.readFile(template, { encoding: "utf8" });
     const $ = cheerio.load(data);
     $("app-entry").after(contextList.join("\n"));
-    fs.writeFile(template, $.html(), { encoding: "utf8" }, error => {
-      if (error) throw error;
-    });
-  });
-});
+    await fs.writeFile(template, $.html(), { encoding: "utf8" });
+    await fs.rename(template, resolvePath("client.njk"));
+  } catch (error) {
+    throw error;
+  }
+}
+
+useWebSDK();

@@ -43,8 +43,8 @@ export async function bootstrap({
 }
 
 export function useTemplateEngine(app: NestExpressApplication, options: Partial<{ noCache: boolean }> = {}) {
-  app.engine("html", useNunjucks(app, { noCache: false, ...options }).render);
-  app.setViewEngine("html");
+  app.engine("njk", useNunjucks(app, { noCache: false, ...options }).render);
+  app.setViewEngine("njk");
 }
 
 export function useStaticAssets(app: NestExpressApplication, options: ServeStaticOptions) {
