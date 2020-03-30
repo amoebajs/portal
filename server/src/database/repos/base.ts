@@ -3,6 +3,13 @@ import omitFn from "lodash/omit";
 import { Connection, Repository, SelectQueryBuilder } from "typeorm";
 import { IListQueryResult } from "#typings/page";
 
+export interface IBaseListQueryOptions {
+  current: number;
+  size: number;
+  orderKey?: string;
+  orderBy?: "ASC" | "DESC";
+}
+
 export class BaseMysqlService {
   protected _connection!: Connection;
 
@@ -19,13 +26,21 @@ export class BaseMysqlService {
 
   protected createListQueryBuilder<M>(
     repo: Repository<M>,
-    current: number | string,
-    size: number | string,
-    where: Record<string, any>,
-    more?: (builder: SelectQueryBuilder<M>) => SelectQueryBuilder<M>,
+    options: {
+      current: number | string;
+      size: number | string;
+      where: Record<string, any>;
+      orderKey: string;
+      orderBy: "ASC" | "DESC";
+      more?: (builder: SelectQueryBuilder<M>) => SelectQueryBuilder<M>;
+    },
   ) {
+    const { current, size, where, orderKey, orderBy, more } = options;
     const builder = this.createWhereBuilder(repo, <any>where, "entry");
-    return (!more ? builder : more(builder)).skip((+current - 1) * +size).take(+size);
+    return (!more ? builder : more(builder))
+      .skip((+current - 1) * +size)
+      .take(+size)
+      .orderBy("entry." + orderKey, orderBy);
   }
 
   protected createWhereBuilder<M>(repo: Repository<M>, where: Partial<M>, alias?: string) {
@@ -43,16 +58,23 @@ export class BaseMysqlService {
 
   protected async invokeListQuery<M>(
     repo: Repository<M>,
-    { current = 1, size = 20, ...where }: Record<string, any> & { current: number; size: number },
+    {
+      current = 1,
+      size = 20,
+      orderKey = "createdAt",
+      orderBy = "ASC",
+      ...where
+    }: Record<string, any> & IBaseListQueryOptions,
     select?: (keyof M)[],
   ): Promise<IListQueryResult<M>> {
-    const [list, count] = await this.createListQueryBuilder(
-      repo,
+    const [list, count] = await this.createListQueryBuilder(repo, {
       current,
       size,
       where,
-      select && (builder => builder.select(<any[]>select.map(i => "entry." + i))),
-    ).getManyAndCount();
+      orderBy,
+      orderKey,
+      more: select && (builder => builder.select(<any[]>select.map(i => "entry." + i))),
+    }).getManyAndCount();
     return {
       items: list,
       current: +current,

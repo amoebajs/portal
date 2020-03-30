@@ -1,14 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { IListQueryResult } from "#typings/page";
-import { BaseMysqlService } from "./base";
+import { BaseMysqlService, IBaseListQueryOptions } from "./base";
 import { PageVersion } from "../entity/page-version.entity";
 
-export interface IListQueryOptions {
+export interface IListQueryOptions extends IBaseListQueryOptions {
   name?: string;
   pageId?: string | number;
   creator?: string;
-  current: number;
-  size: number;
 }
 
 export interface IQueryOptions {

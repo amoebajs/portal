@@ -28,7 +28,13 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.worker.queryList("PAGE", { name, current: +current, size: +size }),
+      data: await this.worker.queryList("PAGE", {
+        name,
+        current: +current,
+        size: +size,
+        orderKey: "updatedAt",
+        orderBy: "DESC",
+      }),
     };
   }
 
@@ -41,14 +47,17 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.worker.querySelectList("CONFIG", { pageId, current: +current, size: +size }, [
-        "id",
-        "name",
-        "pageId",
-        "createdAt",
-        "updatedAt",
-        "creator",
-      ]),
+      data: await this.worker.querySelectList(
+        "CONFIG",
+        {
+          pageId,
+          current: +current,
+          size: +size,
+          orderKey: "updatedAt",
+          orderBy: "DESC",
+        },
+        ["id", "name", "pageId", "createdAt", "updatedAt", "creator"],
+      ),
     };
   }
 
@@ -62,16 +71,17 @@ export class ApiController {
   ) {
     return {
       code: 0,
-      data: await this.worker.querySelectList("VERSION", { name, current: +current, size: +size }, [
-        "id",
-        "name",
-        "pageId",
-        "configId",
-        "taskId",
-        "creator",
-        "createdAt",
-        "updatedAt",
-      ]),
+      data: await this.worker.querySelectList(
+        "VERSION",
+        {
+          name,
+          current: +current,
+          size: +size,
+          orderKey: "updatedAt",
+          orderBy: "DESC",
+        },
+        ["id", "name", "pageId", "configId", "taskId", "creator", "createdAt", "updatedAt"],
+      ),
     };
   }
 

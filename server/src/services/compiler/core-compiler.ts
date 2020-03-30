@@ -265,32 +265,37 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     buildDir: string,
     dependencies: Record<string, any>,
   ) {
-    await this.builder.buildSource({
-      entry: { app: entry },
-      output: { path: buildDir, filename: "[name].[hash].js" },
-      plugins: [
-        this.builder.webpackPlugins.createProgressPlugin({
-          type: "trigger",
-          trigger: data => this.pushTaskLog(id, data, "gray"),
-        }),
-      ],
-      typescript: { compilerOptions: { outDir: "temp-dist" } },
-      template: {
-        addons: {
-          title: [{ properties: { value: page.displayName ?? "测试" } }],
-          link: [{ properties: { rel: "icon", type: "image/x-icon", href: "favicon.ico" } }],
+    try {
+      await this.builder.buildSource({
+        entry: { app: entry },
+        output: { path: buildDir, filename: "[name].[hash].js" },
+        plugins: [
+          this.builder.webpackPlugins.createProgressPlugin({
+            type: "trigger",
+            trigger: data => this.pushTaskLog(id, data, "gray"),
+          }),
+        ],
+        typescript: { compilerOptions: { outDir: "temp-dist" } },
+        template: {
+          addons: {
+            title: [{ properties: { value: page.displayName ?? "测试" } }],
+            link: [{ properties: { rel: "icon", type: "image/x-icon", href: "favicon.ico" } }],
+          },
         },
-      },
-      sandbox: {
-        ...this.sandboxOptions,
-        dependencies,
-        install: {
-          ...this.sandboxOptions.install,
-          type: "trigger",
-          trigger: data => this.pushTaskLog(id, data, "gray"),
+        sandbox: {
+          ...this.sandboxOptions,
+          dependencies,
+          install: {
+            ...this.sandboxOptions.install,
+            type: "trigger",
+            trigger: data => this.pushTaskLog(id, data, "gray"),
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error("Build app dist failed: " + error.message);
+    }
   }
 
   protected async generateAndEmitCode(config: PageConfig, targetFile: string) {
