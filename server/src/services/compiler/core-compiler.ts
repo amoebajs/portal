@@ -3,7 +3,7 @@ import * as fs from "fs-extra";
 import chalk from "chalk";
 import moment from "moment";
 import { Injectable } from "@nestjs/common";
-import { IPageCreateOptions, ISourceCreateTranspileOptions } from "@amoebajs/builder";
+import { IPageCreateOptions, ISourceCreateTranspileOptions, IWebpackOptions } from "@amoebajs/builder";
 import { Configs } from "#services/configs";
 import { PageVersionManager, PagePersistenceManager, IWebsitePageHash } from "#services/manager";
 import { MysqlWorker } from "#services/database";
@@ -30,6 +30,16 @@ export class CoreCompiler implements CompileService<ICompileTask> {
 
   private get builder() {
     return this._factory.builder;
+  }
+
+  protected get sandboxOptions(): IWebpackOptions["sandbox"] {
+    return {
+      rootPath: getNpmSandbox(),
+      install: {
+        registry: "https://registry.npmjs.org",
+        disturl: "https://npm.taobao.org/dist",
+      },
+    };
   }
 
   constructor(
@@ -267,9 +277,10 @@ export class CoreCompiler implements CompileService<ICompileTask> {
       ],
       typescript: { compilerOptions: { outDir: "temp-dist" } },
       sandbox: {
-        rootPath: getNpmSandbox(),
+        ...this.sandboxOptions,
         dependencies,
         install: {
+          ...this.sandboxOptions.install,
           type: "trigger",
           trigger: data => this.pushTaskLog(id, data, "gray"),
         },
