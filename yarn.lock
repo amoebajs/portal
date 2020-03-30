@@ -4,8 +4,8 @@
 
 "@amoebajs/basic-modules@^0.0.1-alpha.1584675104269":
   version "0.0.1-alpha.1584675104269"
-  resolved "https://registry.npm.taobao.org/@amoebajs/basic-modules/download/@amoebajs/basic-modules-0.0.1-alpha.1584675104269.tgz#b9afb609074bc20648869786e6819680c23ea418"
-  integrity sha1-ua+2CQdLwgZIhpeG5oGWgMI+pBg=
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1584675104269.tgz#b9afb609074bc20648869786e6819680c23ea418"
+  integrity sha512-GXE8+4SZCISa6wAZoz0h4/GMfH29vBd7yFXLtVUiHgu8UDbPSsAzXTRyXtKWVFdVjQNYLmR/NdMKQ9lK0alnzg==
 
 "@amoebajs/builder-websdk@0.0.2-alpha.1578124698431":
   version "0.0.2-alpha.1578124698431"
@@ -42,10 +42,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/builder@^0.0.2-alpha.1584675007642":
-  version "0.0.2-alpha.1584675007642"
-  resolved "https://registry.npm.taobao.org/@amoebajs/builder/download/@amoebajs/builder-0.0.2-alpha.1584675007642.tgz#bd296d270f00ca288f7c3eb4b4844b25e9ae92c1"
-  integrity sha1-vSltJw8AyiiPfD60tIRLJemuksE=
+"@amoebajs/builder@^0.0.2-alpha.1585549338892":
+  version "0.0.2-alpha.1585549338892"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1585549338892.tgz#7657c670f0c94eed5f21908d40a7ebf48ade88ff"
+  integrity sha512-73zkKE1LscgoXyvwuiemASb00an9rhWCWdRPmWKVlHpDWVuF3peSj9Z2rYMJirxPzz6/2JaecqPvrGoFDqL+NA==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
