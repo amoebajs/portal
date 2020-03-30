@@ -42,6 +42,13 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     };
   }
 
+  protected get pageTemplateOptions() {
+    return {
+      title: "测试",
+      favicon: "/favicon.ico",
+    };
+  }
+
   constructor(
     protected readonly configs: Configs,
     protected readonly worker: MysqlWorker,
@@ -278,8 +285,8 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         typescript: { compilerOptions: { outDir: "temp-dist" } },
         template: {
           addons: {
-            title: [{ properties: { value: page.displayName ?? "测试" } }],
-            link: [{ properties: { rel: "icon", type: "image/x-icon", href: "favicon.ico" } }],
+            title: [{ properties: { value: page.displayName ?? this.pageTemplateOptions.title } }],
+            link: [{ properties: { rel: "icon", type: "image/x-icon", href: this.pageTemplateOptions.favicon } }],
           },
         },
         sandbox: {
