@@ -266,7 +266,6 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     dependencies: Record<string, any>,
   ) {
     await this.builder.buildSource({
-      template: { title: page.displayName ?? "测试" },
       entry: { app: entry },
       output: { path: buildDir, filename: "[name].[hash].js" },
       plugins: [
@@ -276,6 +275,12 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         }),
       ],
       typescript: { compilerOptions: { outDir: "temp-dist" } },
+      template: {
+        addons: {
+          title: [{ properties: { value: page.displayName ?? "测试" } }],
+          link: [{ properties: { rel: "icon", type: "image/x-icon", href: "favicon.ico" } }],
+        },
+      },
       sandbox: {
         ...this.sandboxOptions,
         dependencies,

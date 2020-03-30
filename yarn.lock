@@ -42,10 +42,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/builder@^0.0.2-alpha.1585549338892":
-  version "0.0.2-alpha.1585549338892"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1585549338892.tgz#7657c670f0c94eed5f21908d40a7ebf48ade88ff"
-  integrity sha512-73zkKE1LscgoXyvwuiemASb00an9rhWCWdRPmWKVlHpDWVuF3peSj9Z2rYMJirxPzz6/2JaecqPvrGoFDqL+NA==
+"@amoebajs/builder@^0.0.2-alpha.1585553046721":
+  version "0.0.2-alpha.1585553046721"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1585553046721.tgz#b4fa94de9c47fad61de2ff546694a39c79c4ea3f"
+  integrity sha512-OhylpknthJ4TC6KgBNs8E9j7SK+bnEA2ei0E4gvpApUkMLTC+x81/8q3M1DPu/hNwcJ0vBFxPGg+vYuZJVY1DA==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
