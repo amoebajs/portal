@@ -121,13 +121,38 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     );
   }
 
+  public useImportIcon(type: XType) {
+    return type === "component" ? "appstore" : type === "composition" ? "code-sandbox" : "api";
+  }
+
+  public useImportLabel(type: XType) {
+    return type === "component" ? "组件" : type === "composition" ? "捆绑" : "指令";
+  }
+
+  public useImportsExpand(type: XType) {
+    return type === "component"
+      ? this.tree.compExpanded
+      : type === "composition"
+      ? this.tree.cpsiExpanded
+      : this.tree.direExpanded;
+  }
+
+  public useTitleIcon(type: XType) {
+    return type === "directive" ? "control" : "layout";
+  }
+
+  public pushModelPathSection(type: XType, model: IDisplayEntity, paths?: string[]) {
+    return !paths ? type + "::" + model.id : paths + "#" + type + "::" + model.id;
+  }
+
   public entityCreateClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
     this.lastModalOk = false;
     this.tempParentPath = (paths && paths.split("#")) || [];
-    model && this.tempParentPath.push(model.id);
+    this.tempParentPath.push(`${type}::` + model.id);
+    this.tempParentPath.push(`target::` + "");
     this.modelRef = this.modal.create({
       nzTitle: "创建节点",
       nzContent: this.createModalContent,
@@ -141,8 +166,8 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
-    const parentPaths = (paths && paths.split("#")) || [];
-    parentPaths.push(model.id);
+    this.tempParentPath = (paths && paths.split("#")) || [];
+    this.tempParentPath.push("target::" + model.id);
     const meta = this.getEntityMetaWithRef(model, type);
     this.lastModalOk = false;
     this.tempEntityData = {
@@ -155,7 +180,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       type,
       source: model,
     };
-    this.tempParentPath = parentPaths;
     this.modelRef = this.modal.create({
       nzTitle: "编辑节点",
       nzContent: this.editModalContent,
@@ -242,41 +266,38 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createOrUpdateNode(e: IEntityEditResult) {
-    // console.log(e);
     const { found, path, index } = this.findPath(this.tempParentPath, { id: e.id, type: e.type });
-    const { module: md, name, id, version, type: createType, ...others } = e;
-    // console.log({ found, path, index });
+    const { module: md, name, id, version, updateId, type: createType, ...others } = e;
     if (!found) {
-      //create
       this.createNewNode(e.type, md, name, version, createType, path, id, others);
     } else {
-      // edit
-      this.updateExistNode(e.type, path, others, index);
+      this.updateExistNode(e.type, path, others, index, updateId);
     }
   }
 
   private updateExistNode(
     type: XType,
     path: string,
-    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name">,
+    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
     index: number,
+    update: string,
   ) {
     if (path === "['page']") {
       this.context.page = {
         ...this.context.page,
         ...others,
+        id: update,
       };
     } else if (type !== "directive") {
       const children = get(this.context, path);
       children[index] = {
-        ...children[index],
+        ...{ ...children[index], id: update },
         ...others,
       };
     } else {
       const directives = get(this.context, path);
-      // console.log([directives, others]);
       directives[index] = {
-        ...directives[index],
+        ...{ ...directives[index], id: update },
         ...others,
       };
     }
@@ -290,7 +311,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     createType: XType,
     path: string,
     id: string,
-    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name">,
+    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
   ) {
     const target = this.getImportTargetSafely(md, name, version, createType);
     if (path === "['page']") {
@@ -310,7 +331,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         ...others,
       });
     } else {
-      // TODO
       let directives = get(this.context, path);
       if (!directives) {
         set(this.context, path, (directives = []));
@@ -347,73 +367,72 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private findPath(paths: string[], model: { id: string; type: XType }) {
-    let found!: IDisplay<IDisplayEntity>;
     let path: string = "";
-    let isRoot = true;
     let lastIndex = -1;
     if (!this.tree.page) {
       return { found: undefined, path: "['page']", index: -1 };
     }
-    if (model.type === "directive") {
-      let target: IDisplay<IDisplayEntity> = this.tree.page;
-      let list: IDisplay<IDisplayEntity>[] = [this.tree.page];
-      for (let index = 0; index < paths.length; index++) {
-        const ph = paths[index];
-        if (index === 0) {
+    let target: IDisplay<IDisplayEntity> = this.tree.page;
+    let list: IDisplay<IDisplayEntity>[] = [];
+    let isRoot = true;
+    for (const sgm of paths) {
+      const [sgmType, sgmValue] = sgm.split("::");
+      if (sgmType === "component" || sgmType === "composition") {
+        if (isRoot) {
           path += "['page']";
-          list = target.children || [];
-        } else if (index === paths.length - 1) {
-          lastIndex = (target.directives || []).findIndex(i => i.id === ph);
-          path += `['directives']`;
+          isRoot = false;
         } else {
-          lastIndex = list.findIndex(i => i.id === ph);
-          target = list[lastIndex];
-          list = target.children || [];
+          lastIndex = (target.children || []).findIndex(i => i.id === sgmValue);
+          target = target.children[lastIndex];
+          list = target?.children || [];
           path += `['children'][${lastIndex}]`;
         }
+        continue;
       }
-      return { index: lastIndex, found: target, path };
-    } else {
-      let list: IDisplay<IDisplayEntity>[] = [this.tree.page];
-      paths.push(model.id);
-      for (const ph of paths) {
-        lastIndex = list.findIndex(i => i.id === ph);
-        if (isRoot) {
-          isRoot = false;
-          path += ph === model.id ? "['page']" : "['page']['children']";
-        } else if (ph !== model.id) {
-          path += `[${lastIndex}]['children']`;
-        }
-        found = list[lastIndex];
-        if (!found || !found.children) continue;
-        list = found.children || [];
-        if (ph === model.id) {
-          break;
-        }
+      if (sgmType === "directive") {
+        lastIndex = (target.directives || []).findIndex(i => i.id === sgmValue);
+        target = target.directives[lastIndex];
+        list = target?.directives || [];
+        path += `['directives'][${lastIndex}]`;
+        continue;
       }
-      return { index: lastIndex, found, path };
+      if (sgmType === "target") {
+        if (model.type === "directive") {
+          list = target.directives || [];
+          lastIndex = list.findIndex(i => i.id === sgmValue);
+          target = list[lastIndex];
+          path += `['directives']`;
+        } else {
+          list = target.children || [];
+          lastIndex = list.findIndex(i => i.id === sgmValue);
+          target = list[lastIndex];
+          path += `['children']`;
+        }
+        continue;
+      }
     }
+    return { index: lastIndex, found: target, path };
   }
 
   private initTree(context: ICompileContext) {
     const components = (context.components || []).map(i => ({
       ...i,
       displayInfo: {
-        displayName: getDisplayText(this.builder.getComponent(i.module, i.name).displayName, i.name),
+        displayName: this.builder.getComponent(i.module, i.name).displayName,
         expanded: false,
       },
     }));
     const directives = (context.directives || []).map(i => ({
       ...i,
       displayInfo: {
-        displayName: getDisplayText(this.builder.getDirective(i.module, i.name).displayName, i.name),
+        displayName: this.builder.getDirective(i.module, i.name).displayName,
         expanded: false,
       },
     }));
     const compositions = (context.compositions || []).map(i => ({
       ...i,
       displayInfo: {
-        displayName: getDisplayText(this.builder.getComposition(i.module, i.name).displayName, i.name),
+        displayName: this.builder.getComposition(i.module, i.name).displayName,
         expanded: false,
       },
     }));
@@ -498,10 +517,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       return cops;
     }
   }
-}
-
-function getDisplayText(displayName: string, name: string): string {
-  return displayName === name ? displayName : `${displayName} (${name})`;
 }
 
 export function callContextValidation(ctx: ICompileContext) {

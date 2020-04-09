@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Subject, BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 
 export interface IDirectiveDefine {
   module: string;
@@ -88,6 +88,7 @@ export interface IEntityDefine {
 export interface IImportDeclaration extends IMapEntry {}
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/interface-name-prefix
   interface Window {
     EwsContext: import("#websdk").EwsWindow;
   }
@@ -150,7 +151,7 @@ export class Builder {
     this.builder = this.factory.builder;
     const modules = this.builder["globalMap"].maps.modules;
     console.log(modules);
-    Object.entries<ISourceModule>(modules).forEach(([name, md]) => {
+    Object.entries<ISourceModule>(modules).forEach(([_, md]) => {
       const components = Object.entries(md.components).map(([, cp]) => cp);
       const directives = Object.entries(md.directives).map(([, cp]) => cp);
       const compositions = Object.entries(md.compositions).map(([, cp]) => cp);

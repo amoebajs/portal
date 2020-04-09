@@ -1,14 +1,14 @@
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
-import { Component, OnDestroy, OnInit, Input, OnChanges, Output, EventEmitter } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
 import {
   Builder,
   ICompileContext,
-  IInputDefine,
   ICompileTypeMeta,
-  IGroupDefine,
   IComponentChildDefine,
   IDirectiveChildDefine,
+  IGroupDefine,
+  IInputDefine,
 } from "../../services/builder.service";
 import { IEntityCreate } from "../module-list/module-list.component";
 
@@ -22,6 +22,7 @@ interface IDataInput {
 
 interface IEntityContext {
   init: boolean;
+  entityId: string;
   displayName: string;
   idVersion: string;
   inputs: IGroup[];
@@ -54,6 +55,7 @@ export interface IEntityEdit extends IEntityCreate {
 
 export interface IEntityEditResult {
   id: string;
+  updateId: string;
   module: string;
   name: string;
   type: "component" | "directive" | "composition";
@@ -94,7 +96,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     for (const key in changes) {
       if (changes.hasOwnProperty(key)) {
         const element = changes[key];
-        if (key === "model") {
+        if (key === "target") {
           this.initContext(element.currentValue);
         }
       }
@@ -102,12 +104,13 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    const { data } = this.entity;
+    const { entityId, data } = this.entity;
     this.clearData(data);
     this.formatData(data);
     const { inputs } = data;
     this.onComplete.emit({
       id: this.target.id,
+      updateId: entityId,
       module: this.target.module,
       name: this.target.name,
       type: this.target.type,
@@ -192,6 +195,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
       });
     });
     this.entity.inputs = Object.entries(groups).map(([, g]) => g);
+    this.entity.entityId = model.id;
     this.entity.init = true;
   }
 
@@ -283,6 +287,7 @@ function createDisplayName(d: IInputDefine | IGroupDefine) {
 function createDefaultEntity(): IEntityContext {
   return {
     init: false,
+    entityId: "undefined",
     displayName: "",
     idVersion: "",
     inputs: [],

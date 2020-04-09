@@ -32,20 +32,14 @@
               model: null,
               enabled: enabled,
               type: type,
-              expanded: type === 'component'? tree.compExpanded: type === 'composition'? tree.cpsiExpanded: tree.direExpanded
+              expanded: useImportsExpand(type)
             }"
           ></ng-container>
-          <i
-            nz-icon
-            [nzType]=" type === 'component' ? 'appstore': type === 'composition'? 'code-sandbox': 'api' "
-            nzTheme="outline"
-          ></i>
-          <span>{{ type === 'component'? '组件': type === 'composition'? '捆绑': '指令' }}</span>
+          <i nz-icon [nzType]="useImportIcon(type)" nzTheme="outline"></i>
+          <span>{{ useImportLabel(type) }}</span>
         </div>
       </div>
-      <ng-container
-        *ngIf="type === 'component'? tree.compExpanded: type === 'composition'? tree.cpsiExpanded: tree.direExpanded"
-      >
+      <ng-container *ngIf="useImportsExpand(type)">
         <div class="section" *ngFor="let comp of tree[type + 's']">
           <ng-container *ngTemplateOutlet="importNode; context: { model: comp, type: type }"></ng-container>
         </div>
@@ -56,11 +50,7 @@
 
 <ng-template #importNode let-model="model" let-type="type">
   <div class="import-decla">
-    <i
-      nz-icon
-      [nzType]=" type === 'component' ? 'appstore':type === 'composition'? 'code-sandbox': 'api' "
-      nzTheme="outline"
-    ></i>
+    <i nz-icon [nzType]="useImportIcon(type)" nzTheme="outline"></i>
     <span [title]="model.id">{{ model.displayInfo.displayName }}</span>
   </div>
 </ng-template>
@@ -75,22 +65,22 @@
         ></ng-container>
       </div>
       <div class="entity-children" *ngIf="checkIfShowChildren(model, 'directive')">
-        <ng-container *ngFor="let directiveNode of model.directives">
+        <ng-container *ngFor="let node of model.directives">
           <ng-container
             *ngTemplateOutlet="entityNode; context: {
-              model: directiveNode,
-              paths: !paths? model.id: (paths + '#' + model.id),
+              model: node,
+              paths: pushModelPathSection(type, model, paths),
               type: 'directive'
             }"
           ></ng-container>
         </ng-container>
       </div>
       <div class="entity-children" *ngIf="checkIfShowChildren(model)">
-        <ng-container *ngFor="let childNode of model.children">
+        <ng-container *ngFor="let node of model.children">
           <ng-container
             *ngTemplateOutlet="entityNode; context: {
-              model: childNode,
-              paths: !paths? model.id: (paths + '#' + model.id),
+              model: node,
+              paths: pushModelPathSection(type, model, paths),
               type: 'component'
             }"
           ></ng-container>
@@ -110,8 +100,8 @@
         type: 'entity'
       }"
     ></ng-container>
-    <i nz-icon [nzType]="type === 'directive'? 'control': 'layout'" nzTheme="outline"></i>
-    <span [title]="model.id">{{ model.displayInfo.displayName }}</span>
+    <i nz-icon [nzType]="useTitleIcon(type)" nzTheme="outline"></i>
+    <span>{{ model.displayInfo.displayName }} - {{ model.id }}</span>
   </div>
 </ng-template>
 

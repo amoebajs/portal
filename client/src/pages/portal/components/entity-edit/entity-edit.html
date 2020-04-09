@@ -3,9 +3,20 @@
     <div class="entity-title">{{ entity.displayName }}</div>
     <div class="quote-style">{{ entity.idVersion }}</div>
   </div>
+  <div *ngIf="entity.init" class="options-group">
+    <div class="options-first-title">节点属性</div>
+    <div class="options-list">
+      <div class="input-layout">
+        <div class="input-label">唯一键</div>
+        <div class="input-content">
+          <input nz-input [placeholder]="'请输入Node Key'" [(ngModel)]="entity.entityId" />
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="options-group">
     <div class="options-first-title">模板属性</div>
-    <div *ngFor="let group of entity.inputs">
+    <ng-container *ngFor="let group of entity.inputs">
       <div *ngIf="group.children.length > 0">
         <div class="options-second-title">{{ group.displayInfo.displayName }}</div>
         <div class="options-list" *ngFor="let input of group.children">
@@ -17,7 +28,7 @@
           ></ng-container>
         </div>
       </div>
-    </div>
+    </ng-container>
   </div>
   <!-- <div class="options-group">
     <div class="options-first-title">附加属性</div>
