@@ -1,6 +1,9 @@
 import * as BuilderSdk from "@amoebajs/builder";
-import { CommonModule, LayoutModule, ZentModule } from "@amoebajs/basic-modules";
+import { CommonModule, LayoutModule } from "@amoebajs/basic-modules";
+import { ZentModule } from "@amoebajs/zent-ui";
 import { BuilderFactory } from "../src/services/compiler/core";
+
+/* eslint-disable @typescript-eslint/interface-name-prefix */
 
 declare global {
   interface Window {

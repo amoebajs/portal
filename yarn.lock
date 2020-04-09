@@ -2,50 +2,15 @@
 # yarn lockfile v1
 
 
-"@amoebajs/basic-modules@^0.0.1-alpha.1584675104269":
-  version "0.0.1-alpha.1584675104269"
-  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1584675104269.tgz#b9afb609074bc20648869786e6819680c23ea418"
-  integrity sha512-GXE8+4SZCISa6wAZoz0h4/GMfH29vBd7yFXLtVUiHgu8UDbPSsAzXTRyXtKWVFdVjQNYLmR/NdMKQ9lK0alnzg==
+"@amoebajs/basic-modules@^0.0.1-alpha.1586412511603":
+  version "0.0.1-alpha.1586412511603"
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1586412511603.tgz#a487f4eee5eadbd8364817116cecfee5714e51fa"
+  integrity sha512-lq2LPrXQ0ISeCxleEL7h9dSP8R7cYB3Ib5nR8ZYq/k3MslLyEMnX77/6Hf0fgZDxEGJvfD2Hsy6YGaSnFWdWQw==
 
-"@amoebajs/builder-websdk@0.0.2-alpha.1578124698431":
-  version "0.0.2-alpha.1578124698431"
-  resolved "https://registry.npm.taobao.org/@amoebajs/builder-websdk/download/@amoebajs/builder-websdk-0.0.2-alpha.1578124698431.tgz#fd9968c0b71ad75ec41795a9d8ce4eb0116d1c3c"
-  integrity sha1-/ZlowLca117EF5Wp2M5OsBFtHDw=
-  dependencies:
-    "@bonbons/di" "2.0.0-beta.3"
-    "@types/cheerio" "^0.22.15"
-    "@types/copy-webpack-plugin" "^5.0.0"
-    "@types/fs-extra" "^8.0.1"
-    "@types/html-webpack-plugin" "^3.2.1"
-    "@types/js-yaml" "^3.12.1"
-    "@types/node" "^12.11.7"
-    "@types/prettier" "^1.18.3"
-    "@types/react" "^16.9.11"
-    "@types/react-dom" "^16.9.4"
-    "@types/uuid" "^3.4.6"
-    "@types/webpack" "^4.41.0"
-    chalk "^3.0.0"
-    cheerio "^0.22.0"
-    chokidar "^3.3.0"
-    copy-webpack-plugin "^5.0.5"
-    css-loader "^3.2.0"
-    fs-extra "^8.1.0"
-    html-webpack-plugin "^3.2.0"
-    js-yaml "^3.13.1"
-    prettier "^1.19.1"
-    reflect-metadata "^0.1.13"
-    style-loader "^1.0.1"
-    ts-import-plugin "^1.6.1"
-    ts-loader "^6.2.1"
-    tslib "^1.10.0"
-    typescript "^3.7.2"
-    uuid "^3.3.3"
-    webpack "^4.41.2"
-
-"@amoebajs/builder@^0.0.2-alpha.1585555781173":
-  version "0.0.2-alpha.1585555781173"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1585555781173.tgz#7750ad061be66bf60a9ebb2164b5ec50a4628d3c"
-  integrity sha512-dGSV4toHHh3acZ7x1gi1piBRgqIRALbHcRFGqqpXZJmEiZjL++PCwbfHI6EghFJ/J2Bi1wILnRS0JV1G0dO9zA==
+"@amoebajs/builder@^0.0.2-alpha.1585734024405":
+  version "0.0.2-alpha.1585734024405"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1585734024405.tgz#f5b0c04770f6ec4d7f6ef77d2c5fe0942b8c7fc9"
+  integrity sha512-o+IzSbBI3YSrOeCh6KpLPurEo+NZPxldUU1dV3SbNKSDa6dBsxEn72PpswELcAwnAvWUSuewAyyy9jCX3bNplw==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -76,6 +41,11 @@
     utility-types "^3.10.0"
     uuid "^3.3.3"
     webpack "^4.41.2"
+
+"@amoebajs/zent-ui@^0.0.1-alpha.1586413002412":
+  version "0.0.1-alpha.1586413002412"
+  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1586413002412.tgz#50353ea3b145ad86bccd04361899790443b29e3e"
+  integrity sha512-t9S9nHvdl4IIOJIUhCy6ymSO8LCVdNFjpCQ0DnJTk7QRXTvpK+Ptq/RvivcoCdncB8nz4gYPc5Ap0DUV1FvPpw==
 
 "@angular-devkit/architect@0.900.7":
   version "0.900.7"
@@ -3639,7 +3609,7 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.npm.taobao.org/copy-descriptor/download/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
-copy-webpack-plugin@5.1.1, copy-webpack-plugin@^5.0.5:
+copy-webpack-plugin@5.1.1:
   version "5.1.1"
   resolved "https://registry.npm.taobao.org/copy-webpack-plugin/download/copy-webpack-plugin-5.1.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcopy-webpack-plugin%2Fdownload%2Fcopy-webpack-plugin-5.1.1.tgz#5481a03dea1123d88a988c6ff8b78247214f0b88"
   integrity sha1-VIGgPeoRI9iKmIxv+LeCRyFPC4g=
@@ -11304,13 +11274,6 @@ tryer@^1.0.1:
   resolved "https://registry.npm.taobao.org/tryer/download/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"
   integrity sha1-8shUBoALmw90yfdGW4HqrSQSUvg=
 
-ts-import-plugin@^1.6.1:
-  version "1.6.5"
-  resolved "https://registry.npm.taobao.org/ts-import-plugin/download/ts-import-plugin-1.6.5.tgz#4f3a109ec5da1c2e85770d133723e1ec3a7bd23b"
-  integrity sha1-TzoQnsXaHC6Fdw0TNyPh7Dp70js=
-  dependencies:
-    tslib "^1.11.1"
-
 ts-import-plugin@^1.6.2:
   version "1.6.2"
   resolved "https://registry.npm.taobao.org/ts-import-plugin/download/ts-import-plugin-1.6.2.tgz#9a9680b6e3e4a4c94fba9f2be7ce6a0ed478c438"
@@ -11405,7 +11368,7 @@ tslib@1.10.0, tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha1-w8GflZc/sKYpc/sJ2Q2WHuQ+XIo=
 
-tslib@1.11.1, tslib@^1.11.1, tslib@^1.7.1:
+tslib@1.11.1, tslib@^1.7.1:
   version "1.11.1"
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
   integrity sha1-6xXRKIJ/vuKEFUnhcfRe0zisfjU=
