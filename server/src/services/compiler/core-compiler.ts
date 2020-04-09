@@ -5,7 +5,7 @@ import moment from "moment";
 import { Injectable } from "@nestjs/common";
 import { IPageCreateOptions, ISourceCreateTranspileOptions, IWebpackOptions } from "@amoebajs/builder";
 import { Configs } from "#services/configs";
-import { PageVersionManager, PagePersistenceManager, IWebsitePageHash } from "#services/manager";
+import { IWebsitePageHash, PagePersistenceManager, PageVersionManager } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { ICompileTask, TaskStatus } from "#typings/page";
 import { Page } from "#database/entity/page.entity";
@@ -80,9 +80,13 @@ export class CoreCompiler implements CompileService<ICompileTask> {
         page = this.manager.getPage(name);
       }
       const version = page?.latest;
-      if (page?.status !== "loaded") {
+      if (page?.status === "default") {
         await this.saveHtmlBundle(name, version);
         this.manager.updatePage(name, { status: "loaded" });
+      } else if (page?.status === "loading") {
+        await this.manager.subscribePage(name);
+      } else {
+        // NOTHING TODO
       }
       return version && `website/${name}.${version}.html`;
     } catch (error) {
@@ -120,7 +124,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
 
   private async createUpdatePage(configs: ICommonBuildConfigs, operator: string) {
     const { name, displayName, description, configName, options } = configs;
-    let page = await this.worker.query("PAGE", { name });
+    const page = await this.worker.query("PAGE", { name });
     let pageId = page?.id;
     if (page === void 0) {
       pageId = await this.worker.createPage({

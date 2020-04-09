@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { createToken } from "#utils/di";
+import { Observable, Subscription } from "rxjs";
 
 export interface IWebsitePageHash {
   latest: string | null;
@@ -11,12 +12,19 @@ export interface IWebsitePageHash {
   };
 }
 
-@Injectable()
-export abstract class PageVersionService<T = IWebsitePageHash> {
-  protected readonly pageCache: Record<string, T> = {};
-  public abstract getPage(pageName: string): T;
-  public abstract updatePage(pageName: string, updates: Partial<T>): void;
+export interface IWebsitePageObserver {
+  observer: Observable<string>;
+  subscriptions: Subscription[];
 }
 
-export type PageVersionManager = PageVersionService<IWebsitePageHash>;
+@Injectable()
+export abstract class PageVersionService {
+  protected readonly pageCache: Record<string, IWebsitePageHash> = {};
+  protected readonly pageObserver: Record<string, IWebsitePageObserver> = {};
+  public abstract getPage(pageName: string): IWebsitePageHash;
+  public abstract updatePage(pageName: string, updates: Partial<IWebsitePageHash>): void;
+  public abstract subscribePage(pageName: string): Promise<string>;
+}
+
+export type PageVersionManager = PageVersionService;
 export const PageVersionManager = createToken<PageVersionManager>(PageVersionService);
