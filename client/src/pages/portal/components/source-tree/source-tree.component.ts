@@ -2,21 +2,22 @@ import get from "lodash/get";
 import set from "lodash/set";
 import {
   Component,
-  OnInit,
-  OnDestroy,
-  OnChanges,
-  Input,
-  Output,
   EventEmitter,
-  ViewChild,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
   TemplateRef,
+  ViewChild,
 } from "@angular/core";
 import { NzModalRef, NzModalService } from "ng-zorro-antd";
 import {
+  Builder,
   ICompileContext,
   IComponentDefine,
   IDirectiveDefine,
-  Builder,
   IPageDefine,
 } from "../../services/builder.service";
 import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
@@ -48,7 +49,7 @@ interface IDisplayEntity extends IPageDefine {
 
 type XType = "component" | "directive" | "composition";
 
-interface CleanPayload {
+interface ICleanPayload {
   type: "c" | "d" | "cs";
   value: any;
 }
@@ -110,7 +111,15 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  ngOnChanges(changes: import("@angular/core").SimpleChanges): void {}
+  ngOnChanges(_: SimpleChanges): void {}
+
+  public checkIfExpanded(model: IDisplayEntity) {
+    return (
+      (model.children && model.children.length > 0) ||
+      (model.directives && model.directives.length > 0) ||
+      (model.compositions && model.compositions.length > 0)
+    );
+  }
 
   public entityCreateClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     if (this.modelRef) {
@@ -504,7 +513,7 @@ export function callContextValidation(ctx: ICompileContext) {
     context.compositions = [];
     return { ...context };
   }
-  const importGroup: Record<string, CleanPayload> = {};
+  const importGroup: Record<string, ICleanPayload> = {};
   const existDirectives: Record<string, any> = {};
   const existComponents: Record<string, any> = {};
   const existCompositions: Record<string, any> = {};
@@ -528,7 +537,7 @@ interface IPayload {
 
 function doChildrenRefCheck(
   page: IPayload,
-  importGroup: Record<string, CleanPayload>,
+  importGroup: Record<string, ICleanPayload>,
   exists: {
     existComponents: Record<string, any>;
     existCompositions: Record<string, any>;

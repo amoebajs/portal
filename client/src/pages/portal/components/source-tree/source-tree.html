@@ -105,7 +105,7 @@
     <ng-container
       *ngTemplateOutlet="expandButton; context: {
         model: model,
-        enabled: model.children && model.children.length > 0,
+        enabled: checkIfExpanded(model),
         expanded: !!model.displayInfo.expanded,
         type: 'entity'
       }"
