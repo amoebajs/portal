@@ -102,24 +102,29 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     if (this._working) {
       throw new Error("core-compiler is still on working for previous task");
     }
-    this._working = true;
-    const pageId = await this.createUpdatePage(configs, configs.creator);
-    const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
-    const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
-    if (success) {
-      const task = await this.worker.query("TASK", { id: taskId });
-      this.runCustomTask(task).finally(async () => {
-        await this.worker.updateTask({
-          id: task.id,
-          operator: configs.creator,
-          logs: (this._taskLogs[task.id] ?? []).join("\n"),
+    try {
+      this._working = true;
+      const pageId = await this.createUpdatePage(configs, configs.creator);
+      const taskId = await this.worker.createTask({ pageId, operator: configs.creator });
+      const success = await this.worker.startTask({ id: taskId, operator: configs.creator });
+      if (success) {
+        const task = await this.worker.query("TASK", { id: taskId });
+        this.runCustomTask(task).finally(async () => {
+          await this.worker.updateTask({
+            id: task.id,
+            operator: configs.creator,
+            logs: (this._taskLogs[task.id] ?? []).join("\n"),
+          });
+          this._working = false;
         });
-        this._working = false;
-      });
-    } else {
-      throw new Error("Task exist with status [pending]");
+      } else {
+        throw new Error("Task exist with status [pending]");
+      }
+      return taskId;
+    } catch (error) {
+      this._working = false;
+      throw error;
     }
-    return taskId;
   }
 
   private async createUpdatePage(configs: ICommonBuildConfigs, operator: string) {
