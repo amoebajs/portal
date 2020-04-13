@@ -9,7 +9,7 @@ import { PageRepo } from "#database/repos/page.repo";
 import { PageVersionRepo } from "#database/repos/page-version.repo";
 import { CompileTaskRepo } from "#database/repos/compile-task.repo";
 import { PageConfigRepo } from "#database/repos/page-config.repo";
-import { TaskStatus, PageStatus, IListQueryResult } from "#typings/page";
+import { IListQueryResult, PageStatus, TaskStatus } from "#typings/page";
 import { DbConnection } from "./connection";
 
 export interface IPageCreateOptions {
@@ -105,23 +105,14 @@ export class MysqlWorker extends BaseMysqlService {
   public readonly active = new Subject<void>();
 
   constructor(
-    dbc: DbConnection,
     private readonly $pages: PageRepo,
     private readonly $versions: PageVersionRepo,
     private readonly $configs: PageConfigRepo,
     private readonly $tasks: CompileTaskRepo,
+    dbc: DbConnection,
   ) {
-    super();
-    dbc.connected.subscribe(connection => {
-      if (!!connection) {
-        this.setConnection(connection);
-        this.$tasks.setConnection(this.connection);
-        this.$pages.setConnection(this.connection);
-        this.$versions.setConnection(this.connection);
-        this.$configs.setConnection(this.connection);
-        this.active.next();
-      }
-    });
+    super(dbc);
+    dbc.connected.subscribe(() => this.active.next());
   }
 
   public async queryList<K extends keyof IListQueryOptions>(

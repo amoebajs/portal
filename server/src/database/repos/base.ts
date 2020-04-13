@@ -2,6 +2,9 @@ import pickFn from "lodash/pick";
 import omitFn from "lodash/omit";
 import { Connection, Repository, SelectQueryBuilder } from "typeorm";
 import { IListQueryResult } from "#typings/page";
+import { DbConnection } from "#services/database/connection";
+import { Subject } from "rxjs";
+import { Injectable } from "@nestjs/common";
 
 export interface IBaseListQueryOptions {
   current: number;
@@ -10,14 +13,23 @@ export interface IBaseListQueryOptions {
   orderBy?: "ASC" | "DESC";
 }
 
+@Injectable()
 export class BaseMysqlService {
   protected _connection!: Connection;
+  protected _connected = new Subject<void>();
 
   protected get connection() {
     if (!this._connection) {
       throw new Error("Invalid operation: mysql's connection is not ready");
     }
     return this._connection;
+  }
+
+  constructor(dbc: DbConnection) {
+    dbc.connected.subscribe(connection => {
+      this.setConnection(connection);
+      this._connected.next();
+    });
   }
 
   public setConnection(connection: Connection) {

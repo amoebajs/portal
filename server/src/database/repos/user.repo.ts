@@ -1,57 +1,59 @@
 import { Injectable } from "@nestjs/common";
-import { IListQueryResult, TaskStatus } from "#typings/page";
+import { IListQueryResult } from "#typings/base";
 import { BaseMysqlService, IBaseListQueryOptions } from "./base";
-import { CompileTask } from "../entity/compile-task.entity";
+import { User } from "../entity/user.entity";
 
 export interface IListQueryOptions extends IBaseListQueryOptions {
+  id?: number | string;
+  key?: string;
   name?: string;
-  pageId?: string;
-  creator?: string;
-  current: number;
-  size: number;
+  account?: string;
 }
 
 export interface IQueryOptions {
-  id: number | string;
+  id?: number | string;
+  key?: string;
+  name?: string;
+  account?: string;
 }
 
 export interface ICreateOptions {
-  pageId: string | number;
-  configId: string | number;
-  versionId: string | number;
-  status: TaskStatus;
   name: string;
-  creator: string;
+  account: string;
+  extends: string;
+  key: string;
 }
 
-export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">> {
-  id: number | string;
+export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "id">> {
+  id?: number | string;
+  key?: string;
   updatedAt: Date;
-  logs?: string;
-  creator?: string;
 }
 
 @Injectable()
-export class CompileTaskRepo extends BaseMysqlService {
+export class UserRepo extends BaseMysqlService {
   protected get repository() {
-    return this.connection.getRepository(CompileTask);
+    return this.connection.getRepository(User);
   }
 
-  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<CompileTask>> {
+  public async queryList(options: IListQueryOptions, repo = this.repository): Promise<IListQueryResult<User>> {
     return this.invokeListQuery(repo, options);
   }
 
   public async querySelectList(
     options: IListQueryOptions,
-    select: (keyof CompileTask)[],
+    select: (keyof User)[],
     repo = this.repository,
-  ): Promise<IListQueryResult<CompileTask>> {
+  ): Promise<IListQueryResult<User>> {
     return this.invokeListQuery(repo, options, select);
   }
 
-  public async query(options: IQueryOptions, repo = this.repository): Promise<CompileTask> {
-    const queries: Partial<CompileTask> = {};
+  public async query(options: IQueryOptions, repo = this.repository): Promise<User> {
+    const queries: Partial<User> = {};
     if (options.id !== void 0) queries.id = options.id;
+    if (options.key !== void 0) queries.key = options.key;
+    if (options.name !== void 0) queries.name = options.name;
+    if (options.account !== void 0) queries.account = options.account;
     return this.queryEntry(repo, queries);
   }
 

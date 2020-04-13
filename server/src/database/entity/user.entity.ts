@@ -1,31 +1,19 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { IPageVersion } from "#typings/page";
+import { IEwsUser } from "#typings/user";
 
-@Entity("ews_page_version")
-export class PageVersion implements IPageVersion {
+@Entity("ews_user")
+export class User implements IEwsUser {
   @PrimaryGeneratedColumn({
     name: "id",
     type: "bigint",
   })
   id!: number | string;
 
-  @Column("bigint", {
+  @Column("varchar", {
     nullable: false,
-    name: "config_id",
+    name: "key",
   })
-  configId!: number | string;
-
-  @Column("bigint", {
-    nullable: true,
-    name: "task_id",
-  })
-  taskId!: number | string;
-
-  @Column("bigint", {
-    nullable: false,
-    name: "page_id",
-  })
-  pageId!: string | number;
+  key!: string;
 
   @Column("varchar", {
     nullable: false,
@@ -35,21 +23,15 @@ export class PageVersion implements IPageVersion {
 
   @Column("varchar", {
     nullable: false,
-    name: "creator",
+    name: "account",
   })
-  creator!: string;
+  account!: string;
 
   @Column("text", {
     nullable: true,
-    name: "metadata",
+    name: "extends",
   })
-  metadata!: string;
-
-  @Column("text", {
-    nullable: true,
-    name: "dist",
-  })
-  dist!: string;
+  extends!: string;
 
   @Column("datetime", {
     nullable: false,

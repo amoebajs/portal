@@ -6,7 +6,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { ServeStaticOptions } from "@nestjs/platform-express/interfaces/serve-static-options.interface";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 import { Configs, IServerConfigs } from "#services/configs";
-import { MysqlWorker } from "#services/database";
+import { DbConnection } from "#services/database/connection";
 import { useMiddlewares } from "./app.middlewares";
 import { MainModule } from "./main.module";
 
@@ -33,13 +33,13 @@ export async function bootstrap({
     .get(Configs)
     .setConfig(configs)
     .setEnv(ewsEnvs);
-  app.get(MysqlWorker);
   useStaticAssets(app, staticOptions);
   useGzip(app, configs);
   useTemplateEngine(app);
   useMiddlewares(app);
+  await useDbConnection(app);
   await onInit(app);
-  await app.listen(configs.port);
+  app.listen(configs.port);
 }
 
 export function useTemplateEngine(app: NestExpressApplication, options: Partial<{ noCache: boolean }> = {}) {
@@ -67,5 +67,20 @@ export function useNunjucks(app: NestExpressApplication, { noCache = false }: { 
     autoescape: true,
     express: app,
     noCache,
+  });
+}
+
+export async function useDbConnection(app: NestExpressApplication) {
+  return new Promise((resolve, reject) => {
+    app.get(DbConnection).connected.subscribe(
+      async () => {
+        try {
+          resolve();
+        } catch (error) {
+          reject();
+        }
+      },
+      error => reject(error),
+    );
   });
 }

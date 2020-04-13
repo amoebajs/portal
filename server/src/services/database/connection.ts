@@ -1,6 +1,6 @@
 import * as path from "path";
 import { Injectable } from "@nestjs/common";
-import { ConnectionOptions, Connection, createConnection } from "typeorm";
+import { Connection, ConnectionOptions, createConnection } from "typeorm";
 import { Configs } from "#services/configs";
 import { Subject } from "rxjs";
 

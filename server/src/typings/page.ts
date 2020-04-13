@@ -1,3 +1,5 @@
+export * from "./base";
+
 export interface IPage {
   id: number | string;
   configId: number | string;
@@ -64,11 +66,4 @@ export enum TaskStatus {
 export enum PageStatus {
   Changed = 0,
   Normal = 1,
-}
-
-export interface IListQueryResult<T> {
-  items: T[];
-  current: number;
-  size: number;
-  total: number;
 }

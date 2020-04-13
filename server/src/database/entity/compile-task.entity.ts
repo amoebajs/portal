@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { ICompileTask, TaskStatus } from "#typings/page";
 
 @Entity("ews_compile_task")

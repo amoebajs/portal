@@ -100,5 +100,5 @@ export class UserService<
   }
 }
 
-export type User = UserService<number, string, {}>;
+export type User = UserService<number | string, string, {}>;
 export const User = createToken<User>(UserService);
