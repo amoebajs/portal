@@ -11,7 +11,7 @@ export class User implements IEwsUser {
 
   @Column("varchar", {
     nullable: false,
-    name: "key",
+    name: "id_key",
   })
   key!: string;
 
