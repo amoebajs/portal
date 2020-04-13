@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Param } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { IPageCreateOptions } from "@amoebajs/builder";
 import { Compiler } from "#services/compiler";
 import { User } from "#services/authentication";

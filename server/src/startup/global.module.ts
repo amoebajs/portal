@@ -2,12 +2,12 @@ import { Global } from "@nestjs/common";
 import { AppModule } from "#app/app.module";
 import { ProvidersModule } from "#utils/base";
 import { DatabaseModule } from "#database/db.module";
-import { Authentication, User, FakeAuthService } from "#services/authentication";
+import { Authentication, FakeAuthService, User } from "#services/authentication";
 import {
-  PageVersionManager,
   CorePageVersionManager,
-  PagePersistenceManager,
   PagePersistenceDbStorage,
+  PagePersistenceManager,
+  PageVersionManager,
 } from "#services/manager";
 import { MysqlWorker } from "#services/database";
 import { DbConnection } from "#services/database/connection";
