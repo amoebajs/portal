@@ -14,6 +14,8 @@ export interface ICreateOptions {
 
 @Injectable()
 export class DistStorageRepo extends BaseMysqlService {
+  protected _cacheKey = "dist_storage";
+
   protected get repository() {
     return this.connection.getRepository(DistStorage);
   }

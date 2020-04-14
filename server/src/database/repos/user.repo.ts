@@ -32,6 +32,8 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "id">> {
 
 @Injectable()
 export class UserRepo extends BaseMysqlService {
+  protected _cacheKey = "user";
+
   protected get repository() {
     return this.connection.getRepository(User);
   }

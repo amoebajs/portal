@@ -33,6 +33,8 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
 
 @Injectable()
 export class CompileTaskRepo extends BaseMysqlService {
+  protected _cacheKey = "compile_task";
+
   protected get repository() {
     return this.connection.getRepository(CompileTask);
   }

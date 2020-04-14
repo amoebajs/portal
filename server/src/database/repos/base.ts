@@ -9,6 +9,7 @@ import { Injectable } from "@nestjs/common";
 export interface IBaseListQueryOptions {
   current: number;
   size: number;
+  cacheKey?: string;
   orderKey?: string;
   orderBy?: "ASC" | "DESC";
 }
@@ -17,6 +18,7 @@ export interface IBaseListQueryOptions {
 export class BaseMysqlService {
   protected _connection!: Connection;
   protected _connected = new Subject<void>();
+  protected _cacheKey!: string;
 
   protected get connection() {
     if (!this._connection) {
@@ -44,11 +46,13 @@ export class BaseMysqlService {
       where: Record<string, any>;
       orderKey: string;
       orderBy: "ASC" | "DESC";
+      cacheKey?: string;
       more?: (builder: SelectQueryBuilder<M>) => SelectQueryBuilder<M>;
     },
   ) {
-    const { current, size, where, orderKey, orderBy, more } = options;
-    const builder = this.createWhereBuilder(repo, <any>where, "entry");
+    const { current, size, where, orderKey, orderBy, cacheKey, more } = options;
+    let builder = this.createWhereBuilder(repo, <any>where, "entry");
+    if (cacheKey !== void 0) builder = builder.cache(cacheKey, 60000);
     return (!more ? builder : more(builder))
       .skip((+current - 1) * +size)
       .take(+size)
@@ -75,6 +79,7 @@ export class BaseMysqlService {
       size = 20,
       orderKey = "createdAt",
       orderBy = "ASC",
+      cacheKey = this._cacheKey + "_list",
       ...where
     }: Record<string, any> & IBaseListQueryOptions,
     select?: (keyof M)[],
@@ -85,6 +90,7 @@ export class BaseMysqlService {
       where,
       orderBy,
       orderKey,
+      cacheKey,
       more: select && (builder => builder.select(<any[]>select.map(i => "entry." + i))),
     }).getManyAndCount();
     return {
@@ -96,7 +102,9 @@ export class BaseMysqlService {
   }
 
   protected async queryEntry<M>(repo: Repository<M>, where: Partial<M>) {
-    return this.createWhereBuilder(repo, where, "entry").getOne();
+    let builder = this.createWhereBuilder(repo, where, "entry");
+    if (this._cacheKey !== void 0) builder = builder.cache(this._cacheKey + "_entity", 60000);
+    return builder.getOne();
   }
 
   protected async updateEntry<M>(repo: Repository<M>, where: Partial<M>, updates: Partial<M>): Promise<boolean> {
@@ -107,11 +115,18 @@ export class BaseMysqlService {
           .reduce((p, c) => ({ ...p, [c[0]]: c[1] }), {}),
       )
       .execute();
-    return res?.raw?.affectedRows > 0;
+    const success = res?.raw?.affectedRows > 0;
+    if (success && this._cacheKey !== void 0) {
+      await this.connection.queryResultCache.remove([this._cacheKey]);
+    }
+    return success;
   }
 
   protected async createEntry<M>(repo: Repository<M>, updates: Partial<M>): Promise<string | number> {
     const res = await repo.insert(<any>{ ...updates });
+    if (this._cacheKey !== void 0) {
+      await this.connection.queryResultCache.remove([this._cacheKey]);
+    }
     return res.identifiers[0].id;
   }
 

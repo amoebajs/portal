@@ -31,6 +31,8 @@ export interface IUpdateOptions extends Partial<Omit<ICreateOptions, "creator">>
 
 @Injectable()
 export class PageVersionRepo extends BaseMysqlService {
+  protected _cacheKey = "page_version";
+
   protected get repository() {
     return this.connection.getRepository(PageVersion);
   }

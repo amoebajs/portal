@@ -4,7 +4,7 @@ import { QueryResultCache } from "typeorm/cache/QueryResultCache";
 import { QueryResultCacheOptions } from "typeorm/cache/QueryResultCacheOptions";
 
 export class MemoryQueryCache implements QueryResultCache {
-  private idCache: Map<string, QueryResultCacheOptions> = new Map();
+  private idCache: Map<string, Record<string, QueryResultCacheOptions>> = new Map();
   private queryCache: Map<string, QueryResultCacheOptions> = new Map();
 
   async connect(): Promise<void> {
@@ -21,14 +21,17 @@ export class MemoryQueryCache implements QueryResultCache {
 
   async getFromCache(options: QueryResultCacheOptions): Promise<QueryResultCacheOptions> {
     if (options.identifier === void 0) {
-      return this.idCache.get(options.identifier);
+      const data = this._getIdCacheContainer(options);
+      return data[options.query];
     }
     return this.queryCache.get(options.query);
   }
 
   async storeInCache(options: QueryResultCacheOptions, savedCache: QueryResultCacheOptions): Promise<void> {
     if (options.identifier === void 0) {
-      this.idCache.set(options.identifier, options);
+      const data = this._getIdCacheContainer(options);
+      data[options.query] = options;
+      this.idCache.set(options.identifier, data);
     } else {
       this.queryCache.set(options.query, options);
     }
@@ -49,5 +52,11 @@ export class MemoryQueryCache implements QueryResultCache {
     for (const id of identifiers) {
       this.idCache.delete(id);
     }
+  }
+
+  private _getIdCacheContainer(options: QueryResultCacheOptions) {
+    let data = this.idCache.get(options.identifier);
+    if (!data) this.idCache.set(options.identifier, (data = {}));
+    return data;
   }
 }
