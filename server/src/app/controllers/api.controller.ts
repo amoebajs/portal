@@ -4,11 +4,17 @@ import { Compiler } from "#services/compiler";
 import { User } from "#services/authentication";
 import { SetRoles, UseRolesAuthentication } from "#utils/roles";
 import { MysqlWorker } from "#services/database";
+import { UserRepo } from "#database/repos/user.repo";
 
 @Controller("api")
 @UseRolesAuthentication({ roles: ["admin"] })
 export class ApiController {
-  constructor(private readonly compiler: Compiler, private readonly worker: MysqlWorker, private readonly user: User) {}
+  constructor(
+    private readonly compiler: Compiler,
+    private readonly worker: MysqlWorker,
+    private readonly user: User,
+    private readonly users: UserRepo,
+  ) {}
 
   @Get("user")
   @SetRoles("admin")
@@ -26,15 +32,20 @@ export class ApiController {
     @Query("size") size: string,
     @Query("name") name: string,
   ) {
+    const pages = await this.worker.queryList("PAGE", {
+      name,
+      current: +current,
+      size: +size,
+      orderKey: "updatedAt",
+      orderBy: "DESC",
+    });
+    for (const page of pages.items) {
+      const infos = await this.users.query({ key: page.creator });
+      page.creator = infos.name;
+    }
     return {
       code: 0,
-      data: await this.worker.queryList("PAGE", {
-        name,
-        current: +current,
-        size: +size,
-        orderKey: "updatedAt",
-        orderBy: "DESC",
-      }),
+      data: pages,
     };
   }
 
@@ -45,19 +56,24 @@ export class ApiController {
     @Query("current") current: string,
     @Query("size") size: string,
   ) {
+    const configs = await this.worker.querySelectList(
+      "CONFIG",
+      {
+        pageId,
+        current: +current,
+        size: +size,
+        orderKey: "updatedAt",
+        orderBy: "DESC",
+      },
+      ["id", "name", "pageId", "createdAt", "updatedAt", "creator"],
+    );
+    for (const config of configs.items) {
+      const infos = await this.users.query({ key: config.creator });
+      config.creator = infos.name;
+    }
     return {
       code: 0,
-      data: await this.worker.querySelectList(
-        "CONFIG",
-        {
-          pageId,
-          current: +current,
-          size: +size,
-          orderKey: "updatedAt",
-          orderBy: "DESC",
-        },
-        ["id", "name", "pageId", "createdAt", "updatedAt", "creator"],
-      ),
+      data: configs,
     };
   }
 
@@ -69,19 +85,24 @@ export class ApiController {
     @Query("size") size: string,
     @Query("name") name: string,
   ) {
+    const versions = await this.worker.querySelectList(
+      "VERSION",
+      {
+        name,
+        current: +current,
+        size: +size,
+        orderKey: "updatedAt",
+        orderBy: "DESC",
+      },
+      ["id", "name", "pageId", "configId", "taskId", "creator", "createdAt", "updatedAt"],
+    );
+    for (const version of versions.items) {
+      const infos = await this.users.query({ key: version.creator });
+      version.creator = infos.name;
+    }
     return {
       code: 0,
-      data: await this.worker.querySelectList(
-        "VERSION",
-        {
-          name,
-          current: +current,
-          size: +size,
-          orderKey: "updatedAt",
-          orderBy: "DESC",
-        },
-        ["id", "name", "pageId", "configId", "taskId", "creator", "createdAt", "updatedAt"],
-      ),
+      data: versions,
     };
   }
 
