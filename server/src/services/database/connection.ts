@@ -1,8 +1,9 @@
 import * as path from "path";
+import { Subject } from "rxjs";
 import { Injectable } from "@nestjs/common";
 import { Connection, ConnectionOptions, createConnection } from "typeorm";
 import { Configs } from "#services/configs";
-import { Subject } from "rxjs";
+import { MemoryQueryCache } from "#database/providers/cache";
 
 export function createOrmOptions(
   user: string,
@@ -21,6 +22,7 @@ export function createOrmOptions(
     type: "mysql",
     synchronize,
     logging: false,
+    cache: { provider: () => new MemoryQueryCache() },
     entities: [path.resolve(__dirname, "..", "..", "database", "entity", "*{.ts,.js}")],
   };
 }
