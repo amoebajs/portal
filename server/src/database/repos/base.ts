@@ -20,6 +20,18 @@ export class BaseMysqlService {
   protected _connected = new Subject<void>();
   protected _cacheKey!: string;
 
+  protected get entityCacheKey() {
+    return this._cacheKey && this._cacheKey + "_entity";
+  }
+
+  protected get listCacheKey() {
+    return this._cacheKey && this._cacheKey + "_list";
+  }
+
+  protected get cacheKeys() {
+    return [this.entityCacheKey, this.listCacheKey];
+  }
+
   protected get connection() {
     if (!this._connection) {
       throw new Error("Invalid operation: mysql's connection is not ready");
@@ -79,7 +91,7 @@ export class BaseMysqlService {
       size = 20,
       orderKey = "createdAt",
       orderBy = "ASC",
-      cacheKey = this._cacheKey + "_list",
+      cacheKey = this._cacheKey && this.listCacheKey,
       ...where
     }: Record<string, any> & IBaseListQueryOptions,
     select?: (keyof M)[],
@@ -103,7 +115,7 @@ export class BaseMysqlService {
 
   protected async queryEntry<M>(repo: Repository<M>, where: Partial<M>) {
     let builder = this.createWhereBuilder(repo, where, "entry");
-    if (this._cacheKey !== void 0) builder = builder.cache(this._cacheKey + "_entity", 60000);
+    if (this._cacheKey !== void 0) builder = builder.cache(this.entityCacheKey, 60000);
     return builder.getOne();
   }
 
@@ -117,7 +129,7 @@ export class BaseMysqlService {
       .execute();
     const success = res?.raw?.affectedRows > 0;
     if (success && this._cacheKey !== void 0) {
-      await this.connection.queryResultCache.remove([this._cacheKey]);
+      await this.connection.queryResultCache.remove(this.cacheKeys);
     }
     return success;
   }
@@ -125,7 +137,7 @@ export class BaseMysqlService {
   protected async createEntry<M>(repo: Repository<M>, updates: Partial<M>): Promise<string | number> {
     const res = await repo.insert(<any>{ ...updates });
     if (this._cacheKey !== void 0) {
-      await this.connection.queryResultCache.remove([this._cacheKey]);
+      await this.connection.queryResultCache.remove(this.cacheKeys);
     }
     return res.identifiers[0].id;
   }

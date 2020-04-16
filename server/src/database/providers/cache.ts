@@ -20,7 +20,7 @@ export class MemoryQueryCache implements QueryResultCache {
   }
 
   async getFromCache(options: QueryResultCacheOptions): Promise<QueryResultCacheOptions> {
-    if (options.identifier === void 0) {
+    if (options.identifier !== void 0) {
       const data = this._getIdCacheContainer(options);
       return data[options.query];
     }
@@ -28,7 +28,7 @@ export class MemoryQueryCache implements QueryResultCache {
   }
 
   async storeInCache(options: QueryResultCacheOptions, savedCache: QueryResultCacheOptions): Promise<void> {
-    if (options.identifier === void 0) {
+    if (options.identifier !== void 0) {
       const data = this._getIdCacheContainer(options);
       data[options.query] = options;
       this.idCache.set(options.identifier, data);
