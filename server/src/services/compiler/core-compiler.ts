@@ -284,7 +284,7 @@ export class CoreCompiler implements CompileService<ICompileTask> {
     try {
       await this.builder.buildSource({
         entry: { app: entry },
-        output: { path: buildDir, filename: "[name].[hash].js" },
+        output: { path: buildDir, filename: "[name].[chunkhash].js" },
         plugins: [
           this.builder.webpackPlugins.createProgressPlugin({
             type: "trigger",
