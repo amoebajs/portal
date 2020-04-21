@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, Output, EventEmitter, ChangeDetectionStrategy } from "@angular/core";
+import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from "@angular/core";
 import { Builder, ICompileModule, IImportDeclaration } from "../../services/builder.service";
 
 export interface IEntityCreate {

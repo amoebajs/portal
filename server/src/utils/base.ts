@@ -1,4 +1,4 @@
-import { Provider, Module } from "@nestjs/common";
+import { Module, Provider } from "@nestjs/common";
 import { ModuleMetadata } from "@nestjs/common/interfaces";
 
 export interface IConstructor<T> {
