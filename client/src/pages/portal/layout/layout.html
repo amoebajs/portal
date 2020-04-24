@@ -77,7 +77,7 @@
   </nz-sider>
   <nz-layout class="container">
     <nz-header class="header">
-      <i class="trigger" nz-icon [nzType]="menuType" (click)="onMenuClock($event)"></i>
+      <i class="trigger" nz-icon [nzType]="menuType" (click)="onMenuClock()"></i>
       <div class="user-group" *ngIf="userInfos.logined">
         <i nz-icon nzType="user" nzTheme="outline"></i>
         <span>{{ userInfos.name }}</span>

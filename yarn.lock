@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@amoebajs/basic-modules@^0.0.1-alpha.1587612441431":
-  version "0.0.1-alpha.1587612441431"
-  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1587612441431.tgz#46770b3db32cde8f17255814648dcc1ffb0e890e"
-  integrity sha512-OCFMuv1+TA//7fUT6qgmi1i0fbofU/+NGYLKW6EHYZ6nRpsLkd6EBvwp6UkASw1AYFAFOrjzklxEyg/4Jr2OlA==
+"@amoebajs/basic-modules@^0.0.1-alpha.1587716313755":
+  version "0.0.1-alpha.1587716313755"
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1587716313755.tgz#419d9462d069783e9aac92587e15888cce562f76"
+  integrity sha512-ArX94wSx0+6Dzgfl+J79Y7CyDFsYpfn33UAy7K3tSWLZxC9z1UuwSzJf1Cww72k9ncIadj7hmvSPw4JxvvW/pw==
 
-"@amoebajs/builder@^0.0.2-alpha.1587612406495":
-  version "0.0.2-alpha.1587612406495"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1587612406495.tgz#c35903252419d887f37c899a82d138b55974129e"
-  integrity sha512-Ykph657rtNmPlaxL6WH8RbKRyci0474qYBacEehyWNEstib2VEaR/KcjGjUm8F6l0nyvtVveXVtbWSDrnGbJYQ==
+"@amoebajs/builder@^0.0.2-alpha.1587716157711":
+  version "0.0.2-alpha.1587716157711"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1587716157711.tgz#5377427b2ad2319f87415f86905e4ca731951fa8"
+  integrity sha512-duz+Rzu0Nh1ktmRGa/ImKYoWZ2fXD5F85zGeXF3pKpneE8y1F6HCWpk38Ms07krV4jtE8xMPKEJYAVt4Mbm8VA==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -42,10 +42,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/zent-ui@^0.0.1-alpha.1587612547762":
-  version "0.0.1-alpha.1587612547762"
-  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1587612547762.tgz#3a3fefb7d064287f2f1e4811e5687c0ef54cec2a"
-  integrity sha512-3u9yO+cpA1KtI9atP5zfM1vM1/SBZ6RgHb27MzdDgKHwG6SVknBsd5OjyiaqgfdQLGeGcxDCFmgroGLDVo0j9Q==
+"@amoebajs/zent-ui@^0.0.1-alpha.1587716359614":
+  version "0.0.1-alpha.1587716359614"
+  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1587716359614.tgz#23922fd321b97e4018a96d86403224496be6f847"
+  integrity sha512-F8I/ktg+DF+CTPqeNDEjbDOwbN2VUmFyjPYRA7qU4a/7V8kM/O2bmHM12orknEQtZI3WmuVirfqQ99ZrQR5QBg==
 
 "@angular-devkit/architect@0.900.7":
   version "0.900.7"
