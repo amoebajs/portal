@@ -107,7 +107,13 @@
 
 <ng-template #entityActions let-model="model" let-paths="paths" let-type="type">
   <div class="entity-actions">
-    <i nz-icon nzType="plus-square" nzTheme="outline" (click)="entityCreateClick(model, type, paths)"></i>
+    <i
+      *ngIf="type === 'component'"
+      nz-icon
+      nzType="plus-square"
+      nzTheme="outline"
+      (click)="entityCreateClick(model, type, paths)"
+    ></i>
     <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick(model, type, paths)"></i>
     <i nz-icon nzType="delete" nzTheme="outline" (click)="entityDeleteClick(model, type, paths)" class="delete-btn"></i>
   </div>
@@ -235,6 +241,10 @@
 
   .entity-actions {
     padding-right: 4px;
+  }
+
+  .entity-actions i {
+    margin-left: 4px;
   }
 
   .common-title .entity-actions {

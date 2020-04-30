@@ -4,7 +4,6 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } 
 import {
   Builder,
   ICompileContext,
-  ICompileTypeMeta,
   IComponentChildDefine,
   IDirectiveChildDefine,
   IGroupDefine,
@@ -13,11 +12,13 @@ import {
 import { IEntityCreate } from "../module-list/module-list.component";
 
 interface IDataInput {
+  define: IInputDefine;
   value: number | string | [any, any][] | null;
-  type: ICompileTypeMeta;
+  type: string;
   selectList?: boolean;
   enumValues?: { key: string | number; value: any }[];
   typeCheck?: (v: any) => boolean;
+  refObservables?: string[];
 }
 
 interface IEntityContext {
@@ -50,6 +51,7 @@ interface IGroup {
 }
 
 export interface IEntityEdit extends IEntityCreate {
+  /** 原始数据，编辑情况才会有 */
   source?: IComponentChildDefine | IDirectiveChildDefine;
 }
 
@@ -84,6 +86,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   onComplete = new EventEmitter<IEntityEditResult>();
 
   public entity!: IEntityContext;
+  public entities!: any[];
   public scope: IScope = {};
 
   constructor(private builder: Builder) {}
@@ -157,8 +160,24 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     this.entity.data.inputs[model.displayInfo.fullname].value = null;
   }
 
+  tryGetEntityDecos(id: string): string[] {
+    const found = this.entities.find(i => i.id === id)!;
+    const component = (this.context.components || []).find(i => i.id === found.ref)!;
+    const exist = this.builder.getComponent(component.module, component.name)!;
+    return <string[]>Object.entries(exist.metadata.observers.observables).map(([, v]) => v);
+  }
+
+  onSelectorChange(data: IDataInput) {
+    if (!data.value[0] || data.value[0] === null) return;
+    data.refObservables = this.tryGetEntityDecos(data.value[0]);
+    if (!data.refObservables.includes(data.value[1])) {
+      data.value[1] = null;
+    }
+  }
+
   private initContext(model: IEntityEdit) {
     this.entity = createDefaultEntity();
+    this.entities = this.readlAllEntities().filter(i => i.id !== model.id);
     this.entity.displayName = model.displayName || model.name;
     this.entity.idVersion = `${model.module}/${model.name}@${model.version}`;
     this.entity.attaches = Object.entries(model.metadata.attaches).map(([, d]) => d);
@@ -201,60 +220,123 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
 
   private initItemNgModel(fullname: string, propertyPath: string, model: IEntityEdit, d: IInputDefine) {
     const ngModel: IDataInput = (this.entity.data.inputs[fullname] = {
+      define: d,
       value: null,
       type: d.type.meta,
     });
     const forkData: any = cloneDeep(model.source || {});
-    const sourceValue = get(forkData.input, propertyPath, null);
-    if (d.type.meta === "string" || d.type.meta === "number" || d.type.meta === "boolean") {
-      ngModel.value = sourceValue === null ? null : sourceValue.expression;
-    } else if (d.type.meta === "map") {
-      ngModel.value = sourceValue === null ? [] : sourceValue.expression;
-      const keys = d.type.mapInfo.key;
-      ngModel.selectList = false;
-      if (Array.isArray(keys)) {
-        ngModel.typeCheck = v => keys.includes(v);
-        ngModel.selectList = true;
-      }
-      if (typeof keys === "function") {
-        ngModel.typeCheck = v => keys(v);
-      }
-      if (typeof keys === "string") {
-        ngModel.typeCheck = v => typeof v === "string";
-      }
-    } else if (d.type.meta === "enums") {
-      ngModel.value = sourceValue === null ? DEFAULT_ENUM_VALUE : sourceValue.expression;
-      const keys = d.type.enumsInfo;
-      ngModel.selectList = false;
-      const otherOptions = keys.map(k => ({ key: k, value: k }));
-      ngModel.enumValues = [{ key: DEFAULT_ENUM_VALUE_LABEL, value: DEFAULT_ENUM_VALUE }, ...otherOptions];
-      if (Array.isArray(keys)) {
-        ngModel.typeCheck = (v: any) => keys.includes(v);
-        ngModel.selectList = true;
-      }
+    const source = get(forkData.input, propertyPath, null);
+    if (this.isLiteralValueMode(d)) {
+      return this.useLiteralValue(ngModel, source, d);
     }
+    if (this.isLiteralMapMode(d)) {
+      return this.useLiteralMap(ngModel, source, d);
+    }
+    if (this.isLiteralEnumsMode(d)) {
+      return this.useLiteralEnums(ngModel, source, d);
+    }
+    if (this.isEntityRefObservable(d)) {
+      return this.useEntityRefObservable(ngModel, source);
+    }
+  }
+
+  private isLiteralEnumsMode(d: IInputDefine) {
+    return d.type.expressionType === "literal" && d.type.meta === "enums";
+  }
+
+  private isLiteralMapMode(d: IInputDefine) {
+    return d.type.expressionType === "literal" && d.type.meta === "map";
+  }
+
+  private isLiteralValueMode(d: IInputDefine) {
+    return (
+      d.type.expressionType === "literal" &&
+      (d.type.meta === "string" || d.type.meta === "number" || d.type.meta === "boolean")
+    );
+  }
+
+  private isEntityRefObservable(d: IInputDefine) {
+    return d.type.expressionType === "entityRef" && d.type.entityRefType === "observable";
+  }
+
+  private useLiteralValue(model: IDataInput, value: any, d: IInputDefine) {
+    model.type = "literal-" + d.type.meta;
+    model.value = value === null ? null : value.expression;
+  }
+
+  private useLiteralMap(model: IDataInput, value: any, d: IInputDefine) {
+    model.type = "literal-map";
+    model.value = value === null ? [] : value.expression;
+    const keys = d.type.mapInfo.key;
+    model.selectList = false;
+    if (Array.isArray(keys)) {
+      model.typeCheck = v => keys.includes(v);
+      model.selectList = true;
+    }
+    if (typeof keys === "function") {
+      model.typeCheck = v => keys(v);
+    }
+    if (typeof keys === "string") {
+      model.typeCheck = v => typeof v === "string";
+    }
+  }
+
+  private useLiteralEnums(model: IDataInput, value: any, d: IInputDefine) {
+    model.type = "literal-enums";
+    model.value = value === null ? DEFAULT_ENUM_VALUE : value.expression;
+    const keys = d.type.enumsInfo;
+    model.selectList = false;
+    const otherOptions =
+      typeof keys === "function" ? [] : Array.isArray(keys) ? keys.map(k => ({ key: k, value: k })) : keys.allowValues;
+    model.enumValues = [{ key: DEFAULT_ENUM_VALUE_LABEL, value: DEFAULT_ENUM_VALUE }, ...otherOptions];
+    if (Array.isArray(keys)) {
+      model.typeCheck = (v: any) => keys.includes(v);
+      model.selectList = true;
+    }
+  }
+
+  private useEntityRefObservable(model: IDataInput, value: any) {
+    model.type = "entyti-ref-observable";
+    model.value = value === null ? [null, null] : [value.expression.ref, value.expression.expression];
+    this.onSelectorChange(model);
+  }
+
+  private readlAllEntities(target: IComponentChildDefine | IDirectiveChildDefine = this.context.page!) {
+    const list: any[] = [];
+    const hack = <IComponentChildDefine>target;
+    list.push(...(hack?.children || []));
+    list.push(...(hack?.directives || []));
+    for (const iterator of hack?.children || []) {
+      list.push(...this.readlAllEntities(iterator));
+    }
+    for (const iterator of hack?.directives || []) {
+      list.push(...this.readlAllEntities(iterator));
+    }
+    return list;
   }
 
   private clearData(data: { inputs: Record<string, IDataInput> }) {
     for (const key in data.inputs) {
       if (data.inputs.hasOwnProperty(key)) {
         const element = data.inputs[key];
-        if (element.type === "string" || element.type === "number") {
-          if (element.value === null) {
-            delete data.inputs[key];
-          }
-          continue;
-        } else if (element.type === "map") {
-          if (Array.isArray(element.value)) {
-            if (element.value.length === 0) {
+        if (element.type.startsWith("literal")) {
+          if (element.type === "literal-string" || element.type === "literal-number") {
+            if (element.value === null) {
               delete data.inputs[key];
             }
-            element.value = element.value.filter(i => i[1] !== null);
-          }
-          continue;
-        } else if (element.type === "enums") {
-          if (element.value === DEFAULT_ENUM_VALUE) {
-            delete data.inputs[key];
+            continue;
+          } else if (element.type === "literal-map") {
+            if (Array.isArray(element.value)) {
+              if (element.value.length === 0) {
+                delete data.inputs[key];
+              }
+              element.value = element.value.filter(i => i[1] !== null);
+            }
+            continue;
+          } else if (element.type === "literal-enums") {
+            if (element.value === DEFAULT_ENUM_VALUE) {
+              delete data.inputs[key];
+            }
           }
         }
       }
@@ -267,11 +349,20 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
       if (data.inputs.hasOwnProperty(key)) {
         const element = data.inputs[key];
         const [group, realKey] = key.split(".");
-        if (!newInputs[group]) newInputs[group] = {};
-        (group === "default" ? newInputs : newInputs[group])[realKey] = {
-          type: "literal",
+        console.log([group, realKey, element.value]);
+        if (group !== "default" && !newInputs[group]) newInputs[group] = {};
+        const container = group === "default" ? newInputs : newInputs[group];
+        container[realKey] = {
+          type: element.define.type.expressionType,
           expression: element.value,
         };
+        if (this.isEntityRefObservable(element.define)) {
+          container[realKey].expression = {
+            type: "observable",
+            ref: element.value[0],
+            expression: element.value[1],
+          };
+        }
       }
     }
     data.inputs = newInputs;

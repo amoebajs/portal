@@ -37,8 +37,9 @@
     <div [class.editor-column-hidden]="!showPreview.edit" class="editor-column preview-trees">
       <textarea
         *ngIf="showEditor === 'config'"
-        style="height: 80vh"
         rows="36"
+        spellcheck="false"
+        class="textarea-yaml-styles"
         nz-input
         [(ngModel)]="pageConfigs"
         (ngModelChange)="onTextareaChange($event)"
@@ -215,5 +216,13 @@
   .windows-search i {
     transform: rotateY(180deg);
     margin-right: 8px;
+  }
+
+  .textarea-yaml-styles {
+    height: 80vh;
+    font-size: 1em;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: #484848;
+    background-color: #fcfcfc;
   }
 </style>

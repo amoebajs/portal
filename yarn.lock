@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@amoebajs/basic-modules@^0.0.1-alpha.1587974139827":
-  version "0.0.1-alpha.1587974139827"
-  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1587974139827.tgz#e789d6084e43821691f348a0e04bbb9b6a4941a1"
-  integrity sha512-E6V2UM7cptLU3nanhoPN/QXuEYeqb4NfD8yit3SISVseLM8NfK+XB5+z7cdDTJ2A7QM6a5mb4lUxHOPARWyt+g==
+"@amoebajs/basic-modules@^0.0.1-alpha.1588218393163":
+  version "0.0.1-alpha.1588218393163"
+  resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1588218393163.tgz#0b029734a36d33eeca20ab95b681b4fba7d10b03"
+  integrity sha512-duIq9QjOG5ggIxXTFy7WeXvpPohDonzvhy6F1kF691Ps/LKnTNiT8jAeQYnLOGXyI6CCvB9gt9Za+5oBYnIJSw==
 
-"@amoebajs/builder@^0.0.2-alpha.1587895615458":
-  version "0.0.2-alpha.1587895615458"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1587895615458.tgz#c41d2f4ece595d1b9a6ab950c848b2a9ca439553"
-  integrity sha512-0VP6IFxwZJ0+vdBOEMT1uJPK5qPuSvpag2SiQPhB1Wh2QdQ4uyJlkUm9JoBOGlOehOMI88wPqYlt80dLGfKxIQ==
+"@amoebajs/builder@^0.0.2-alpha.1588234033238":
+  version "0.0.2-alpha.1588234033238"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1588234033238.tgz#cf05f18defa8119fe8d6205bf101218bf7c9a03f"
+  integrity sha512-9aOFJgOPM6sBoCRm8+42UzkbxpsdeBG6daHbO675cgKcDbTq3S+MHewRtglr12f0S9OVQTub1Sn8DEt811lZGA==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -35,6 +35,7 @@
     react "^16.12.0"
     reflect-metadata "^0.1.13"
     style-loader "^1.0.1"
+    ts-import-plugin "^1.6.6"
     ts-loader "^6.2.1"
     tslib "^1.10.0"
     typescript "^3.7.2"
@@ -42,10 +43,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/zent-ui@^0.0.1-alpha.1587974186159":
-  version "0.0.1-alpha.1587974186159"
-  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1587974186159.tgz#7ea921e957fc6cd6bde1c702373d52515dba5e0f"
-  integrity sha512-3e2ei8PG3aBznWZQ4julVDyOlri9KV5cIE94dAjyTkPUhRneMpdEcmbpXxBU0idj8y742wiYEltofFIzbuS+sw==
+"@amoebajs/zent-ui@^0.0.1-alpha.1588228581570":
+  version "0.0.1-alpha.1588228581570"
+  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1588228581570.tgz#170935ef4974ddaa99888cf5c0a4c47311f05db2"
+  integrity sha512-/X7tXk85fkpT10QXa4/kUDOMYhRfWA3OU7OUBEKOeGe3T95Br1ZQL2eKcybX8mN83j4lo15sl8hKE1OupKC+kg==
 
 "@angular-devkit/architect@0.900.7":
   version "0.900.7"
@@ -11281,6 +11282,13 @@ ts-import-plugin@^1.6.2:
   dependencies:
     tslib "^1.10.0"
 
+ts-import-plugin@^1.6.6:
+  version "1.6.6"
+  resolved "https://registry.npmjs.org/ts-import-plugin/-/ts-import-plugin-1.6.6.tgz#d348f0e16bca7ffef74cc582cee10ad0e73204bf"
+  integrity sha512-u0c1YsVlKIALIkei0qqsCY3CcfOl+WdOKy0keTQM5T75jd2eLfuLJwsnhtHxstW9Ha51kZADHXj4EfP+Z0C+tQ==
+  dependencies:
+    tslib "^1.11.1"
+
 ts-jest@^24.1.0:
   version "24.3.0"
   resolved "https://registry.npm.taobao.org/ts-jest/download/ts-jest-24.3.0.tgz#b97814e3eab359ea840a1ac112deae68aa440869"
@@ -11368,7 +11376,7 @@ tslib@1.10.0, tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha1-w8GflZc/sKYpc/sJ2Q2WHuQ+XIo=
 
-tslib@1.11.1, tslib@^1.7.1:
+tslib@1.11.1, tslib@^1.11.1, tslib@^1.7.1:
   version "1.11.1"
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
   integrity sha1-6xXRKIJ/vuKEFUnhcfRe0zisfjU=

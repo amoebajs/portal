@@ -58,11 +58,7 @@ export interface IInputDefine {
   };
   group: string | null;
   description: string | null;
-  type: {
-    meta: ICompileTypeMeta;
-    enumsInfo: (string | number)[] | null;
-    mapInfo: { key: any[] | Function; value: any } | null;
-  };
+  type: import("@amoebajs/builder").IMetaType;
 }
 
 export interface IGroupDefine {
@@ -172,17 +168,20 @@ export class Builder {
     return this.builder["globalMap"].getComposition(module, name);
   }
 
-  public async createSource(configs: import("@amoebajs/builder").IPageCreateOptions) {
+  public async createSource(configs: import("@amoebajs/builder").IPageCreateOptions, mode: "ts" | "js" = "js") {
     if (!this._onLoad.getValue()) throw new Error("websdk has not been loaded.");
     return this.builder.createSource({
       configs,
       prettier: false,
-      transpile: {
-        module: "es2015",
-        target: "es2015",
-        enabled: true,
-        jsx: "react",
-      },
+      transpile:
+        mode === "js"
+          ? {
+              module: "es2015",
+              target: "es2015",
+              enabled: true,
+              jsx: "react",
+            }
+          : { enabled: false },
     });
   }
 }

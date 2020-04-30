@@ -18,9 +18,9 @@
     "update:core": "yarn add @amoebajs/builder @amoebajs/basic-modules @amoebajs/zent-ui --registry=https://registry.npmjs.org"
   },
   "dependencies": {
-    "@amoebajs/basic-modules": "^0.0.1-alpha.1587974139827",
-    "@amoebajs/builder": "^0.0.2-alpha.1587895615458",
-    "@amoebajs/zent-ui": "^0.0.1-alpha.1587974186159",
+    "@amoebajs/basic-modules": "^0.0.1-alpha.1588218393163",
+    "@amoebajs/builder": "^0.0.2-alpha.1588234033238",
+    "@amoebajs/zent-ui": "^0.0.1-alpha.1588228581570",
     "@nestjs/common": "^6.7.2",
     "@nestjs/core": "^6.7.2",
     "@nestjs/platform-express": "^6.7.2",

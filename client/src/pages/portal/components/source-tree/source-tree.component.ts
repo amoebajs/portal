@@ -16,7 +16,9 @@ import { NzModalRef, NzModalService } from "ng-zorro-antd";
 import {
   Builder,
   ICompileContext,
+  IComponentChildDefine,
   IComponentDefine,
+  IDirectiveChildDefine,
   IDirectiveDefine,
   IPageDefine,
 } from "../../services/builder.service";
@@ -151,7 +153,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     }
     this.lastModalOk = false;
     this.tempParentPath = (paths && paths.split("#")) || [];
-    this.tempParentPath.push(`${type}::` + model.id);
+    this.tempParentPath.push(`${type}::` + model?.id ?? "undefined");
     this.tempParentPath.push(`target::` + "");
     this.modelRef = this.modal.create({
       nzTitle: "创建节点",
@@ -190,7 +192,9 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
-    const { found, path, index } = this.findPath((paths && paths.split("#")) || [], { id: model.id, type });
+    const pathlist = (paths && paths.split("#")) || [];
+    pathlist.push("target::" + model.id);
+    const { found, path, index } = this.findPath(pathlist, { id: model.id, type });
     if (found) {
       this.willDelete = found;
       const ref = this.modal.warning({
@@ -261,8 +265,9 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.lastModalOk) return;
     this.createOrUpdateNode(e);
     this.tempParentPath = [];
-    this.onContextChange.emit(this.context);
-    this.initTree(this.context);
+    const context = callContextValidation(this.context);
+    this.onContextChange.emit(context);
+    this.initTree(context);
   }
 
   private createOrUpdateNode(e: IEntityEditResult) {
@@ -415,6 +420,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private initTree(context: ICompileContext) {
+    const oldTree = this.tree;
     const components = (context.components || []).map(i => ({
       ...i,
       displayInfo: {
@@ -436,7 +442,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         expanded: false,
       },
     }));
-    const oldTree = this.tree;
     this.tree = {
       page: null,
       directives,
@@ -451,24 +456,33 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       this.tree.direExpanded = oldTree.direExpanded;
     }
     if (context.page) {
-      this.tree.page = context.page && this.getEntityDisplayName(context.page);
+      this.tree.page = context.page && this.getEntityDisplayName(context.page, oldTree?.page);
     }
   }
 
-  private getEntityDisplayName(target: IDisplayEntity | IPageDefine): IDisplay<IDisplayEntity> {
-    const { ref } = target;
-    const { children, directives, compositions, ...others } = target;
+  private getEntityDisplayName(
+    target: IDisplayEntity | IPageDefine,
+    old?: IDisplay<IDisplayEntity>,
+  ): IDisplay<IDisplayEntity> {
+    const { ref, children, directives, compositions, ...others } = target;
     let comp = this.tree.components.find(i => i.id === ref);
     if (!comp) comp = this.tree.compositions.find(i => i.id === ref);
     if (comp) {
       return {
         ...others,
-        children: (children || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
-        directives: (directives || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
-        compositions: (compositions || []).map(i => this.getEntityDisplayName(i)).filter(i => !!i),
+        ref,
+        children: (children || [])
+          .map((i, index) => this.getEntityDisplayName(i, old?.children?.[index]))
+          .filter(i => !!i),
+        directives: (directives || [])
+          .map((i, index) => this.getEntityDisplayName(i, old?.directives?.[index]))
+          .filter(i => !!i),
+        compositions: (compositions || [])
+          .map((i, index) => this.getEntityDisplayName(i, old?.compositions?.[index]))
+          .filter(i => !!i),
         displayInfo: {
           displayName: comp.displayInfo.displayName,
-          expanded: true,
+          expanded: old?.displayInfo?.expanded ?? true,
         },
       };
     }
@@ -476,9 +490,10 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     if (dire) {
       return {
         ...others,
+        ref,
         displayInfo: {
           displayName: dire.displayInfo.displayName,
-          expanded: true,
+          expanded: old?.displayInfo?.expanded ?? true,
         },
       };
     }
@@ -519,9 +534,26 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 }
 
+function getAllEntities(
+  target: IComponentChildDefine | IDirectiveChildDefine = this.context.page!,
+): IDirectiveChildDefine[] {
+  const list: IDirectiveChildDefine[] = [];
+  const hack = <IComponentChildDefine>target;
+  list.push(...(hack.children || []));
+  list.push(...(hack.directives || []));
+  for (const iterator of hack.children || []) {
+    list.push(...getAllEntities(iterator));
+  }
+  for (const iterator of hack.directives || []) {
+    list.push(...getAllEntities(iterator));
+  }
+  return list;
+}
+
 export function callContextValidation(ctx: ICompileContext) {
   const context = ctx;
   const page = context.page;
+  const entities = [page, ...getAllEntities(page)];
   if (!page) {
     context.components = [];
     context.directives = [];
@@ -536,11 +568,16 @@ export function callContextValidation(ctx: ICompileContext) {
   (context.directives || []).forEach(e => (importGroup[e.id] = { type: "d", value: e }));
   (context.compositions || []).forEach(e => (importGroup[e.id] = { type: "cs", value: e }));
   doChildrenRefCheck(page, importGroup, { existComponents, existCompositions, existDirectives }, true);
-  context.components = Object.entries(existComponents).map(([, e]) => e);
-  context.directives = Object.entries(existDirectives).map(([, e]) => e);
-  context.compositions = Object.entries(existCompositions).map(([, e]) => e);
-  // console.log(context);
-  return { ...context };
+  const components = shakeUselessImports(entities, existComponents);
+  const directives = shakeUselessImports(entities, existDirectives);
+  const compositions = shakeUselessImports(entities, existCompositions);
+  return { provider: context.provider, components, directives, compositions, page: context.page };
+}
+
+function shakeUselessImports(entities: IDirectiveChildDefine[], items: Record<string, any>) {
+  return Object.entries(items)
+    .map(([, e]) => e)
+    .filter(c => entities.findIndex(i => i.ref === c.id) >= 0);
 }
 
 interface IPayload {
@@ -595,5 +632,6 @@ function createDefaultConfigs(): ICompileContext {
     provider: "react",
     components: [],
     directives: [],
+    compositions: [],
   };
 }

@@ -41,24 +41,24 @@
 </div>
 
 <ng-template #optionItem let-model="model" let-group="group" let-data="data">
-  <ng-container [ngSwitch]="model.type.meta">
-    <div *ngSwitchCase="'string'" class="input-layout">
+  <ng-container [ngSwitch]="data.type">
+    <div *ngSwitchCase="'literal-string'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="stringColorGroup; context: { model: model, data: data }"></ng-container>
     </div>
-    <div *ngSwitchCase="'number'" class="input-layout">
+    <div *ngSwitchCase="'literal-number'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="numberGroup; context: { model: model, data: data }"></ng-container>
     </div>
-    <div *ngSwitchCase="'boolean'" class="input-layout">
+    <div *ngSwitchCase="'literal-boolean'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="booleanGroup; context: { model: model, data: data }"></ng-container>
     </div>
-    <div *ngSwitchCase="'enums'" class="input-layout">
+    <div *ngSwitchCase="'literal-enums'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="enumsGroup; context: { model: model, data: data }"></ng-container>
     </div>
-    <div *ngSwitchCase="'map'" class="map-layout">
+    <div *ngSwitchCase="'literal-map'" class="map-layout">
       <div class="map-layout-title">
         <div class="map-label">{{ model.displayInfo.displayName }}</div>
         <div class="map-add-btn">
@@ -66,6 +66,10 @@
           <ng-container *ngTemplateOutlet="mapItemGroup; context: { model: model, data: data }"></ng-container>
         </div>
       </div>
+    </div>
+    <div *ngSwitchCase="'entyti-ref-observable'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="entityRefObservableGroup; context: { model: model, data: data }"></ng-container>
     </div>
     <div *ngSwitchDefault class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
@@ -110,6 +114,17 @@
     </nz-select>
     <input class="x-value" nz-input [(ngModel)]="item[1]" />
     <button class="x-delete" nz-button nzType="danger" (click)="removeMapEntry(model, idx)">删除</button>
+  </div>
+</ng-template>
+
+<ng-template #entityRefObservableGroup let-model="model" let-data="data">
+  <div class="enref-obsr-content">
+    <nz-select class="x-selector" [(ngModel)]="data.value[0]" (ngModelChange)="onSelectorChange(data)">
+      <nz-option *ngFor="let option of entities" [nzLabel]="option.id" [nzValue]="option.id"></nz-option>
+    </nz-select>
+    <nz-select class="x-target" *ngIf="data.refObservables" [(ngModel)]="data.value[1]">
+      <nz-option *ngFor="let option of data.refObservables" [nzLabel]="option" [nzValue]="option"></nz-option>
+    </nz-select>
   </div>
 </ng-template>
 
@@ -243,5 +258,20 @@
 
   .number-input-group button {
     margin-left: 8px;
+  }
+
+  .enref-obsr-content {
+    margin: 4px 0 0 0;
+    width: 480px;
+    display: flex;
+  }
+
+  .enref-obsr-content .x-selector {
+    flex: 2;
+    margin-right: 8px;
+  }
+
+  .enref-obsr-content .x-target {
+    flex: 1;
   }
 </style>

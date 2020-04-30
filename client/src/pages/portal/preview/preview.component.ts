@@ -111,6 +111,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
       console.log(JSON.stringify(newValue, null, "  "));
       this.createContext = callContextValidation(newValue);
       this.trackPreviewIfNeed();
+      this.builder.createSource(<any>this.createContext, "ts").then(r => console.log(r.sourceCode));
     } catch (error) {
       console.log(error);
     }
