@@ -43,10 +43,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/zent-ui@^0.0.1-alpha.1588228581570":
-  version "0.0.1-alpha.1588228581570"
-  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1588228581570.tgz#170935ef4974ddaa99888cf5c0a4c47311f05db2"
-  integrity sha512-/X7tXk85fkpT10QXa4/kUDOMYhRfWA3OU7OUBEKOeGe3T95Br1ZQL2eKcybX8mN83j4lo15sl8hKE1OupKC+kg==
+"@amoebajs/zent-ui@^0.0.1-alpha.1588242140397":
+  version "0.0.1-alpha.1588242140397"
+  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1588242140397.tgz#650d0e18aae43903734c81a322fa7e5fa62b98f2"
+  integrity sha512-f55AHwrBIuvSuD/vQVlikbpFyvxJWMWG3EeBD80UOQCLJsS31z5muo3SQlME/FQI6wp0ntFZ9zqT4WbND1fHtA==
 
 "@angular-devkit/architect@0.900.7":
   version "0.900.7"
