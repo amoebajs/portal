@@ -194,7 +194,10 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     const pathlist = (paths && paths.split("#")) || [];
     pathlist.push("target::" + model.id);
+    console.log(pathlist);
+    console.log({ id: model.id, type });
     const { found, path, index } = this.findPath(pathlist, { id: model.id, type });
+    console.log([found, path, index]);
     if (found) {
       this.willDelete = found;
       const ref = this.modal.warning({
@@ -408,10 +411,15 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
           target = list[lastIndex];
           path += `['directives']`;
         } else {
-          list = target.children || [];
-          lastIndex = list.findIndex(i => i.id === sgmValue);
-          target = list[lastIndex];
-          path += `['children']`;
+          if (isRoot) {
+            path += "['page']";
+            isRoot = false;
+          } else {
+            list = target.children || [];
+            lastIndex = list.findIndex(i => i.id === sgmValue);
+            target = list[lastIndex];
+            path += `['children']`;
+          }
         }
         continue;
       }
@@ -534,9 +542,8 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 }
 
-function getAllEntities(
-  target: IComponentChildDefine | IDirectiveChildDefine = this.context.page!,
-): IDirectiveChildDefine[] {
+function getAllEntities(target?: IComponentChildDefine | IDirectiveChildDefine): IDirectiveChildDefine[] {
+  if (!target) return [];
   const list: IDirectiveChildDefine[] = [];
   const hack = <IComponentChildDefine>target;
   list.push(...(hack.children || []));
