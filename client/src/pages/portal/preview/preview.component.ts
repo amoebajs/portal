@@ -92,6 +92,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 
   onEditorClick(value: any) {
     if (value === "config") {
+      console.log(this.createContext);
       this.pageConfigs = yamljs.safeDump(this.createContext);
     }
     this.showEditor = value;

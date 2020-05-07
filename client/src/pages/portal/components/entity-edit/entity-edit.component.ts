@@ -10,6 +10,9 @@ import {
   IInputDefine,
 } from "../../services/builder.service";
 import { IEntityCreate } from "../module-list/module-list.component";
+import { NzMessageService } from "ng-zorro-antd";
+
+type IEntity = IComponentChildDefine | IDirectiveChildDefine;
 
 interface IDataInput {
   define: IInputDefine;
@@ -57,12 +60,19 @@ export interface IEntityEdit extends IEntityCreate {
 
 export interface IEntityEditResult {
   id: string;
+  parentId?: string;
   updateId: string;
   module: string;
   name: string;
   type: "component" | "directive" | "composition";
   version: string | number;
   input: Record<string, any>;
+  attach: Record<string, any>;
+}
+
+interface IAttachItem {
+  define: any;
+  value: any;
 }
 
 const DEFAULT_ENUM_VALUE_LABEL = "默认值";
@@ -82,18 +92,23 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   @Input()
   parents: string[] = [];
 
+  @Input()
+  parent!: IComponentChildDefine;
+
   @Output()
   onComplete = new EventEmitter<IEntityEditResult>();
 
+  @Output()
+  onValid = new EventEmitter<boolean>(true);
+
   public entity!: IEntityContext;
-  public entities!: any[];
+  public entities!: IEntity[];
+  public attaches!: any[];
   public scope: IScope = {};
 
-  constructor(private builder: Builder) {}
+  constructor(private builder: Builder, private message: NzMessageService) {}
 
-  ngOnInit(): void {
-    this.initContext(this.target);
-  }
+  ngOnInit(): void {}
 
   ngOnChanges(changes: import("@angular/core").SimpleChanges): void {
     for (const key in changes) {
@@ -113,12 +128,14 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     const { inputs } = data;
     this.onComplete.emit({
       id: this.target.id,
+      parentId: this.parent?.id,
       updateId: entityId,
       module: this.target.module,
       name: this.target.name,
       type: this.target.type,
       version: this.target.version,
       input: inputs,
+      attach: this.reduceAttaches(),
     });
   }
 
@@ -129,8 +146,12 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     return false;
   }
 
-  onModelChange() {
-    // console.log(this.entity.data);
+  onModelChange(data: any) {
+    const valid = this.entities.findIndex(i => i.id === data) < 0;
+    this.onValid.emit(valid);
+    if (!valid) {
+      this.message.error("Invalid params.");
+    }
   }
 
   addMapEntry(model: IDisplayInput) {
@@ -162,8 +183,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
 
   tryGetEntityDecos(id: string): string[] {
     const found = this.entities.find(i => i.id === id)!;
-    const component = (this.context.components || []).find(i => i.id === found.ref)!;
-    const exist = this.builder.getComponent(component.module, component.name)!;
+    const exist = this.getComponentByRef(found.ref);
     return <string[]>Object.entries(exist.metadata.observers.observables).map(([, v]) => v);
   }
 
@@ -176,8 +196,9 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private initContext(model: IEntityEdit) {
+    this.setContextEntities(model);
+    this.setParentAttaches(model);
     this.entity = createDefaultEntity();
-    this.entities = this.readlAllEntities().filter(i => i.id !== model.id);
     this.entity.displayName = model.displayName || model.name;
     this.entity.idVersion = `${model.module}/${model.name}@${model.version}`;
     this.entity.attaches = Object.entries(model.metadata.attaches).map(([, d]) => d);
@@ -216,6 +237,37 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
     this.entity.inputs = Object.entries(groups).map(([, g]) => g);
     this.entity.entityId = model.id;
     this.entity.init = true;
+  }
+
+  private reduceAttaches(): Record<string, any> {
+    return (this.attaches ?? [])
+      .filter(i => i.value !== null)
+      .reduce((p, c) => ({ ...p, [c.define.name.value]: c.value }), {});
+  }
+
+  private setContextEntities(model: IEntityEdit) {
+    this.entities = this.readlAllEntities().filter(i => i.id !== model.id);
+  }
+
+  private setParentAttaches(model: IEntityEdit) {
+    if (!this.parent) return;
+    const parentComp = this.getComponentByRef(this.parent.ref);
+    if (!parentComp) return;
+    this.attaches = [];
+    const entries = Object.entries(parentComp.metadata.attaches);
+    for (const [key, item] of entries) {
+      const attach = { define: item, value: null };
+      const found = this.parent.attach?.[key]?.expression.find((i: any) => i.id === model.id);
+      if (found) {
+        attach.value = found.value;
+      }
+      this.attaches.push(attach);
+    }
+  }
+
+  private getComponentByRef(ref: string) {
+    const component = (this.context.components || []).find(i => i.id === ref)!;
+    return this.builder.getComponent(component.module, component.name)!;
   }
 
   private initItemNgModel(fullname: string, propertyPath: string, model: IEntityEdit, d: IInputDefine) {
@@ -304,8 +356,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   private readlAllEntities(target: IComponentChildDefine | IDirectiveChildDefine = this.context.page!) {
     const list: any[] = [];
     const hack = <IComponentChildDefine>target;
-    list.push(...(hack?.children || []));
-    list.push(...(hack?.directives || []));
+    list.push(target);
     for (const iterator of hack?.children || []) {
       list.push(...this.readlAllEntities(iterator));
     }

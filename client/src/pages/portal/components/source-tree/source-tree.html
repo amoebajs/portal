@@ -55,13 +55,13 @@
   </div>
 </ng-template>
 
-<ng-template #entityNode let-model="model" let-paths="paths" let-type="type">
+<ng-template #entityNode let-model="model" let-paths="paths" let-type="type" let-parent="parent">
   <div *ngIf="model" class="section" [class.not-root]="!!paths">
     <div class="common-decla">
       <div class="common-title">
         <ng-container *ngTemplateOutlet="entityTitleContent; context: { model: model, type: type }"></ng-container>
         <ng-container
-          *ngTemplateOutlet="entityActions; context: { model: model, paths: paths, type: type }"
+          *ngTemplateOutlet="entityActions; context: { model: model, paths: paths, parent: parent, type: type }"
         ></ng-container>
       </div>
       <div class="entity-children" *ngIf="checkIfShowChildren(model, 'directive')">
@@ -69,6 +69,7 @@
           <ng-container
             *ngTemplateOutlet="entityNode; context: {
               model: node,
+              parent: model,
               paths: pushModelPathSection(type, model, paths),
               type: 'directive'
             }"
@@ -80,6 +81,7 @@
           <ng-container
             *ngTemplateOutlet="entityNode; context: {
               model: node,
+              parent: model,
               paths: pushModelPathSection(type, model, paths),
               type: 'component'
             }"
@@ -105,16 +107,16 @@
   </div>
 </ng-template>
 
-<ng-template #entityActions let-model="model" let-paths="paths" let-type="type">
+<ng-template #entityActions let-model="model" let-paths="paths" let-type="type" let-parent="parent">
   <div class="entity-actions">
     <i
       *ngIf="type === 'component'"
       nz-icon
       nzType="plus-square"
       nzTheme="outline"
-      (click)="entityCreateClick(model, type, paths)"
+      (click)="entityCreateClick(model, parent, type, paths)"
     ></i>
-    <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick(model, type, paths)"></i>
+    <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick(model, parent, type, paths)"></i>
     <i nz-icon nzType="delete" nzTheme="outline" (click)="entityDeleteClick(model, type, paths)" class="delete-btn"></i>
   </div>
 </ng-template>
@@ -152,9 +154,11 @@
 <ng-template #entityEditContent>
   <div class="model-slide-edit" *ngIf="tempEntityData">
     <app-portal-entity-edit
-      [target]="tempEntityData"
       [context]="context"
+      [target]="tempEntityData"
+      [parent]="tempParentRef"
       [parents]="tempParentPath || []"
+      (onValid)="receiveEmitEntityValid($event)"
       (onComplete)="receiveEmitEntity($event)"
     ></app-portal-entity-edit>
   </div>
@@ -184,7 +188,9 @@
   <div *ngIf="!tree.page" class="empty-state">
     <nz-result nzIcon="meh-twotone" nzTitle="当前页面空无一物">
       <div nz-result-extra>
-        <button nz-button nzType="primary" (click)="entityCreateClick(null, 'component')">点击创建页面根</button>
+        <button nz-button nzType="primary" (click)="entityCreateClick(null, undefined, 'component')">
+          点击创建页面根
+        </button>
       </div>
     </nz-result>
   </div>

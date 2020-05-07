@@ -7,10 +7,10 @@
   resolved "https://registry.npmjs.org/@amoebajs/basic-modules/-/basic-modules-0.0.1-alpha.1588218393163.tgz#0b029734a36d33eeca20ab95b681b4fba7d10b03"
   integrity sha512-duIq9QjOG5ggIxXTFy7WeXvpPohDonzvhy6F1kF691Ps/LKnTNiT8jAeQYnLOGXyI6CCvB9gt9Za+5oBYnIJSw==
 
-"@amoebajs/builder@^0.0.2-alpha.1588739863971":
-  version "0.0.2-alpha.1588739863971"
-  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1588739863971.tgz#15b47934164332eb68fc3402a36ac1e77abbff24"
-  integrity sha512-yw1TUG7IYzDIu9KtMKr+xTKGJhqzp5M4T0PP7TkP4o0Ag1H3FsshK/+MhdHl3zUWg6VmmFfSerblcijwHS3P/Q==
+"@amoebajs/builder@^0.0.2-alpha.1588835034659":
+  version "0.0.2-alpha.1588835034659"
+  resolved "https://registry.npmjs.org/@amoebajs/builder/-/builder-0.0.2-alpha.1588835034659.tgz#9970070f4704ae78500e728f1803e439a021ffb9"
+  integrity sha512-5MSArQZpnzXk0FYW+j0RfAz3LpvY39PekBxmpgu3fbvnufsOmkwrKcOo4WIi8Eg3zJjmP+zNyYpD2q0wK/dZpQ==
   dependencies:
     "@bonbons/di" "2.0.0-beta.3"
     "@types/cheerio" "^0.22.15"
@@ -43,10 +43,10 @@
     uuid "^3.3.3"
     webpack "^4.41.2"
 
-"@amoebajs/zent-ui@^0.0.1-alpha.1588740221256":
-  version "0.0.1-alpha.1588740221256"
-  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1588740221256.tgz#093c152fd1010c6386867a2794ebec76f3aae641"
-  integrity sha512-x2tc3BvoHL0hhvHRMEkf9ALSyO7kqma777jfDy15Y7u2RQK7YeQju1XhIoIBpxO1ahu+DbHYiQVZg4Lc8tmn7w==
+"@amoebajs/zent-ui@^0.0.1-alpha.1588837060111":
+  version "0.0.1-alpha.1588837060111"
+  resolved "https://registry.npmjs.org/@amoebajs/zent-ui/-/zent-ui-0.0.1-alpha.1588837060111.tgz#71c8fc5c06234d317a4c257db1f5ee4b0ef3d991"
+  integrity sha512-3a7x2eqIXGAqUj16dml1Bqnlqwj/W+J9WE9velZHvMmCip513xDm3wncFmnIMpKuR1C3dMIBfVxk0jEogz8f+A==
 
 "@angular-devkit/architect@0.900.7":
   version "0.900.7"

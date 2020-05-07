@@ -79,6 +79,8 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public tree: ISourceTree;
   public tempEntityData!: IEntityEdit | null;
   public tempParentPath!: string[];
+  public tempParentRef!: IDisplayEntity;
+  public tempParentValid!: boolean;
   public willDelete!: IDisplay<IDisplayEntity>;
 
   private modelRef!: NzModalRef;
@@ -147,7 +149,12 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     return !paths ? type + "::" + model.id : paths + "#" + type + "::" + model.id;
   }
 
-  public entityCreateClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
+  public entityCreateClick(
+    model: IDisplay<IDisplayEntity>,
+    parent: IDisplay<IDisplayEntity> | undefined,
+    type: XType,
+    paths?: string,
+  ) {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
@@ -155,16 +162,23 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     this.tempParentPath = (paths && paths.split("#")) || [];
     this.tempParentPath.push(`${type}::` + model?.id ?? "undefined");
     this.tempParentPath.push(`target::` + "");
+    this.tempParentRef = parent;
+    this.tempParentValid = true;
     this.modelRef = this.modal.create({
       nzTitle: "创建节点",
       nzContent: this.createModalContent,
       nzWidth: "500px",
-      nzOnOk: () => (this.lastModalOk = true),
+      nzOnOk: () => (this.lastModalOk = this.tempParentValid),
       nzOnCancel: () => {},
     });
   }
 
-  public entityEditClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
+  public entityEditClick(
+    model: IDisplay<IDisplayEntity>,
+    parent: IDisplay<IDisplayEntity> | undefined,
+    type: XType,
+    paths?: string,
+  ) {
     if (this.modelRef) {
       this.modelRef.destroy();
     }
@@ -182,11 +196,13 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       type,
       source: model,
     };
+    this.tempParentRef = parent;
+    this.tempParentValid = true;
     this.modelRef = this.modal.create({
       nzTitle: "编辑节点",
       nzContent: this.editModalContent,
       nzWidth: "800px",
-      nzOnOk: () => (this.lastModalOk = true),
+      nzOnOk: () => (this.lastModalOk = this.tempParentValid),
       nzOnCancel: () => {},
     });
   }
@@ -194,10 +210,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     const pathlist = (paths && paths.split("#")) || [];
     pathlist.push("target::" + model.id);
-    console.log(pathlist);
-    console.log({ id: model.id, type });
     const { found, path, index } = this.findPath(pathlist, { id: model.id, type });
-    console.log([found, path, index]);
     if (found) {
       this.willDelete = found;
       const ref = this.modal.warning({
@@ -265,6 +278,9 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
 
   public receiveEmitEntity(e: IEntityEditResult) {
     this.tempEntityData = null;
+    this.tempParentRef = null;
+    this.tempParentValid = false;
+    console.log(e);
     if (!this.lastModalOk) return;
     this.createOrUpdateNode(e);
     this.tempParentPath = [];
@@ -273,42 +289,41 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     this.initTree(context);
   }
 
+  public receiveEmitEntityValid(valid: boolean) {
+    this.tempParentValid = valid;
+  }
+
   private createOrUpdateNode(e: IEntityEditResult) {
     const { found, path, index } = this.findPath(this.tempParentPath, { id: e.id, type: e.type });
-    const { module: md, name, id, version, updateId, type: createType, ...others } = e;
+    const { module: md, name, id, version, updateId, type: createType, parentId: pid, ...others } = e;
+    console.log(pid);
     if (!found) {
       this.createNewNode(e.type, md, name, version, createType, path, id, others);
     } else {
-      this.updateExistNode(e.type, path, others, index, updateId);
+      this.updateExistNode(e.type, path, others, index, id, updateId);
     }
   }
 
   private updateExistNode(
     type: XType,
     path: string,
-    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
+    { input, attach }: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
     index: number,
+    oldid: string,
     update: string,
   ) {
     if (path === "['page']") {
-      this.context.page = {
-        ...this.context.page,
-        ...others,
-        id: update,
-      };
-    } else if (type !== "directive") {
-      const children = get(this.context, path);
-      children[index] = {
-        ...{ ...children[index], id: update },
-        ...others,
-      };
-    } else {
-      const directives = get(this.context, path);
-      directives[index] = {
-        ...{ ...directives[index], id: update },
-        ...others,
-      };
+      this.context.page = { ...this.context.page, input, id: update };
+      return;
     }
+    if (type !== "directive") {
+      const children = get(this.context, path);
+      children[index] = { ...children[index], input, id: update };
+      this.createUpdateAttach(path.replace(/\['children'\]$/, "['attach']"), attach, oldid, update);
+      return;
+    }
+    const directives = get(this.context, path);
+    directives[index] = { ...directives[index], input, id: update };
   }
 
   private createNewNode(
@@ -319,35 +334,38 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     createType: XType,
     path: string,
     id: string,
-    others: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
+    { input, attach }: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
   ) {
     const target = this.getImportTargetSafely(md, name, version, createType);
     if (path === "['page']") {
-      this.context.page = {
-        id,
-        ref: target.id,
-        ...others,
-      };
-    } else if (type !== "directive") {
+      this.context.page = { id, ref: target.id, input };
+      return;
+    }
+    if (type !== "directive") {
       let children = get(this.context, path);
-      if (!children) {
-        set(this.context, path, (children = []));
+      if (!children) set(this.context, path, (children = []));
+      children.push({ id, ref: target.id, input });
+      this.createUpdateAttach(path, attach, id);
+      return;
+    }
+    let directives = get(this.context, path);
+    if (!directives) set(this.context, path, (directives = []));
+    directives.push({ id, ref: target.id, input });
+  }
+
+  private createUpdateAttach(path: string, attach: Record<string, any>, oldid: string, updateid?: string) {
+    const entries = Object.entries(attach);
+    let attaches = get(this.context, path);
+    if (!attaches) set(this.context, path, (attaches = {}));
+    for (const [key, value] of entries) {
+      const matches: any = attaches[key] ?? (attaches[key] = { type: "childRefs", expression: [] });
+      const found = matches.expression.find((i: any) => i.id === oldid);
+      if (found) {
+        found.id = updateid ?? oldid;
+        found.value = value;
+      } else {
+        matches.expression.push({ id: updateid ?? oldid, value });
       }
-      children.push({
-        id,
-        ref: target.id,
-        ...others,
-      });
-    } else {
-      let directives = get(this.context, path);
-      if (!directives) {
-        set(this.context, path, (directives = []));
-      }
-      directives.push({
-        id,
-        ref: target.id,
-        ...others,
-      });
     }
   }
 

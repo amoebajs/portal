@@ -9,7 +9,12 @@
       <div class="input-layout">
         <div class="input-label">唯一键</div>
         <div class="input-content">
-          <input nz-input [placeholder]="'请输入Node Key'" [(ngModel)]="entity.entityId" />
+          <input
+            nz-input
+            [placeholder]="'请输入Node Key'"
+            [(ngModel)]="entity.entityId"
+            (ngModelChange)="onModelChange($event)"
+          />
         </div>
       </div>
     </div>
@@ -30,14 +35,17 @@
       </div>
     </ng-container>
   </div>
-  <!-- <div class="options-group">
+  <div *ngIf="attaches && attaches.length > 0" class="options-group">
     <div class="options-first-title">附加属性</div>
-    <div class="options-list" *ngFor="let attach of entity.attaches">
-      <ng-container
-        *ngTemplateOutlet="optionItem; context: { model: attach, display: attach.name.displayValue, name: attach.name.value }"
-      ></ng-container>
+    <div class="options-list" *ngFor="let attach of attaches">
+      <div class="input-layout">
+        <div class="input-label">{{ attach.define.name.displayValue }}</div>
+        <div class="input-content">
+          <input nz-input [(ngModel)]="attach.value" />
+        </div>
+      </div>
     </div>
-  </div> -->
+  </div>
 </div>
 
 <ng-template #optionItem let-model="model" let-group="group" let-data="data">
