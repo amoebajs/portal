@@ -114,9 +114,9 @@
       nz-icon
       nzType="plus-square"
       nzTheme="outline"
-      (click)="entityCreateClick(model, parent, type, paths)"
+      (click)="entityEditClick('create', model, parent, type, paths)"
     ></i>
-    <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick(model, parent, type, paths)"></i>
+    <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick('edit', model, parent, type, paths)"></i>
     <i nz-icon nzType="delete" nzTheme="outline" (click)="entityDeleteClick(model, type, paths)" class="delete-btn"></i>
   </div>
 </ng-template>
@@ -132,37 +132,37 @@
   <i *ngIf="!enabled" style="color: #888888" nz-icon nzType="stop" nzTheme="outline"></i>
 </ng-template>
 
-<ng-template #createModalContent>
-  <div *ngIf="tempEntityData" class="edit-goback" (click)="editGoBack()">
+<!-- <ng-template #createModalContent let-params>
+  <div *ngIf="params.target" class="edit-goback" (click)="editGoBack()">
     <i nz-icon nzType="left" nzTheme="outline"></i>
     <span>后退</span>
   </div>
   <div class="model-slide-group">
-    <div class="model-slide-selectlist" *ngIf="!tempEntityData">
+    <div class="model-slide-selectlist" *ngIf="!params.target">
       <app-portal-module-list (onEntityCreate)="saveEntityTemp($event)"></app-portal-module-list>
     </div>
-    <ng-container *ngTemplateOutlet="entityEditContent"></ng-container>
+    <ng-container *ngTemplateOutlet="entityEditContent; context: { params: params }"></ng-container>
   </div>
 </ng-template>
 
-<ng-template #editModalContent>
+<ng-template #editModalContent let-params>
   <div class="model-slide-group">
-    <ng-container *ngTemplateOutlet="entityEditContent"></ng-container>
+    <ng-container *ngTemplateOutlet="entityEditContent; context: { params: params }"></ng-container>
   </div>
 </ng-template>
 
-<ng-template #entityEditContent>
-  <div class="model-slide-edit" *ngIf="tempEntityData">
+<ng-template #entityEditContent let-params="params">
+  <div class="model-slide-edit" *ngIf="params.target">
     <app-portal-entity-edit
-      [context]="context"
-      [target]="tempEntityData"
-      [parent]="tempParentRef"
-      [parents]="tempParentPath || []"
+      [context]="params.context"
+      [target]="params.target"
+      [parent]="params.parent"
+      [parents]="params.paths || []"
       (onValid)="receiveEmitEntityValid($event)"
       (onComplete)="receiveEmitEntity($event)"
     ></app-portal-entity-edit>
   </div>
-</ng-template>
+</ng-template> -->
 
 <ng-template #loadingWebsdk>
   <div class="empty-state">
@@ -188,7 +188,7 @@
   <div *ngIf="!tree.page" class="empty-state">
     <nz-result nzIcon="meh-twotone" nzTitle="当前页面空无一物">
       <div nz-result-extra>
-        <button nz-button nzType="primary" (click)="entityCreateClick(null, undefined, 'component')">
+        <button nz-button nzType="primary" (click)="entityEditClick('create', null, undefined, 'component')">
           点击创建页面根
         </button>
       </div>
@@ -279,39 +279,5 @@
 
   .delete-btn:hover {
     color: #ff4d4f;
-  }
-
-  .model-slide-group {
-    display: flex;
-    height: 60vh;
-  }
-
-  .model-slide-selectlist {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .model-slide-edit {
-    flex: 1;
-    overflow-y: auto;
-    margin: -4px;
-  }
-
-  .edit-goback {
-    display: inline-block;
-    margin-left: -12px;
-    margin-top: -24px;
-    margin-bottom: 4px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: 500;
-    color: #1890ff;
-    height: 36px;
-  }
-
-  .edit-goback i {
-    margin-right: 4px;
-    font-weight: 500;
-    color: #1890ff;
   }
 </style>

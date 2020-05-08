@@ -82,7 +82,7 @@ const DEFAULT_ENUM_VALUE = "?##default##?";
   selector: "app-portal-entity-edit",
   templateUrl: "./entity-edit.html",
 })
-export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
+export class EntityEditComponent implements OnInit, OnChanges {
   @Input()
   target: IEntityEdit;
 
@@ -94,6 +94,9 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input()
   parent!: IComponentChildDefine;
+
+  @Input()
+  finish: boolean = false;
 
   @Output()
   onComplete = new EventEmitter<IEntityEditResult>();
@@ -116,12 +119,17 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
         const element = changes[key];
         if (key === "target") {
           this.initContext(element.currentValue);
+          continue;
+        }
+        if (key === "finish") {
+          element.currentValue === true && this.outputEntity();
+          continue;
         }
       }
     }
   }
 
-  ngOnDestroy(): void {
+  outputEntity(): void {
     const { entityId, data } = this.entity;
     this.clearData(data);
     this.formatData(data);

@@ -22,9 +22,9 @@ import {
   IDirectiveDefine,
   IPageDefine,
 } from "../../services/builder.service";
-import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
-import { IEntityCreate } from "../module-list/module-list.component";
+import { IEntityEditResult } from "../entity-edit/entity-edit.component";
 import { Subscription } from "rxjs";
+import { EntityCUComponent, IEntityCUResult } from "../entity-cu/entity-cu.component";
 
 type IDisplay<T> = T & {
   displayInfo: {
@@ -67,20 +67,10 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   @Output()
   onContextChange = new EventEmitter<ICompileContext>();
 
-  @ViewChild("createModalContent")
-  private createModalContent: TemplateRef<any>;
-
-  @ViewChild("editModalContent")
-  private editModalContent: TemplateRef<any>;
-
   @ViewChild("deleteModalContext")
   private deleteModalContext: TemplateRef<any>;
 
   public tree: ISourceTree;
-  public tempEntityData!: IEntityEdit | null;
-  public tempParentPath!: string[];
-  public tempParentRef!: IDisplayEntity;
-  public tempParentValid!: boolean;
   public willDelete!: IDisplay<IDisplayEntity>;
 
   private modelRef!: NzModalRef;
@@ -149,62 +139,60 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     return !paths ? type + "::" + model.id : paths + "#" + type + "::" + model.id;
   }
 
-  public entityCreateClick(
-    model: IDisplay<IDisplayEntity>,
-    parent: IDisplay<IDisplayEntity> | undefined,
-    type: XType,
-    paths?: string,
-  ) {
-    if (this.modelRef) {
-      this.modelRef.destroy();
-    }
-    this.lastModalOk = false;
-    this.tempParentPath = (paths && paths.split("#")) || [];
-    this.tempParentPath.push(`${type}::` + model?.id ?? "undefined");
-    this.tempParentPath.push(`target::` + "");
-    this.tempParentRef = parent;
-    this.tempParentValid = true;
-    this.modelRef = this.modal.create({
-      nzTitle: "创建节点",
-      nzContent: this.createModalContent,
-      nzWidth: "500px",
-      nzOnOk: () => (this.lastModalOk = this.tempParentValid),
-      nzOnCancel: () => {},
-    });
-  }
-
   public entityEditClick(
+    mode: "create" | "edit",
     model: IDisplay<IDisplayEntity>,
     parent: IDisplay<IDisplayEntity> | undefined,
     type: XType,
     paths?: string,
   ) {
-    if (this.modelRef) {
-      this.modelRef.destroy();
+    let target!: any;
+    const plist: string[] = (paths && paths.split("#")) || [];
+    if (mode === "edit") {
+      plist.push("target::" + model.id);
+      const meta = this.getEntityMetaWithRef(model, type);
+      target = {
+        id: model.id,
+        module: meta.moduleName,
+        name: meta.name,
+        displayName: meta.displayName === meta.name ? null : meta.displayName,
+        version: (<any>meta.metadata.entity).version,
+        metadata: meta.metadata,
+        type,
+        source: model,
+      };
+    } else {
+      plist.push(`${type}::` + model?.id ?? "undefined");
+      plist.push(`target::` + "");
     }
-    this.tempParentPath = (paths && paths.split("#")) || [];
-    this.tempParentPath.push("target::" + model.id);
-    const meta = this.getEntityMetaWithRef(model, type);
     this.lastModalOk = false;
-    this.tempEntityData = {
-      id: model.id,
-      module: meta.moduleName,
-      name: meta.name,
-      displayName: meta.displayName === meta.name ? null : meta.displayName,
-      version: (<any>meta.metadata.entity).version,
-      metadata: meta.metadata,
-      type,
-      source: model,
-    };
-    this.tempParentRef = parent;
-    this.tempParentValid = true;
     this.modelRef = this.modal.create({
-      nzTitle: "编辑节点",
-      nzContent: this.editModalContent,
-      nzWidth: "800px",
-      nzOnOk: () => (this.lastModalOk = this.tempParentValid),
-      nzOnCancel: () => {},
+      nzTitle: mode === "edit" ? "编辑节点" : "创建节点",
+      nzWidth: mode === "edit" ? 800 : 500,
+      nzFooter: null,
+      nzContent: EntityCUComponent,
+      nzComponentParams: {
+        context: this.context,
+        paths: plist,
+        target,
+        parent,
+      },
     });
+    const subps: Subscription[] = [];
+    subps.push(
+      this.modelRef.afterClose.subscribe(() => {
+        subps.forEach(s => s.unsubscribe());
+        this.modelRef.destroy();
+        this.modelRef = void 0;
+      }),
+    );
+    subps.push(
+      this.modelRef.afterOpen.subscribe(() => {
+        const instance = this.modelRef.getContentComponent();
+        instance.modalRef = this.modelRef;
+        subps.push(instance.onComplete.subscribe((e: any) => this.receiveEmitEntity(e)));
+      }),
+    );
   }
 
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
@@ -262,39 +250,15 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     return false;
   }
 
-  public saveEntityTemp(e: IEntityCreate) {
-    this.tempEntityData = e;
-    if (this.modelRef) {
-      this.modelRef.getConfig().nzWidth = "800px";
-    }
-  }
-
-  public editGoBack() {
-    this.tempEntityData = null;
-    if (this.modelRef) {
-      this.modelRef.getConfig().nzWidth = "500px";
-    }
-  }
-
-  public receiveEmitEntity(e: IEntityEditResult) {
-    this.tempEntityData = null;
-    this.tempParentRef = null;
-    this.tempParentValid = false;
-    console.log(e);
-    if (!this.lastModalOk) return;
+  public receiveEmitEntity(e: IEntityCUResult) {
     this.createOrUpdateNode(e);
-    this.tempParentPath = [];
     const context = callContextValidation(this.context);
     this.onContextChange.emit(context);
     this.initTree(context);
   }
 
-  public receiveEmitEntityValid(valid: boolean) {
-    this.tempParentValid = valid;
-  }
-
-  private createOrUpdateNode(e: IEntityEditResult) {
-    const { found, path, index } = this.findPath(this.tempParentPath, { id: e.id, type: e.type });
+  private createOrUpdateNode({ result: e, paths }: IEntityCUResult) {
+    const { found, path, index } = this.findPath(paths, { id: e.id, type: e.type });
     const { module: md, name, id, version, updateId, type: createType, parentId: pid, ...others } = e;
     console.log(pid);
     if (!found) {

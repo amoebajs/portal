@@ -13,6 +13,7 @@ import { EntityEditComponent } from "./components/entity-edit/entity-edit.compon
 import { SourceTreeComponent } from "./components/source-tree/source-tree.component";
 import { ManagePagesComponent } from "./manage/pages/pages.component";
 import { ManagePageComponent } from "./manage/page/page.component";
+import { EntityCUComponent } from "./components/entity-cu/entity-cu.component";
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { ManagePageComponent } from "./manage/page/page.component";
     ModuleListComponent,
     EntityEditComponent,
     SourceTreeComponent,
+    EntityCUComponent,
   ],
   imports: [
     CommonsModule,

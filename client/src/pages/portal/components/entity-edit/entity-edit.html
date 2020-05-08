@@ -49,7 +49,7 @@
 </div>
 
 <ng-template #optionItem let-model="model" let-group="group" let-data="data">
-  <ng-container [ngSwitch]="data.type">
+  <ng-container *ngIf="data" [ngSwitch]="data.type">
     <div *ngSwitchCase="'literal-string'" class="input-layout">
       <div class="input-label">{{ model.displayInfo.displayName }}</div>
       <ng-container *ngTemplateOutlet="stringColorGroup; context: { model: model, data: data }"></ng-container>
