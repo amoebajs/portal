@@ -28,7 +28,7 @@
     [nzTotal]="pagination.total"
     [(nzPageIndex)]="pagination.current"
     [(nzPageSize)]="pagination.size"
-    (nzPageIndexChange)="queryVersionList()"
+    (nzPageIndexChange)="queryConfigList()"
     [nzScroll]="{ x: '1000px' }"
   >
     <thead>
@@ -38,7 +38,7 @@
         <th nzWidth="120px">参数内容</th>
         <th nzWidth="120px">创建时间</th>
         <th nzWidth="120px">更新时间</th>
-        <th nzWidth="160px" nzRight="0px">操作</th>
+        <th nzWidth="60px" nzRight="0px">操作</th>
       </tr>
     </thead>
     <tbody>
@@ -50,8 +50,9 @@
         </td>
         <td nzWidth="120px">{{ data.createdAt | datetime }}</td>
         <td nzWidth="120px">{{ data.updatedAt | datetime }}</td>
-        <td nzWidth="160px" nzRight="0px">
+        <td nzWidth="60px" nzRight="0px">
           <!-- <a *ngIf="data.taskId" (click)="showVersionTaskLog(data.taskId)">查看日志</a> -->
+          <a [routerLink]="'/portal/preview/edit/' + data.id">编辑</a>
         </td>
       </tr>
     </tbody>
@@ -75,7 +76,7 @@
         <th nzWidth="120px">创建者</th>
         <th nzWidth="120px">产物</th>
         <th nzWidth="120px">完成时间</th>
-        <th nzWidth="160px" nzRight="0px">操作</th>
+        <th nzWidth="60px" nzRight="0px">操作</th>
       </tr>
     </thead>
     <tbody>
@@ -86,7 +87,7 @@
           <a (click)="showVersionDist(data.id)">查看构建产物列表</a>
         </td>
         <td nzWidth="120px">{{ data.updatedAt | datetime }}</td>
-        <td nzWidth="160px" nzRight="0px">
+        <td nzWidth="60px" nzRight="0px">
           <a *ngIf="data.taskId" (click)="showVersionTaskLog(data.taskId)">查看日志</a>
         </td>
       </tr>

@@ -19,8 +19,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   @ViewChild("previewTpl") previewTpl: TemplateRef<HTMLDivElement>;
 
   public isCreate = true;
-  public pageId!: string;
-  public details!: any;
+  public configId!: string;
 
   public showButton = false;
   public showEditor: "view" | "config" | "hide" = "view";
@@ -69,9 +68,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
       const url = route.snapshot.url.map(i => i.path).join("/");
       if (url !== "preview/create" && !!params.id) {
         this.isCreate = false;
-        this.pageId = params.id;
-        this.details = await this.portal.fetchPageDetails(this.pageId);
-        const config = await this.portal.fetchPageConfigDetails(this.pageId, this.details.configId);
+        this.configId = params.id;
+        const config = await this.portal.fetchConfigDetails(this.configId);
         this.createContext = JSON.parse(config.data);
         this.pageConfigs = yamljs.safeDump(this.createContext);
       } else {

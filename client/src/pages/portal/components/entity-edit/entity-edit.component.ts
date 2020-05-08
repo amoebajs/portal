@@ -354,6 +354,7 @@ export class EntityEditComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private readlAllEntities(target: IComponentChildDefine | IDirectiveChildDefine = this.context.page!) {
+    if (!target) return [];
     const list: any[] = [];
     const hack = <IComponentChildDefine>target;
     list.push(target);

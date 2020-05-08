@@ -265,14 +265,14 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public saveEntityTemp(e: IEntityCreate) {
     this.tempEntityData = e;
     if (this.modelRef) {
-      this.modelRef.getInstance().nzWidth = "800px";
+      this.modelRef.getConfig().nzWidth = "800px";
     }
   }
 
   public editGoBack() {
     this.tempEntityData = null;
     if (this.modelRef) {
-      this.modelRef.getInstance().nzWidth = "500px";
+      this.modelRef.getConfig().nzWidth = "500px";
     }
   }
 

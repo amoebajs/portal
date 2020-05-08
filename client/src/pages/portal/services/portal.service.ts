@@ -76,6 +76,14 @@ export class PortalService {
     return this.http.get<any>(`page/${pageid}/config/${configid}`);
   }
 
+  public fetchConfigDetails(configid: string | number) {
+    return this.http.get<any>(`config/${configid}`);
+  }
+
+  public fetchVersionDetails(versionid: string | number) {
+    return this.http.get<any>(`version/${versionid}`);
+  }
+
   public fetchTaskLogs(taskid: number | string) {
     return this.http.get<any>(`task/${taskid}/logs`);
   }

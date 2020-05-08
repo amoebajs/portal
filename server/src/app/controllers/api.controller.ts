@@ -126,7 +126,7 @@ export class ApiController {
 
   @Get("page/:id/version/:vid")
   @SetRoles("admin")
-  public async getPageVersionDetails(@Param("id") _: string, @Param("vid") id: string) {
+  public async getPageVersionDetails(@Param("vid") id: string) {
     return {
       code: 0,
       data: await this.worker.query("VERSION", { id }),
@@ -139,6 +139,24 @@ export class ApiController {
     return {
       code: 0,
       data: await this.worker.query("CONFIG", { id, pageId }),
+    };
+  }
+
+  @Get("config/:cid")
+  @SetRoles("admin")
+  public async getConfigDetails(@Param("cid") id: string) {
+    return {
+      code: 0,
+      data: await this.worker.query("CONFIG", { id }),
+    };
+  }
+
+  @Get("version/:vid")
+  @SetRoles("admin")
+  public async getVersionDetails(@Param("vid") id: string) {
+    return {
+      code: 0,
+      data: await this.worker.query("VERSION", { id }),
     };
   }
 

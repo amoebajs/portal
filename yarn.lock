@@ -200,12 +200,10 @@
   resolved "https://registry.npm.taobao.org/@angular/animations/download/@angular/animations-9.0.7.tgz#b91219257ea40f34a79fd66f10860409f29f3e29"
   integrity sha1-uRIZJX6kDzSnn9ZvEIYECfKfPik=
 
-"@angular/cdk@^8.0.0":
-  version "8.2.3"
-  resolved "https://registry.npm.taobao.org/@angular/cdk/download/@angular/cdk-8.2.3.tgz#16b96ffa935cbf5a646757ecaf2b19c434678f72"
-  integrity sha1-Frlv+pNcv1pkZ1fsrysZxDRnj3I=
-  dependencies:
-    tslib "^1.7.1"
+"@angular/cdk@^9.0.0":
+  version "9.2.2"
+  resolved "https://registry.npm.taobao.org/@angular/cdk/download/@angular/cdk-9.2.2.tgz#776be85aa55146f00dcd4909b81c67da47286c75"
+  integrity sha1-d2voWqVRRvANzUkJuBxn2kcobHU=
   optionalDependencies:
     parse5 "^5.0.0"
 
@@ -300,13 +298,12 @@
   dependencies:
     tinycolor2 "^1.4.1"
 
-"@ant-design/icons-angular@^8.0.2":
-  version "8.1.1"
-  resolved "https://registry.npm.taobao.org/@ant-design/icons-angular/download/@ant-design/icons-angular-8.1.1.tgz#06889764a9fefed0f6a7f23c33a0ab64916b479f"
-  integrity sha1-BoiXZKn+/tD2p/I8M6CrZJFrR58=
+"@ant-design/icons-angular@^9.0.0":
+  version "9.0.1"
+  resolved "https://registry.npm.taobao.org/@ant-design/icons-angular/download/@ant-design/icons-angular-9.0.1.tgz#5ac8bec5bc34d23120820c93f8511b59aa117bc5"
+  integrity sha1-Wsi+xbw00jEgggyT+FEbWaoRe8U=
   dependencies:
     "@ant-design/colors" "^3.1.0"
-    tslib "^1.9.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
@@ -4018,10 +4015,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-date-fns@^1.30.1:
-  version "1.30.1"
-  resolved "https://registry.npm.taobao.org/date-fns/download/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
-  integrity sha1-LnG/CxGRU9u0zE6I2epaz7UNwFw=
+date-fns@^2.10.0:
+  version "2.13.0"
+  resolved "https://registry.npm.taobao.org/date-fns/download/date-fns-2.13.0.tgz#d7b8a0a2d392e8d88a8024d0a46b980bbfdbd708"
+  integrity sha1-17igotOS6NiKgCTQpGuYC7/b1wg=
 
 date-format@^2.0.0:
   version "2.1.0"
@@ -8039,15 +8036,15 @@ next-tick@~1.0.0:
   resolved "https://registry.npm.taobao.org/next-tick/download/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
-ng-zorro-antd@^8.5.0:
-  version "8.5.2"
-  resolved "https://registry.npm.taobao.org/ng-zorro-antd/download/ng-zorro-antd-8.5.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fng-zorro-antd%2Fdownload%2Fng-zorro-antd-8.5.2.tgz#575ea85a75df7bfcc8712e82f819b355fade6b2b"
-  integrity sha1-V16oWnXfe/zIcS6C+BmzVfreays=
+ng-zorro-antd@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.npm.taobao.org/ng-zorro-antd/download/ng-zorro-antd-9.1.0.tgz#83afda582f73b75f71836e9ad3f2a7444e205daa"
+  integrity sha1-g6/aWC9zt19xg26a0/KnRE4gXao=
   dependencies:
-    "@angular/cdk" "^8.0.0"
-    "@ant-design/icons-angular" "^8.0.2"
-    date-fns "^1.30.1"
-    tslib "^1.9.0"
+    "@angular/cdk" "^9.0.0"
+    "@ant-design/icons-angular" "^9.0.0"
+    date-fns "^2.10.0"
+    resize-observer-polyfill "^1.5.1"
 
 nice-try@^1.0.4:
   version "1.0.5"
@@ -9918,6 +9915,11 @@ requires-port@^1.0.0:
   resolved "https://registry.npm.taobao.org/requires-port/download/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
 
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.npm.taobao.org/resize-observer-polyfill/download/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
+  integrity sha1-DpAg3T0hAkRY1OvSfiPkAmmBBGQ=
+
 resolve-cwd@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npm.taobao.org/resolve-cwd/download/resolve-cwd-2.0.0.tgz#00a9f7387556e27038eae232caa372a6a59b665a"
@@ -11376,7 +11378,7 @@ tslib@1.10.0, tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha1-w8GflZc/sKYpc/sJ2Q2WHuQ+XIo=
 
-tslib@1.11.1, tslib@^1.11.1, tslib@^1.7.1:
+tslib@1.11.1, tslib@^1.11.1:
   version "1.11.1"
   resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
   integrity sha1-6xXRKIJ/vuKEFUnhcfRe0zisfjU=
