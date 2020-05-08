@@ -3,7 +3,7 @@ import yamljs from "js-yaml";
 import debounce from "lodash/debounce";
 import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { NzMessageService } from "ng-zorro-antd";
+import { NzMessageService, NzModalService } from "ng-zorro-antd";
 import { Project } from "@stackblitz/sdk/typings/interfaces";
 import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
@@ -17,6 +17,7 @@ import { callContextValidation } from "../components/source-tree/source-tree.com
 export class PortalPreviewComponent implements OnInit, AfterViewInit {
   @ViewChild("previewRender") previewRender: ElementRef;
   @ViewChild("previewTpl") previewTpl: TemplateRef<HTMLDivElement>;
+  @ViewChild("saveModalContent") saveModal: TemplateRef<HTMLElement>;
 
   public isCreate = true;
   public configId!: string;
@@ -62,6 +63,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     private portal: PortalService,
     private builder: Builder,
     private message: NzMessageService,
+    private modal: NzModalService,
   ) {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
     route.params.subscribe(async params => {
@@ -101,7 +103,14 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     this.trackPreviewIfNeed();
   }
 
-  onPreviewSaveClick() {}
+  onPreviewSaveClick() {
+    this.modal.confirm({
+      nzTitle: "保存",
+      nzWidth: 600,
+      nzContent: this.saveModal,
+      nzComponentParams: { a: "123" },
+    });
+  }
 
   onTextareaChange(value: string) {
     try {

@@ -89,6 +89,10 @@
   </div>
 </ng-template>
 
+<ng-template #saveModalContent let-params>
+  <div>{{ params.a }}</div>
+</ng-template>
+
 <style>
   :host ::ng-deep iframe {
     border-width: 0;
