@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import {
   NzButtonModule,
   NzDropDownModule,
+  NzFormModule,
   NzIconModule,
   NzInputModule,
   NzInputNumberModule,
@@ -16,7 +17,7 @@ import {
   NzTabsModule,
 } from "ng-zorro-antd";
 import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { JsonStringifyPipe } from "./pipes/json.pipe";
 import { DateTimePipe } from "./pipes/datetime.pipe";
 
@@ -25,6 +26,7 @@ import { DateTimePipe } from "./pipes/datetime.pipe";
   exports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     NzButtonModule,
     NzInputModule,
     NzLayoutModule,
@@ -36,6 +38,7 @@ import { DateTimePipe } from "./pipes/datetime.pipe";
     NzTabsModule,
     NzTableModule,
     NzIconModule,
+    NzFormModule,
     NzMessageModule,
     NzDropDownModule,
     NzNotificationModule,

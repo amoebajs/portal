@@ -31,7 +31,8 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 
   public lastDepts: Record<string, string> = {};
   public createContext!: ICompileContext;
-  public pageConfigs!: string;
+  public configs!: string;
+  public page!: any;
   public vm!: VM;
 
   private project: Project = {
@@ -73,11 +74,12 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
         this.configId = params.id;
         const config = await this.portal.fetchConfigDetails(this.configId);
         this.createContext = JSON.parse(config.data);
-        this.pageConfigs = yamljs.safeDump(this.createContext);
+        this.configs = yamljs.safeDump(this.createContext);
+        this.page = await this.portal.fetchPageDetails(config.pageId);
       } else {
         this.isCreate = true;
         this.createContext = createDEVConfigs();
-        this.pageConfigs = yamljs.safeDump(this.createContext);
+        this.configs = yamljs.safeDump(this.createContext);
       }
     });
   }
@@ -93,7 +95,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   onEditorClick(value: any) {
     if (value === "config") {
       console.log(this.createContext);
-      this.pageConfigs = yamljs.safeDump(this.createContext);
+      this.configs = yamljs.safeDump(this.createContext);
     }
     this.showEditor = value;
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { IPageCreateOptions } from "@amoebajs/builder";
 import { Compiler } from "#services/compiler";
 import { User } from "#services/authentication";
@@ -124,6 +124,55 @@ export class ApiController {
     };
   }
 
+  @Post("page")
+  @SetRoles("admin")
+  public async createNewPage(
+    @Body("name") name: string,
+    @Body("displayName") display?: string,
+    @Body("description") desc?: string,
+  ) {
+    try {
+      return {
+        code: 0,
+        data: await this.worker.createNewPage(name, display, desc, String(this.user.infos.id)),
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        code: 500,
+        data: {
+          id: -1,
+          errorMsg: error.message,
+        },
+      };
+    }
+  }
+
+  @Put("page/:id")
+  @SetRoles("admin")
+  public async updateExistPage(
+    @Param("id") id: string,
+    @Body("name") name: string,
+    @Body("displayName") display?: string,
+    @Body("description") desc?: string,
+  ) {
+    try {
+      return {
+        code: 0,
+        data: await this.worker.updateExistPage(id, name, display, desc),
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        code: 500,
+        data: {
+          id: -1,
+          errorMsg: error.message,
+        },
+      };
+    }
+  }
+
   @Get("page/:id/version/:vid")
   @SetRoles("admin")
   public async getPageVersionDetails(@Param("vid") id: string) {
@@ -160,6 +209,36 @@ export class ApiController {
     };
   }
 
+  @Post("config")
+  @SetRoles("admin")
+  public async createConfig(
+    @Body("name") name?: string,
+    @Body("pageId") pageId?: string,
+    @Body("data") data?: Record<string, any>,
+  ) {
+    try {
+      // return {
+      //   code: 0,
+      //   data: await this.worker.createPage({
+      //     name,
+      //     displayName,
+      //     description,
+      //     operator: String(this.user.infos.id),
+      //   }),
+      // };
+      // this.data
+    } catch (error) {
+      console.log(error);
+      return {
+        code: 500,
+        data: {
+          id: -1,
+          errorMsg: error.message,
+        },
+      };
+    }
+  }
+
   @Post("preview")
   @SetRoles("super-admin")
   public async createSourcePreview(@Body() data: any) {
@@ -182,7 +261,7 @@ export class ApiController {
     };
   }
 
-  @Post("page")
+  @Post("page2")
   @SetRoles("super-admin")
   public async createPage(
     @Body("name") name?: string,

@@ -56,6 +56,10 @@ export class PortalService {
     return this.http.post<string>("page", { name, displayName, description: desc });
   }
 
+  public updatePage(id: string | number, name: string, displayName?: string, desc?: string) {
+    return this.http.put<string>(`page/${id}`, { name, displayName, description: desc });
+  }
+
   public fetchPageDetails(pageid: number | string) {
     return this.http.get<any>(`page/${pageid}`);
   }

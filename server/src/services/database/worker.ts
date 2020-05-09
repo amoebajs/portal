@@ -134,6 +134,40 @@ export class MysqlWorker extends BaseMysqlService {
     return (<any>this)[ProviderMap[type]].query(options);
   }
 
+  public async createNewPage(name: string, display: string, desc: string, operator: string) {
+    const duplicated = await this.$pages.query({ name });
+    if (!!duplicated) {
+      throw new Error("Page with same name is already exist");
+    }
+    const pageid = await this.$pages.create({
+      name,
+      displayName: display,
+      description: desc,
+      status: PageStatus.Changed,
+      creator: operator,
+    });
+    return pageid;
+  }
+
+  public async updateExistPage(id: string, name: string, display: string, desc: string) {
+    const exist = await this.$pages.query({ id });
+    if (!exist) {
+      throw new Error("Page with same name is not exist");
+    }
+    const success = await this.$pages.update(
+      {
+        id,
+        name,
+        displayName: display,
+        description: desc,
+        status: PageStatus.Changed,
+        updatedAt: new Date(),
+      },
+      ["id"],
+    );
+    return success;
+  }
+
   public async createPage(options: IPageCreateOptions): Promise<number | string> {
     let pageId: string | number;
     await this.connection.transaction(async manager => {

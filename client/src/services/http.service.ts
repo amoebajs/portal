@@ -67,7 +67,7 @@ export class HttpService {
         observer = this.client.put<T>(pathPre, data, xhrOpt);
         break;
       case "POST":
-        observer = this.client.put<T>(pathPre, data, xhrOpt);
+        observer = this.client.post<T>(pathPre, data, xhrOpt);
         break;
       case "DELETE":
         observer = this.client.delete<T>(`${pathPre}${this.processQueries(data)}`, xhrOpt);
