@@ -8,7 +8,7 @@ import { Project } from "@stackblitz/sdk/typings/interfaces";
 import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
 import { Builder, ICompileContext } from "../services/builder.service";
-import { callContextValidation } from "../components/source-tree/source-tree.component";
+import { callContextValidation } from "../components/source-tree/utils";
 
 @Component({
   selector: "app-portal-preview",

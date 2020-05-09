@@ -1,14 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NzModalRef } from "ng-zorro-antd";
-import { Builder, ICompileContext, IComponentChildDefine } from "../../services/builder.service";
+import { ICompileContext, IComponentChildDefine } from "../../services/builder.service";
 import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
 import { IEntityCreate } from "../module-list/module-list.component";
-import { Subject } from "rxjs";
-
-export interface IEntityCUResult {
-  result: IEntityEditResult;
-  paths: string[];
-}
 
 @Component({
   selector: "app-portal-entity-cu",
@@ -31,14 +25,13 @@ export class EntityCUComponent implements OnInit, OnDestroy {
   @Input()
   public parent?: IComponentChildDefine;
 
-  private _onComplete = new Subject<IEntityCUResult>();
-
-  public onComplete = this._onComplete.asObservable();
   public selected?: IEntityEdit;
+  public result?: IEntityEditResult;
   public valid: boolean = true;
   public finished = false;
+  public completed = false;
 
-  constructor(private builder: Builder) {}
+  constructor() {}
 
   ngOnInit(): void {
     this.selected = this.target;
@@ -65,10 +58,9 @@ export class EntityCUComponent implements OnInit, OnDestroy {
   }
 
   receiveEmitEntity(e: any) {
-    this._onComplete.next({
-      result: e,
-      paths: this.paths,
-    });
+    this.result = e;
+    this.completed = true;
+    this.modalRef.triggerOk();
   }
 
   clickOk() {
@@ -81,7 +73,7 @@ export class EntityCUComponent implements OnInit, OnDestroy {
 
   clickCancel() {
     if (this.modalRef) {
-      this.modalRef.close();
+      this.modalRef.triggerCancel();
     }
   }
 }

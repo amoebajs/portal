@@ -15,10 +15,10 @@
   </ng-container>
 </ng-container>
 
-<ng-template #deleteModalContext>
-  <div *ngIf="willDelete">
-    <div>节点类型：{{ willDelete.displayInfo.displayName }}</div>
-    <div>节点ID：{{ willDelete.id }}</div>
+<ng-template #deleteModalContext let-params>
+  <div *ngIf="params.willDelete">
+    <div>节点类型：{{ params.willDelete.displayInfo.displayName }}</div>
+    <div>节点ID：{{ params.willDelete.id }}</div>
   </div>
 </ng-template>
 

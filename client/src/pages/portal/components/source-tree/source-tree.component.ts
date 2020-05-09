@@ -12,49 +12,19 @@ import {
   TemplateRef,
   ViewChild,
 } from "@angular/core";
-import { NzModalRef, NzModalService } from "ng-zorro-antd";
+import { NzModalService } from "ng-zorro-antd";
+import { Subscription } from "rxjs";
 import {
   Builder,
   ICompileContext,
-  IComponentChildDefine,
   IComponentDefine,
-  IDirectiveChildDefine,
   IDirectiveDefine,
   IPageDefine,
 } from "../../services/builder.service";
-import { IEntityEditResult } from "../entity-edit/entity-edit.component";
-import { Subscription } from "rxjs";
-import { EntityCUComponent, IEntityCUResult } from "../entity-cu/entity-cu.component";
-
-type IDisplay<T> = T & {
-  displayInfo: {
-    displayName: string;
-    expanded: boolean;
-  };
-};
-
-interface ISourceTree {
-  components: IDisplay<IComponentDefine>[];
-  directives: IDisplay<IDirectiveDefine>[];
-  compositions: IDisplay<IDirectiveDefine>[];
-  compExpanded: boolean;
-  direExpanded: boolean;
-  cpsiExpanded: boolean;
-  page?: IDisplay<IDisplayEntity>;
-}
-
-interface IDisplayEntity extends IPageDefine {
-  children?: IDisplay<IDisplayEntity>[];
-  directives?: IDisplay<IDisplayEntity>[];
-  compositions?: IDisplay<IDisplayEntity>[];
-}
-
-type XType = "component" | "directive" | "composition";
-
-interface ICleanPayload {
-  type: "c" | "d" | "cs";
-  value: any;
-}
+import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
+import { EntityCUComponent } from "../entity-cu/entity-cu.component";
+import { IDisplay, IDisplayEntity, ISourceTree, XType } from "./typings";
+import { callContextValidation, createDefaultConfigs } from "./utils";
 
 @Component({
   selector: "app-portal-source-tree",
@@ -71,11 +41,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   private deleteModalContext: TemplateRef<any>;
 
   public tree: ISourceTree;
-  public willDelete!: IDisplay<IDisplayEntity>;
-
-  private modelRef!: NzModalRef;
-  private lastModalOk = false;
-
   private subp!: Subscription;
 
   public get onLoad() {
@@ -97,9 +62,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    if (this.modelRef) {
-      this.modelRef.destroy();
-    }
     if (this.subp && !this.subp.closed) {
       this.subp.unsubscribe();
     }
@@ -146,7 +108,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     type: XType,
     paths?: string,
   ) {
-    let target!: any;
+    let target!: IEntityEdit;
     const plist: string[] = (paths && paths.split("#")) || [];
     if (mode === "edit") {
       plist.push("target::" + model.id);
@@ -165,8 +127,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       plist.push(`${type}::` + model?.id ?? "undefined");
       plist.push(`target::` + "");
     }
-    this.lastModalOk = false;
-    this.modelRef = this.modal.create({
+    const ref = this.modal.create({
       nzTitle: mode === "edit" ? "编辑节点" : "创建节点",
       nzWidth: mode === "edit" ? 800 : 500,
       nzFooter: null,
@@ -177,20 +138,21 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         target,
         parent,
       },
+      nzOnOk: instance => {
+        this.receiveEmitEntity(instance);
+      },
     });
     const subps: Subscription[] = [];
     subps.push(
-      this.modelRef.afterClose.subscribe(() => {
+      ref.afterClose.subscribe(() => {
         subps.forEach(s => s.unsubscribe());
-        this.modelRef.destroy();
-        this.modelRef = void 0;
+        ref.destroy();
       }),
     );
     subps.push(
-      this.modelRef.afterOpen.subscribe(() => {
-        const instance = this.modelRef.getContentComponent();
-        instance.modalRef = this.modelRef;
-        subps.push(instance.onComplete.subscribe((e: any) => this.receiveEmitEntity(e)));
+      ref.afterOpen.subscribe(() => {
+        const instance = ref.getContentComponent();
+        instance.modalRef = ref;
       }),
     );
   }
@@ -200,11 +162,11 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     pathlist.push("target::" + model.id);
     const { found, path, index } = this.findPath(pathlist, { id: model.id, type });
     if (found) {
-      this.willDelete = found;
       const ref = this.modal.warning({
         nzTitle: "确认删除节点吗?",
         nzCancelText: "Cancel",
         nzContent: this.deleteModalContext,
+        nzComponentParams: { willDelete: found },
         nzOnOk: () => {
           const target = get(this.context, path);
           if (Array.isArray(target)) {
@@ -216,12 +178,8 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
           this.onContextChange.emit(context);
           this.initTree(context);
           ref.destroy();
-          this.willDelete = null;
         },
-        nzOnCancel: () => {
-          ref.destroy();
-          this.willDelete = null;
-        },
+        nzOnCancel: () => ref.destroy(),
       });
     }
   }
@@ -250,17 +208,17 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
     return false;
   }
 
-  public receiveEmitEntity(e: IEntityCUResult) {
+  public receiveEmitEntity(e: EntityCUComponent) {
     this.createOrUpdateNode(e);
     const context = callContextValidation(this.context);
     this.onContextChange.emit(context);
     this.initTree(context);
   }
 
-  private createOrUpdateNode({ result: e, paths }: IEntityCUResult) {
+  private createOrUpdateNode({ result: e, paths }: EntityCUComponent) {
     const { found, path, index } = this.findPath(paths, { id: e.id, type: e.type });
-    const { module: md, name, id, version, updateId, type: createType, parentId: pid, ...others } = e;
-    console.log(pid);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { module: md, name, id, version, updateId, type: createType, parentId: _, ...others } = e;
     if (!found) {
       this.createNewNode(e.type, md, name, version, createType, path, id, others);
     } else {
@@ -271,7 +229,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   private updateExistNode(
     type: XType,
     path: string,
-    { input, attach }: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId">,
+    { input, attach }: Omit<IEntityEditResult, "module" | "id" | "version" | "type" | "name" | "updateId" | "parentId">,
     index: number,
     oldid: string,
     update: string,
@@ -522,105 +480,4 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       return cops;
     }
   }
-}
-
-function getAllEntities(target?: IComponentChildDefine | IDirectiveChildDefine): IDirectiveChildDefine[] {
-  if (!target) return [];
-  const list: IDirectiveChildDefine[] = [];
-  const hack = <IComponentChildDefine>target;
-  list.push(...(hack.children || []));
-  list.push(...(hack.directives || []));
-  for (const iterator of hack.children || []) {
-    list.push(...getAllEntities(iterator));
-  }
-  for (const iterator of hack.directives || []) {
-    list.push(...getAllEntities(iterator));
-  }
-  return list;
-}
-
-export function callContextValidation(ctx: ICompileContext) {
-  const context = ctx;
-  const page = context.page;
-  const entities = [page, ...getAllEntities(page)];
-  if (!page) {
-    context.components = [];
-    context.directives = [];
-    context.compositions = [];
-    return { ...context };
-  }
-  const importGroup: Record<string, ICleanPayload> = {};
-  const existDirectives: Record<string, any> = {};
-  const existComponents: Record<string, any> = {};
-  const existCompositions: Record<string, any> = {};
-  (context.components || []).forEach(e => (importGroup[e.id] = { type: "c", value: e }));
-  (context.directives || []).forEach(e => (importGroup[e.id] = { type: "d", value: e }));
-  (context.compositions || []).forEach(e => (importGroup[e.id] = { type: "cs", value: e }));
-  doChildrenRefCheck(page, importGroup, { existComponents, existCompositions, existDirectives }, true);
-  const components = shakeUselessImports(entities, existComponents);
-  const directives = shakeUselessImports(entities, existDirectives);
-  const compositions = shakeUselessImports(entities, existCompositions);
-  return { provider: context.provider, components, directives, compositions, page: context.page };
-}
-
-function shakeUselessImports(entities: IDirectiveChildDefine[], items: Record<string, any>) {
-  return Object.entries(items)
-    .map(([, e]) => e)
-    .filter(c => entities.findIndex(i => i.ref === c.id) >= 0);
-}
-
-interface IPayload {
-  ref: string;
-  children?: IPayload[];
-  directives?: IPayload[];
-  root?: boolean;
-}
-
-function doChildrenRefCheck(
-  page: IPayload,
-  importGroup: Record<string, ICleanPayload>,
-  exists: {
-    existComponents: Record<string, any>;
-    existCompositions: Record<string, any>;
-    existDirectives: Record<string, any>;
-  },
-  checkSelf = false,
-) {
-  const directives: IPayload[] = page.directives || [];
-  for (const e of directives) {
-    // console.log(e);
-    const element = importGroup[e.ref];
-    if (element) {
-      exists.existDirectives[e.ref] = element.value;
-    }
-  }
-  const children: IPayload[] = [...(page.children || [])];
-  if (checkSelf) children.unshift({ ref: page.ref, root: true });
-  for (const d of children) {
-    const element = importGroup[d.ref];
-    if (element) {
-      switch (element.type) {
-        case "c":
-          exists.existComponents[d.ref] = element.value;
-          break;
-        case "cs":
-          exists.existCompositions[d.ref] = element.value;
-          break;
-        default:
-          break;
-      }
-    }
-    if (!d.root) {
-      doChildrenRefCheck(d, importGroup, exists);
-    }
-  }
-}
-
-function createDefaultConfigs(): ICompileContext {
-  return {
-    provider: "react",
-    components: [],
-    directives: [],
-    compositions: [],
-  };
 }
