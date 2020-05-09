@@ -21,7 +21,7 @@ import {
   IDirectiveDefine,
   IPageDefine,
 } from "../../services/builder.service";
-import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
+import { IEntityEdit, IEntityEditResult } from "../entity-edit/typings";
 import { EntityCUComponent } from "../entity-cu/entity-cu.component";
 import { IDisplay, IDisplayEntity, ISourceTree, XType } from "./typings";
 import { callContextValidation, createDefaultConfigs, findPath } from "./utils";

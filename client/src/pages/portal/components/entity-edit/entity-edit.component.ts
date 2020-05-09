@@ -1,79 +1,25 @@
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
+import { NzMessageService } from "ng-zorro-antd";
 import {
   Builder,
   ICompileContext,
   IComponentChildDefine,
   IDirectiveChildDefine,
-  IGroupDefine,
   IInputDefine,
 } from "../../services/builder.service";
-import { IEntityCreate } from "../module-list/module-list.component";
-import { NzMessageService } from "ng-zorro-antd";
-
-type IEntity = IComponentChildDefine | IDirectiveChildDefine;
-
-interface IDataInput {
-  define: IInputDefine;
-  value: number | string | [any, any][] | null;
-  type: string;
-  selectList?: boolean;
-  enumValues?: { key: string | number; value: any }[];
-  typeCheck?: (v: any) => boolean;
-  refObservables?: string[];
-}
-
-interface IEntityContext {
-  init: boolean;
-  entityId: string;
-  displayName: string;
-  idVersion: string;
-  inputs: IGroup[];
-  attaches: IInputDefine[];
-  data: {
-    inputs: Record<string, IDataInput>;
-  };
-}
-
-interface IScope {}
-
-type IDisplayInput = IInputDefine & {
-  displayInfo: {
-    displayName: string | null;
-    fullname: string;
-  };
-};
-
-interface IGroup {
-  name: string;
-  children: IDisplayInput[];
-  displayInfo: {
-    displayName: string | null;
-  };
-}
-
-export interface IEntityEdit extends IEntityCreate {
-  /** 原始数据，编辑情况才会有 */
-  source?: IComponentChildDefine | IDirectiveChildDefine;
-}
-
-export interface IEntityEditResult {
-  id: string;
-  parentId?: string;
-  updateId: string;
-  module: string;
-  name: string;
-  type: "component" | "directive" | "composition";
-  version: string | number;
-  input: Record<string, any>;
-  attach: Record<string, any>;
-}
-
-interface IAttachItem {
-  define: any;
-  value: any;
-}
+import {
+  IDataInput,
+  IDisplayInput,
+  IEntity,
+  IEntityContext,
+  IEntityEdit,
+  IEntityEditResult,
+  IGroup,
+  IScope,
+} from "./typings";
+import { createDefaultEntity, createDisplayName } from "./utils";
 
 const DEFAULT_ENUM_VALUE_LABEL = "默认值";
 const DEFAULT_ENUM_VALUE = "?##default##?";
@@ -427,24 +373,4 @@ export class EntityEditComponent implements OnInit, OnChanges {
     }
     data.inputs = newInputs;
   }
-}
-
-function createDisplayName(d: IInputDefine | IGroupDefine) {
-  return d.name.displayValue !== d.name.value && !!d.name.displayValue
-    ? `${d.name.displayValue} (${d.name.value})`
-    : d.name.value;
-}
-
-function createDefaultEntity(): IEntityContext {
-  return {
-    init: false,
-    entityId: "undefined",
-    displayName: "",
-    idVersion: "",
-    inputs: [],
-    attaches: [],
-    data: {
-      inputs: {},
-    },
-  };
 }

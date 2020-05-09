@@ -1,29 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from "@angular/core";
-import { Builder, ICompileModule, IImportDeclaration } from "../../services/builder.service";
-
-export interface IEntityCreate {
-  id: string;
-  type: "component" | "directive" | "composition";
-  module: string;
-  name: string;
-  displayName: string | null;
-  version: string | number;
-  metadata: IImportDeclaration["metadata"];
-}
-
-export interface IDisplayImport extends IImportDeclaration {
-  displayInfo: { displayName: string };
-}
-
-export interface IDisplayModule extends Omit<ICompileModule, "components" | "directives" | "compositions"> {
-  components: IDisplayImport[];
-  directives: IDisplayImport[];
-  compositions: IDisplayImport[];
-  displayInfo: {
-    displayName: string;
-    expanded: boolean;
-  };
-}
+import { Builder } from "../../services/builder.service";
+import { IDisplayImport, IDisplayModule, IEntityCreate } from "./typings";
+import { createDisplayName } from "./utils";
 
 @Component({
   selector: "app-portal-module-list",
@@ -83,8 +61,4 @@ export class ModuleListComponent implements OnInit, OnDestroy {
       };
     });
   }
-}
-
-function createDisplayName(i: any) {
-  return i.displayName !== i.name ? i.displayName + " (" + i.name + ")" : i.displayName;
 }

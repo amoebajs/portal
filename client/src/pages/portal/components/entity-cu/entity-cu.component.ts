@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { NzModalRef } from "ng-zorro-antd";
 import { ICompileContext, IComponentChildDefine } from "../../services/builder.service";
-import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
-import { IEntityCreate } from "../module-list/module-list.component";
+import { IEntityEdit, IEntityEditResult } from "../entity-edit/typings";
+import { IEntityCreate } from "../module-list/typings";
 
 @Component({
   selector: "app-portal-entity-cu",
