@@ -1,5 +1,5 @@
 import { ICompileContext, IComponentChildDefine, IDirectiveChildDefine } from "../../services/builder.service";
-import { ICleanPayload, IPayload } from "./typings";
+import { ICleanPayload, IDisplay, IDisplayEntity, IPayload, XType } from "./typings";
 
 export function createDefaultConfigs(): ICompileContext {
   return {
@@ -93,4 +93,60 @@ export function callContextValidation(ctx: ICompileContext) {
   const directives = shakeUselessImports(entities, existDirectives);
   const compositions = shakeUselessImports(entities, existCompositions);
   return { provider: context.provider, components, directives, compositions, page: context.page };
+}
+
+export function findPath(
+  target: IDisplay<IDisplayEntity> | undefined,
+  paths: string[],
+  model: { id: string; type: XType },
+) {
+  let path: string = "";
+  let lastIndex = -1;
+  if (!target) {
+    return { found: undefined, path: "['page']", index: -1 };
+  }
+  let list: IDisplay<IDisplayEntity>[] = [];
+  let isRoot = true;
+  for (const sgm of paths) {
+    const [sgmType, sgmValue] = sgm.split("::");
+    if (sgmType === "component" || sgmType === "composition") {
+      if (isRoot) {
+        path += "['page']";
+        isRoot = false;
+      } else {
+        lastIndex = (target.children || []).findIndex(i => i.id === sgmValue);
+        target = target.children[lastIndex];
+        list = target?.children || [];
+        path += `['children'][${lastIndex}]`;
+      }
+      continue;
+    }
+    if (sgmType === "directive") {
+      lastIndex = (target.directives || []).findIndex(i => i.id === sgmValue);
+      target = target.directives[lastIndex];
+      list = target?.directives || [];
+      path += `['directives'][${lastIndex}]`;
+      continue;
+    }
+    if (sgmType === "target") {
+      if (model.type === "directive") {
+        list = target.directives || [];
+        lastIndex = list.findIndex(i => i.id === sgmValue);
+        target = list[lastIndex];
+        path += `['directives']`;
+      } else {
+        if (isRoot) {
+          path += "['page']";
+          isRoot = false;
+        } else {
+          list = target.children || [];
+          lastIndex = list.findIndex(i => i.id === sgmValue);
+          target = list[lastIndex];
+          path += `['children']`;
+        }
+      }
+      continue;
+    }
+  }
+  return { index: lastIndex, found: target, path };
 }

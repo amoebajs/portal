@@ -24,7 +24,7 @@ import {
 import { IEntityEdit, IEntityEditResult } from "../entity-edit/entity-edit.component";
 import { EntityCUComponent } from "../entity-cu/entity-cu.component";
 import { IDisplay, IDisplayEntity, ISourceTree, XType } from "./typings";
-import { callContextValidation, createDefaultConfigs } from "./utils";
+import { callContextValidation, createDefaultConfigs, findPath } from "./utils";
 
 @Component({
   selector: "app-portal-source-tree",
@@ -160,7 +160,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     const pathlist = (paths && paths.split("#")) || [];
     pathlist.push("target::" + model.id);
-    const { found, path, index } = this.findPath(pathlist, { id: model.id, type });
+    const { found, path, index } = findPath(this.tree.page, pathlist, { id: model.id, type });
     if (found) {
       const ref = this.modal.warning({
         nzTitle: "确认删除节点吗?",
@@ -216,7 +216,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createOrUpdateNode({ result: e, paths }: EntityCUComponent) {
-    const { found, path, index } = this.findPath(paths, { id: e.id, type: e.type });
+    const { found, path, index } = findPath(this.tree.page, paths, { id: e.id, type: e.type });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { module: md, name, id, version, updateId, type: createType, parentId: _, ...others } = e;
     if (!found) {
@@ -312,59 +312,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       }
     }
     return target;
-  }
-
-  private findPath(paths: string[], model: { id: string; type: XType }) {
-    let path: string = "";
-    let lastIndex = -1;
-    if (!this.tree.page) {
-      return { found: undefined, path: "['page']", index: -1 };
-    }
-    let target: IDisplay<IDisplayEntity> = this.tree.page;
-    let list: IDisplay<IDisplayEntity>[] = [];
-    let isRoot = true;
-    for (const sgm of paths) {
-      const [sgmType, sgmValue] = sgm.split("::");
-      if (sgmType === "component" || sgmType === "composition") {
-        if (isRoot) {
-          path += "['page']";
-          isRoot = false;
-        } else {
-          lastIndex = (target.children || []).findIndex(i => i.id === sgmValue);
-          target = target.children[lastIndex];
-          list = target?.children || [];
-          path += `['children'][${lastIndex}]`;
-        }
-        continue;
-      }
-      if (sgmType === "directive") {
-        lastIndex = (target.directives || []).findIndex(i => i.id === sgmValue);
-        target = target.directives[lastIndex];
-        list = target?.directives || [];
-        path += `['directives'][${lastIndex}]`;
-        continue;
-      }
-      if (sgmType === "target") {
-        if (model.type === "directive") {
-          list = target.directives || [];
-          lastIndex = list.findIndex(i => i.id === sgmValue);
-          target = list[lastIndex];
-          path += `['directives']`;
-        } else {
-          if (isRoot) {
-            path += "['page']";
-            isRoot = false;
-          } else {
-            list = target.children || [];
-            lastIndex = list.findIndex(i => i.id === sgmValue);
-            target = list[lastIndex];
-            path += `['children']`;
-          }
-        }
-        continue;
-      }
-    }
-    return { index: lastIndex, found: target, path };
   }
 
   private initTree(context: ICompileContext) {
