@@ -6,8 +6,11 @@
     <h4>修改时间：{{ details.updatedAt | datetime }}</h4>
     <br />
   </ng-container>
-  <nz-tabset nzTabPosition="top" nzType="card">
+  <nz-tabset *ngIf="!!details" nzTabPosition="top" nzType="card">
     <nz-tab nzTitle="配置管理">
+      <div class="config-actions">
+        <button nz-button nzType="primary" [routerLink]="'/portal/preview/create/' + details.id">Create</button>
+      </div>
       <ng-container
         *ngTemplateOutlet="configListTable; context: { data: configs.items, pagination: configs.pagination }"
       ></ng-container>
@@ -122,5 +125,9 @@
     color: #55ee77;
     padding: 12px;
     width: 2000px;
+  }
+
+  .config-actions {
+    padding-bottom: 8px;
   }
 </style>

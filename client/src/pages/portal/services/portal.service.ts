@@ -33,7 +33,7 @@ export class PortalService {
       icon: "user",
       selected: false,
       items: Object.entries(UseRouter.data)
-        .filter(i => !["page", "edit"].includes(i[0]))
+        .filter(i => !["page", "edit", "create"].includes(i[0]))
         .map(i => ({
           name: i[1].data.title,
           link: "/portal" + (i[1].path === "" ? "" : "/" + i[1].path),
@@ -58,6 +58,10 @@ export class PortalService {
 
   public updatePage(id: string | number, name: string, displayName?: string, desc?: string) {
     return this.http.put<string>(`page/${id}`, { name, displayName, description: desc });
+  }
+
+  public createConfig(page: string | number, name: string, data: Record<string, any>) {
+    return this.http.post<string>(`page/${page}/config`, { name, data });
   }
 
   public fetchPageDetails(pageid: number | string) {

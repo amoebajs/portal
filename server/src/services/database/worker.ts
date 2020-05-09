@@ -168,6 +168,16 @@ export class MysqlWorker extends BaseMysqlService {
     return success;
   }
 
+  public async createConfig(pageId: string | number, name: string, data: Record<string, any>, operator: string) {
+    const configid = await this.$configs.create({
+      name,
+      pageId,
+      data: JSON.stringify(data),
+      creator: operator,
+    });
+    return configid;
+  }
+
   public async createPage(options: IPageCreateOptions): Promise<number | string> {
     let pageId: string | number;
     await this.connection.transaction(async manager => {

@@ -209,24 +209,18 @@ export class ApiController {
     };
   }
 
-  @Post("config")
+  @Post("page/:id/config")
   @SetRoles("admin")
   public async createConfig(
-    @Body("name") name?: string,
-    @Body("pageId") pageId?: string,
-    @Body("data") data?: Record<string, any>,
+    @Param("id") pageId: string,
+    @Body("name") name: string,
+    @Body("data") data: Record<string, any>,
   ) {
     try {
-      // return {
-      //   code: 0,
-      //   data: await this.worker.createPage({
-      //     name,
-      //     displayName,
-      //     description,
-      //     operator: String(this.user.infos.id),
-      //   }),
-      // };
-      // this.data
+      return {
+        code: 0,
+        data: await this.worker.createConfig(pageId, name, data ?? {}, String(this.user.infos.id)),
+      };
     } catch (error) {
       console.log(error);
       return {

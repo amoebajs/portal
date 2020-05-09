@@ -2,7 +2,7 @@ import SDK from "@stackblitz/sdk";
 import yamljs from "js-yaml";
 import debounce from "lodash/debounce";
 import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { NzMessageService, NzModalService } from "ng-zorro-antd";
 import { Project } from "@stackblitz/sdk/typings/interfaces";
 import { VM } from "@stackblitz/sdk/typings/VM";
@@ -21,6 +21,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 
   public isCreate = true;
   public configId!: string;
+  public pageId!: string;
 
   public showButton = false;
   public showEditor: "view" | "config" | "hide" = "view";
@@ -32,7 +33,6 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   public lastDepts: Record<string, string> = {};
   public createContext!: ICompileContext;
   public configs!: string;
-  public page!: any;
   public vm!: VM;
 
   private project: Project = {
@@ -60,6 +60,7 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
 
   constructor(
     route: ActivatedRoute,
+    private router: Router,
     private renderer: Renderer2,
     private portal: PortalService,
     private builder: Builder,
@@ -69,15 +70,18 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
     route.params.subscribe(async params => {
       const url = route.snapshot.url.map(i => i.path).join("/");
-      if (url !== "preview/create" && !!params.id) {
+      if (!url.startsWith("preview/create")) {
         this.isCreate = false;
         this.configId = params.id;
         const config = await this.portal.fetchConfigDetails(this.configId);
         this.createContext = JSON.parse(config.data);
         this.configs = yamljs.safeDump(this.createContext);
-        this.page = await this.portal.fetchPageDetails(config.pageId);
+        console.log(this.configs);
+        const page = await this.portal.fetchPageDetails(config.pageId);
+        this.pageId = page.id;
       } else {
         this.isCreate = true;
+        this.pageId = params.id;
         this.createContext = createDEVConfigs();
         this.configs = yamljs.safeDump(this.createContext);
       }
@@ -108,9 +112,13 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
   onPreviewSaveClick() {
     this.modal.confirm({
       nzTitle: "保存",
-      nzWidth: 600,
+      nzWidth: 500,
       nzContent: this.saveModal,
-      nzComponentParams: { a: "123" },
+      nzComponentParams: { content: "新建配置并保存？" },
+      nzOnOk: async () => {
+        await this.portal.createConfig(this.pageId, `Config-${new Date().getTime()}`, this.createContext);
+        this.router.navigateByUrl(`/portal/manage/page/${this.pageId}`);
+      },
     });
   }
 

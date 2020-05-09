@@ -1,13 +1,14 @@
 import get from "lodash/get";
 import set from "lodash/set";
 import {
-  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
+  SimpleChanges,
   TemplateRef,
   ViewChild,
 } from "@angular/core";
@@ -28,9 +29,8 @@ import { callContextValidation, createDefaultConfigs, findPath, getEntityDisplay
 @Component({
   selector: "app-portal-source-tree",
   templateUrl: "./source-tree.html",
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SourceTreeComponent implements OnInit, OnDestroy {
+export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   @Input()
   context: ICompileContext;
 
@@ -40,6 +40,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy {
   @ViewChild("deleteModalContext")
   private deleteModalContext: TemplateRef<any>;
 
+  public init = false;
   public tree: ISourceTree;
   private subp!: Subscription;
 
@@ -56,9 +57,19 @@ export class SourceTreeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subp = this.builder.onLoad.subscribe(loaded => {
       if (loaded === true) {
+        this.init = true;
         this.initTree(this.context || createDefaultConfigs());
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const entries = Object.entries(changes);
+    for (const [key, iterator] of entries) {
+      if (key === "context" && this.init) {
+        this.initTree(iterator.currentValue);
+      }
+    }
   }
 
   ngOnDestroy(): void {

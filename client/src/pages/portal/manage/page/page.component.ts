@@ -65,8 +65,8 @@ export class ManagePageComponent implements OnInit {
     this.queryVersionList();
     this.queryConfigList();
     const [version, config] = await Promise.all([
-      this.queryVersion(this.details.versionId),
-      this.queryConfig(this.details.configId),
+      this.details.versionId ? this.queryVersion(this.details.versionId) : Promise.resolve({}),
+      this.details.configId ? this.queryConfig(this.details.configId) : Promise.resolve({}),
     ]);
     this.version = version;
     this.config = config;
