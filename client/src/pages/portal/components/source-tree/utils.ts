@@ -1,5 +1,10 @@
-import { ICompileContext, IComponentChildDefine, IDirectiveChildDefine } from "../../services/builder.service";
-import { ICleanPayload, IDisplay, IDisplayEntity, IPayload, XType } from "./typings";
+import {
+  ICompileContext,
+  IComponentChildDefine,
+  IDirectiveChildDefine,
+  IPageDefine,
+} from "../../services/builder.service";
+import { ICleanPayload, IDisplay, IDisplayEntity, IPayload, ISourceTree, XType } from "./typings";
 
 export function createDefaultConfigs(): ICompileContext {
   return {
@@ -95,17 +100,13 @@ export function callContextValidation(ctx: ICompileContext) {
   return { provider: context.provider, components, directives, compositions, page: context.page };
 }
 
-export function findPath(
-  target: IDisplay<IDisplayEntity> | undefined,
-  paths: string[],
-  model: { id: string; type: XType },
-) {
+export function findPath(target: IPageDefine | undefined, paths: string[], model: { id: string; type: XType }) {
   let path: string = "";
   let lastIndex = -1;
   if (!target) {
     return { found: undefined, path: "['page']", index: -1 };
   }
-  let list: IDisplay<IDisplayEntity>[] = [];
+  let list: (IDirectiveChildDefine | IComponentChildDefine)[] = [];
   let isRoot = true;
   for (const sgm of paths) {
     const [sgmType, sgmValue] = sgm.split("::");
@@ -149,4 +150,44 @@ export function findPath(
     }
   }
   return { index: lastIndex, found: target, path };
+}
+
+export function getEntityDisplayName(
+  tree: ISourceTree,
+  target: IDisplayEntity | IPageDefine,
+  old?: IDisplay<IDisplayEntity>,
+): IDisplay<IDisplayEntity> {
+  const { ref, children, directives, compositions, ...others } = target;
+  let comp = tree.components.find(i => i.id === ref);
+  if (!comp) comp = tree.compositions.find(i => i.id === ref);
+  if (comp) {
+    return {
+      ...others,
+      ref,
+      children: (children || [])
+        .map((i, index) => getEntityDisplayName(tree, i, old?.children?.[index]))
+        .filter(i => !!i),
+      directives: (directives || [])
+        .map((i, index) => getEntityDisplayName(tree, i, old?.directives?.[index]))
+        .filter(i => !!i),
+      compositions: (compositions || [])
+        .map((i, index) => getEntityDisplayName(tree, i, old?.compositions?.[index]))
+        .filter(i => !!i),
+      displayInfo: {
+        displayName: comp.displayInfo.displayName,
+        expanded: old?.displayInfo?.expanded ?? true,
+      },
+    };
+  }
+  const dire = tree.directives.find(i => i.id === ref);
+  if (dire) {
+    return {
+      ...others,
+      ref,
+      displayInfo: {
+        displayName: dire.displayInfo.displayName,
+        expanded: old?.displayInfo?.expanded ?? true,
+      },
+    };
+  }
 }

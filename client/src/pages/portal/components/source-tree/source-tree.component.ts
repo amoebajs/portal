@@ -1,14 +1,13 @@
 import get from "lodash/get";
 import set from "lodash/set";
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges,
   TemplateRef,
   ViewChild,
 } from "@angular/core";
@@ -24,13 +23,14 @@ import {
 import { IEntityEdit, IEntityEditResult } from "../entity-edit/typings";
 import { EntityCUComponent } from "../entity-cu/entity-cu.component";
 import { IDisplay, IDisplayEntity, ISourceTree, XType } from "./typings";
-import { callContextValidation, createDefaultConfigs, findPath } from "./utils";
+import { callContextValidation, createDefaultConfigs, findPath, getEntityDisplayName } from "./utils";
 
 @Component({
   selector: "app-portal-source-tree",
   templateUrl: "./source-tree.html",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
+export class SourceTreeComponent implements OnInit, OnDestroy {
   @Input()
   context: ICompileContext;
 
@@ -66,8 +66,6 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       this.subp.unsubscribe();
     }
   }
-
-  ngOnChanges(_: SimpleChanges): void {}
 
   public checkIfExpanded(model: IDisplayEntity) {
     return (
@@ -160,7 +158,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   public entityDeleteClick(model: IDisplay<IDisplayEntity>, type: XType, paths?: string) {
     const pathlist = (paths && paths.split("#")) || [];
     pathlist.push("target::" + model.id);
-    const { found, path, index } = findPath(this.tree.page, pathlist, { id: model.id, type });
+    const { found, path, index } = findPath(this.context.page, pathlist, { id: model.id, type });
     if (found) {
       const ref = this.modal.warning({
         nzTitle: "确认删除节点吗?",
@@ -216,7 +214,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private createOrUpdateNode({ result: e, paths }: EntityCUComponent) {
-    const { found, path, index } = findPath(this.tree.page, paths, { id: e.id, type: e.type });
+    const { found, path, index } = findPath(this.context.page, paths, { id: e.id, type: e.type });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { module: md, name, id, version, updateId, type: createType, parentId: _, ...others } = e;
     if (!found) {
@@ -337,7 +335,7 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
         expanded: false,
       },
     }));
-    this.tree = {
+    const tree = {
       page: null,
       directives,
       components,
@@ -347,51 +345,13 @@ export class SourceTreeComponent implements OnInit, OnDestroy, OnChanges {
       cpsiExpanded: false,
     };
     if (oldTree) {
-      this.tree.compExpanded = oldTree.compExpanded;
-      this.tree.direExpanded = oldTree.direExpanded;
+      tree.compExpanded = oldTree.compExpanded;
+      tree.direExpanded = oldTree.direExpanded;
     }
     if (context.page) {
-      this.tree.page = context.page && this.getEntityDisplayName(context.page, oldTree?.page);
+      tree.page = context.page && getEntityDisplayName(tree, context.page, oldTree?.page);
     }
-  }
-
-  private getEntityDisplayName(
-    target: IDisplayEntity | IPageDefine,
-    old?: IDisplay<IDisplayEntity>,
-  ): IDisplay<IDisplayEntity> {
-    const { ref, children, directives, compositions, ...others } = target;
-    let comp = this.tree.components.find(i => i.id === ref);
-    if (!comp) comp = this.tree.compositions.find(i => i.id === ref);
-    if (comp) {
-      return {
-        ...others,
-        ref,
-        children: (children || [])
-          .map((i, index) => this.getEntityDisplayName(i, old?.children?.[index]))
-          .filter(i => !!i),
-        directives: (directives || [])
-          .map((i, index) => this.getEntityDisplayName(i, old?.directives?.[index]))
-          .filter(i => !!i),
-        compositions: (compositions || [])
-          .map((i, index) => this.getEntityDisplayName(i, old?.compositions?.[index]))
-          .filter(i => !!i),
-        displayInfo: {
-          displayName: comp.displayInfo.displayName,
-          expanded: old?.displayInfo?.expanded ?? true,
-        },
-      };
-    }
-    const dire = this.tree.directives.find(i => i.id === ref);
-    if (dire) {
-      return {
-        ...others,
-        ref,
-        displayInfo: {
-          displayName: dire.displayInfo.displayName,
-          expanded: old?.displayInfo?.expanded ?? true,
-        },
-      };
-    }
+    this.tree = tree;
   }
 
   private getEntityMetaWithRef(model: IDisplay<IDisplayEntity>, type: XType) {

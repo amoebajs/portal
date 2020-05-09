@@ -56,7 +56,7 @@
 </ng-template>
 
 <ng-template #entityNode let-model="model" let-paths="paths" let-type="type" let-parent="parent">
-  <div *ngIf="model" class="section" [class.not-root]="!!paths">
+  <div *ngIf="!!model" class="section" [class.not-root]="!!paths">
     <div class="common-decla">
       <div class="common-title">
         <ng-container *ngTemplateOutlet="entityTitleContent; context: { model: model, type: type }"></ng-container>
@@ -131,38 +131,6 @@
   ></i>
   <i *ngIf="!enabled" style="color: #888888" nz-icon nzType="stop" nzTheme="outline"></i>
 </ng-template>
-
-<!-- <ng-template #createModalContent let-params>
-  <div *ngIf="params.target" class="edit-goback" (click)="editGoBack()">
-    <i nz-icon nzType="left" nzTheme="outline"></i>
-    <span>后退</span>
-  </div>
-  <div class="model-slide-group">
-    <div class="model-slide-selectlist" *ngIf="!params.target">
-      <app-portal-module-list (onEntityCreate)="saveEntityTemp($event)"></app-portal-module-list>
-    </div>
-    <ng-container *ngTemplateOutlet="entityEditContent; context: { params: params }"></ng-container>
-  </div>
-</ng-template>
-
-<ng-template #editModalContent let-params>
-  <div class="model-slide-group">
-    <ng-container *ngTemplateOutlet="entityEditContent; context: { params: params }"></ng-container>
-  </div>
-</ng-template>
-
-<ng-template #entityEditContent let-params="params">
-  <div class="model-slide-edit" *ngIf="params.target">
-    <app-portal-entity-edit
-      [context]="params.context"
-      [target]="params.target"
-      [parent]="params.parent"
-      [parents]="params.paths || []"
-      (onValid)="receiveEmitEntityValid($event)"
-      (onComplete)="receiveEmitEntity($event)"
-    ></app-portal-entity-edit>
-  </div>
-</ng-template> -->
 
 <ng-template #loadingWebsdk>
   <div class="empty-state">
