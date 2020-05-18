@@ -4,37 +4,70 @@
   "main": "index.js",
   "repository": "https://github.com/amoebajs/portal.git",
   "contributors": [
-    "bigmogician <bigmogician@outlook.com>"
+    "bigmogician <bigmogician@outlook.com>",
+    "pigwang <pigw4ng@gmail.com>"
   ],
+  "workspaces": {
+    "packages": [
+      "client",
+      "server"
+    ],
+    "nohoist": [
+      "**/@angular/*",
+      "**/@angular/*/**",
+      "**/@ngrx/*",
+      "**/@ngrx/*/**",
+      "**/@ionic/*",
+      "**/@ionic/*/**",
+      "**/@ionic-native/*",
+      "**/@ionic-native/*/**",
+      "**/@angular-builders/*",
+      "**/@angular-builders/*/**",
+      "**/@angular-devkit/*",
+      "**/@angular-devkit/*/**"
+    ]
+  },
   "license": "AGPL-3.0-only",
+  "sideEffects": false,
   "private": true,
   "scripts": {
-    "install:client": "cd client && yarn install",
-    "install:server": "cd server && yarn install",
-    "install:all": "yarn && yarn install:client && yarn install:server",
-    "start": "cd server && yarn start --watch",
-    "start:fix": "cd server && yarn start:fix",
+    "preinstall": "node scripts/pre-install.js",
+    "install:all": "yarn && yarn build:websdk",
+    "update:core": "cd server && yarn update:core && cd .. && yarn install:all",
+    "start": "cd server && yarn start",
+    "start:watch": "cd server && yarn start --watch",
     "start:prod": "cd server && yarn start:prod",
     "dev": "cd client && yarn start",
+    "build:websdk": "node scripts/build-sdk.js",
     "build:server": "cd server && yarn build",
     "build:client": "cd client && yarn build",
     "build": "yarn build:client && yarn build:server",
-    "postbuild": "npx rimraf server/build && npx copy client/dist/**/*.* server/build",
+    "postinstall": "node scripts/post-install.js",
+    "postbuild": "npx ncp client/dist server/dist/src/assets && node scripts/use-websdk.js",
     "docker:build": "node scripts/docker.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "fs-extra": "^8.1.0",
+    "ts-loader": "^6.2.1",
+    "webpack": "^4.41.2",
+    "webpack-bundle-analyzer": "^3.6.0"
+  },
   "devDependencies": {
+    "@types/fs-extra": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
     "@typescript-eslint/parser": "^2.14.0",
     "babel-eslint": "^10.0.3",
-    "copy": "^0.3.2",
+    "cheerio": "^1.0.0-rc.3",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-jsx-control-statements": "^2.2.1",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.17.0",
+    "ncp": "^2.0.0",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
+    "ts-import-plugin": "^1.6.2",
     "typescript": "^3.7.3"
   }
 }

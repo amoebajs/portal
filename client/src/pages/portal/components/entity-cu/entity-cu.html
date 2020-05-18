@@ -1,0 +1,94 @@
+<div class="x-entity-cu">
+  <ng-container *ngIf="target">
+    <ng-container *ngTemplateOutlet="editModalContent"></ng-container>
+  </ng-container>
+  <ng-container *ngIf="!target">
+    <ng-container *ngTemplateOutlet="createModalContent"></ng-container>
+  </ng-container>
+  <div class="actions">
+    <button *ngIf="selected" nz-button nzType="primary" [disabled]="!valid" (click)="clickOk()">Ok</button>
+    <button nz-button nzType="default" (click)="clickCancel()">Cancel</button>
+  </div>
+</div>
+
+<ng-template #createModalContent>
+  <div *ngIf="selected" class="edit-goback" (click)="editGoBack()">
+    <i nz-icon nzType="left" nzTheme="outline"></i>
+    <span>后退</span>
+  </div>
+  <div class="model-slide-group">
+    <div class="model-slide-selectlist" *ngIf="!selected">
+      <app-portal-module-list (onEntityCreate)="saveEntityTemp($event)"></app-portal-module-list>
+    </div>
+    <ng-container *ngTemplateOutlet="entityEditContent"></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #editModalContent>
+  <div class="model-slide-group">
+    <ng-container *ngTemplateOutlet="entityEditContent"></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #entityEditContent>
+  <div class="model-slide-edit" *ngIf="selected">
+    <app-portal-entity-edit
+      [context]="context"
+      [target]="selected"
+      [parent]="parent"
+      [parents]="paths || []"
+      [finish]="finished"
+      (onValid)="receiveEmitEntityValid($event)"
+      (onComplete)="receiveEmitEntity($event)"
+    ></app-portal-entity-edit>
+  </div>
+</ng-template>
+
+<style>
+  .x-entity-cu {
+    width: 100%;
+  }
+
+  .actions {
+    padding-top: 12px;
+    text-align: right;
+  }
+
+  .actions button {
+    margin-left: 8px;
+  }
+
+  .model-slide-group {
+    display: flex;
+    height: 60vh;
+  }
+
+  .model-slide-selectlist {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .edit-goback {
+    display: inline-block;
+    margin-left: -12px;
+    margin-top: -24px;
+    margin-bottom: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #1890ff;
+    height: 36px;
+  }
+
+  .edit-goback i {
+    margin-right: 4px;
+    font-weight: 500;
+    color: #1890ff;
+  }
+
+  .model-slide-edit {
+    flex: 1;
+    overflow-y: auto;
+    margin: -4px;
+  }
+</style>

@@ -11,7 +11,11 @@
     margin: 16px 0;
     padding: 24px;
     background: #fff;
-    min-height: 360px;
+    /* min-height: 360px; */
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    margin-bottom: 0;
+    padding-top: 16px;
   }
 
   .container {
@@ -71,9 +75,9 @@
       </li>
     </ul>
   </nz-sider>
-  <nz-layout>
+  <nz-layout class="container">
     <nz-header class="header">
-      <i class="trigger" nz-icon [nzType]="menuType" (click)="onMenuClock($event)"></i>
+      <i class="trigger" nz-icon [nzType]="menuType" (click)="onMenuClock()"></i>
       <div class="user-group" *ngIf="userInfos.logined">
         <i nz-icon nzType="user" nzTheme="outline"></i>
         <span>{{ userInfos.name }}</span>

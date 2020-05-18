@@ -1,0 +1,285 @@
+<div class="root" *ngIf="entity.init">
+  <div class="title-block">
+    <div class="entity-title">{{ entity.displayName }}</div>
+    <div class="quote-style">{{ entity.idVersion }}</div>
+  </div>
+  <div *ngIf="entity.init" class="options-group">
+    <div class="options-first-title">节点属性</div>
+    <div class="options-list">
+      <div class="input-layout">
+        <div class="input-label">唯一键</div>
+        <div class="input-content">
+          <input
+            nz-input
+            [placeholder]="'请输入Node Key'"
+            [(ngModel)]="entity.entityId"
+            (ngModelChange)="onModelChange($event)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="options-group">
+    <div class="options-first-title">模板属性</div>
+    <ng-container *ngFor="let group of entity.inputs">
+      <div *ngIf="group.children.length > 0">
+        <div class="options-second-title">{{ group.displayInfo.displayName }}</div>
+        <div class="options-list" *ngFor="let input of group.children">
+          <ng-container
+            *ngTemplateOutlet="optionItem; context: {
+              model: input,
+              data: entity.data.inputs[input.displayInfo.fullname]
+            }"
+          ></ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+  <div *ngIf="attaches && attaches.length > 0" class="options-group">
+    <div class="options-first-title">附加属性</div>
+    <div class="options-list" *ngFor="let attach of attaches">
+      <div class="input-layout">
+        <div class="input-label">{{ attach.define.name.displayValue }}</div>
+        <div class="input-content">
+          <input nz-input [(ngModel)]="attach.value" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #optionItem let-model="model" let-group="group" let-data="data">
+  <ng-container *ngIf="data" [ngSwitch]="data.type">
+    <div *ngSwitchCase="'literal-string'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="stringColorGroup; context: { model: model, data: data }"></ng-container>
+    </div>
+    <div *ngSwitchCase="'literal-number'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="numberGroup; context: { model: model, data: data }"></ng-container>
+    </div>
+    <div *ngSwitchCase="'literal-boolean'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="booleanGroup; context: { model: model, data: data }"></ng-container>
+    </div>
+    <div *ngSwitchCase="'literal-enums'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="enumsGroup; context: { model: model, data: data }"></ng-container>
+    </div>
+    <div *ngSwitchCase="'literal-map'" class="map-layout">
+      <div class="map-layout-title">
+        <div class="map-label">{{ model.displayInfo.displayName }}</div>
+        <div class="map-add-btn">
+          <button nz-button nzSize="small" nzType="primary" (click)="addMapEntry(model)">+</button>
+          <ng-container *ngTemplateOutlet="mapItemGroup; context: { model: model, data: data }"></ng-container>
+        </div>
+      </div>
+    </div>
+    <div *ngSwitchCase="'entyti-ref-observable'" class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <ng-container *ngTemplateOutlet="entityRefObservableGroup; context: { model: model, data: data }"></ng-container>
+    </div>
+    <div *ngSwitchDefault class="input-layout">
+      <div class="input-label">{{ model.displayInfo.displayName }}</div>
+      <span [title]="model | jsonStringify" style="color: #888">暂不支持的属性</span>
+    </div>
+  </ng-container>
+</ng-template>
+
+<ng-template #stringColorGroup let-model="model" let-data="data">
+  <div class="input-content">
+    <input nz-input [placeholder]="'请输入' + model.displayInfo.displayName" [(ngModel)]="data.value" />
+    <div *ngIf="isColor(data.value)" class="color-preview" [style.background]="data.value"></div>
+  </div>
+</ng-template>
+
+<ng-template #numberGroup let-model="model" let-data="data">
+  <div class="number-input-group">
+    <nz-input-number [(ngModel)]="data.value" [nzStep]="1" nzPlaceHolder="默认值"></nz-input-number>
+    <button *ngIf="data.value !== null" nz-button nzType="danger" (click)="clearNumberValue(model)">
+      清除
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #booleanGroup let-model="model" let-data="data">
+  <div class="number-input-group">
+    <nz-switch [(ngModel)]="data.value"></nz-switch>
+  </div>
+</ng-template>
+
+<ng-template #enumsGroup let-model="model" let-data="data">
+  <nz-select class="enum-select" *ngIf="data.selectList" [(ngModel)]="data.value">
+    <nz-option *ngFor="let option of data.enumValues" [nzLabel]="option.key" [nzValue]="option.value"></nz-option>
+  </nz-select>
+</ng-template>
+
+<ng-template #mapItemGroup let-model="model" let-data="data">
+  <div class="map-select-line" *ngFor="let item of data.value; let idx = index;">
+    <input class="x-label" *ngIf="!data.selectList" nz-input [(ngModel)]="item[0]" />
+    <nz-select class="x-label" *ngIf="data.selectList" [(ngModel)]="item[0]">
+      <nz-option *ngFor="let option of model.type.mapInfo.key" [nzLabel]="option" [nzValue]="option"></nz-option>
+    </nz-select>
+    <input class="x-value" nz-input [(ngModel)]="item[1]" />
+    <button class="x-delete" nz-button nzType="danger" (click)="removeMapEntry(model, idx)">删除</button>
+  </div>
+</ng-template>
+
+<ng-template #entityRefObservableGroup let-model="model" let-data="data">
+  <div class="enref-obsr-content">
+    <nz-select class="x-selector" [(ngModel)]="data.value[0]" (ngModelChange)="onSelectorChange(data)">
+      <nz-option *ngFor="let option of entities" [nzLabel]="option.id" [nzValue]="option.id"></nz-option>
+    </nz-select>
+    <nz-select class="x-target" *ngIf="data.refObservables" [(ngModel)]="data.value[1]">
+      <nz-option *ngFor="let option of data.refObservables" [nzLabel]="option" [nzValue]="option"></nz-option>
+    </nz-select>
+  </div>
+</ng-template>
+
+<style>
+  .root {
+    display: block;
+    padding: 4px;
+  }
+
+  .title-block {
+    padding: 12px;
+    border: 0px solid #ececec;
+    border-bottom-width: 1px;
+    background-color: #fcfcfc;
+    margin-top: -8px;
+  }
+
+  .entity-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .quote-style {
+    display: inline-block;
+    border-width: 0 0 0 6px;
+    border-color: #888;
+    border-style: solid;
+    padding: 4px;
+    padding-left: 4px;
+    background: #f2f2f2;
+  }
+
+  .options-group {
+    padding: 12px;
+  }
+
+  .options-first-title {
+    font-size: 16px;
+    font-weight: 500;
+    padding-bottom: 4px;
+  }
+
+  .options-second-title {
+    font-size: 14px;
+    font-weight: 300;
+    padding: 4px;
+    background: #ececec;
+    margin-top: 4px;
+  }
+
+  .options-list {
+    padding-left: 4px;
+  }
+
+  .input-layout {
+    display: flex;
+    padding: 8px 0;
+  }
+
+  .input-layout .input-label {
+    width: 200px;
+    line-height: 32px;
+  }
+
+  .input-layout .input-content {
+    flex: 1;
+    display: flex;
+  }
+
+  .input-content input {
+    border-radius: 0;
+  }
+
+  .input-content .color-preview {
+    background: #888;
+    margin-left: 8px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #d9d9d9;
+  }
+
+  .map-layout {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+  }
+
+  .map-layout-title {
+    display: flex;
+  }
+
+  .map-layout-title .map-label {
+    width: 200px;
+    line-height: 32px;
+  }
+
+  .map-layout-title .map-add-btn {
+    flex: 1;
+    padding-top: 8px;
+  }
+
+  .map-select-line {
+    margin: 4px 0 0 0;
+    display: flex;
+  }
+
+  .map-select-line .x-label {
+    flex: 1;
+    margin-right: 8px;
+  }
+
+  .map-select-line .x-value {
+    flex: 2;
+  }
+
+  .map-select-line .x-delete {
+    width: 60px;
+    height: 32px;
+    margin-left: 8px;
+    padding: 0;
+  }
+
+  .enum-select {
+    width: 240px;
+  }
+
+  .number-input-group {
+    display: block;
+  }
+
+  .number-input-group button {
+    margin-left: 8px;
+  }
+
+  .enref-obsr-content {
+    margin: 4px 0 0 0;
+    width: 480px;
+    display: flex;
+  }
+
+  .enref-obsr-content .x-selector {
+    flex: 2;
+    margin-right: 8px;
+  }
+
+  .enref-obsr-content .x-target {
+    flex: 1;
+  }
+</style>

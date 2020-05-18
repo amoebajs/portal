@@ -1,19 +1,232 @@
+<app-portal-layout>
+  <div class="buttons-group">
+    <div class="buttons-group-section">
+      <nz-button-group class="button-item">
+        <button nz-button [nzType]="showEditor === 'view'? 'primary': 'default'" (click)="onEditorClick('view')">
+          视图
+        </button>
+        <button nz-button [nzType]="showEditor === 'config'? 'primary': 'default'" (click)="onEditorClick('config')">
+          参数
+        </button>
+      </nz-button-group>
+      <nz-button-group class="button-item">
+        <button nz-button [nzType]="showPreview.edit? 'primary': 'default'" (click)="onPreviewClick('edit')">
+          编辑
+        </button>
+        <button nz-button [nzType]="showPreview.preview? 'primary': 'default'" (click)="onPreviewClick('preview')">
+          预览
+        </button>
+      </nz-button-group>
+      <div class="buttom-dropdown">
+        <a nz-dropdown [nzDropdownMenu]="menu">
+          查看NPM依赖
+          <i nz-icon nzType="down"></i>
+        </a>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu nzSelectable>
+            <li *ngFor="let dependency of lastDeptKvs" nz-menu-item>{{ dependency[0] }}: {{ dependency[1] }}</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+    <div class="buttons-group-section">
+      <button nz-button [nzType]="'primary'" (click)="onPreviewSaveClick()">保存</button>
+    </div>
+  </div>
+  <div class="editor-group">
+    <div [class.editor-column-hidden]="!showPreview.edit" class="editor-column preview-trees">
+      <textarea
+        *ngIf="showEditor === 'config'"
+        rows="36"
+        spellcheck="false"
+        class="textarea-yaml-styles"
+        nz-input
+        [(ngModel)]="configs"
+        (ngModelChange)="onTextareaChange($event)"
+      ></textarea>
+      <app-portal-source-tree
+        *ngIf="showEditor === 'view'"
+        [context]="createContext"
+        (onContextChange)="onContextChange($event)"
+      ></app-portal-source-tree>
+    </div>
+    <div [class.editor-column-hidden]="!showPreview.preview" class="editor-column preview-container">
+      <div #previewRender></div>
+      <ng-container *ngTemplateOutlet="previewBottomBar"></ng-container>
+      <ng-container *ngTemplateOutlet="previewTopBar"></ng-container>
+      <ng-container *ngTemplateOutlet="previewLoading"></ng-container>
+    </div>
+  </div>
+</app-portal-layout>
+
+<ng-template #previewTpl>
+  <div class="preview-host-placeholder"></div>
+</ng-template>
+
+<ng-template #previewBottomBar>
+  <div class="preview-preblock">
+    <div class="windows-logo">
+      <i nz-icon nzType="windows" nzTheme="fill"></i>
+    </div>
+    <div class="windows-logo windows-search">
+      <i nz-icon nzType="search" nzTheme="outline"></i>
+      <span>Type here to search</span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #previewTopBar>
+  <div class="preview-preblock topblock">
+    <div class="circle-mac red"></div>
+    <div class="circle-mac green"></div>
+    <div class="circle-mac yellow"></div>
+  </div>
+</ng-template>
+
+<ng-template #previewLoading>
+  <div *ngIf="!vm" class="preview-loading">
+    <nz-result [nzIcon]="'smile-twotone'" [nzTitle]="'页面预览正在启动，请稍候'"></nz-result>
+  </div>
+</ng-template>
+
+<ng-template #saveModalContent let-params>
+  <div>{{ params.content }}</div>
+</ng-template>
+
 <style>
   :host ::ng-deep iframe {
     border-width: 0;
   }
 
-  .start-button {
-    margin-bottom: 8px;
+  .buttons-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .buttons-group-section {
+    display: flex;
+  }
+
+  .button-item {
+    margin-right: 12px;
+  }
+
+  .buttom-dropdown {
+    padding-top: 4px;
+  }
+
+  .editor-group {
+    display: flex;
+  }
+
+  .editor-column {
+    position: relative;
+    flex: 1;
+    transform: scaleX(1);
+  }
+
+  .editor-column-hidden {
+    flex: 0;
+    width: 0;
+    transform: scaleX(0);
+  }
+
+  .preview-trees {
+    height: 80vh;
+    overflow: hidden;
+  }
+
+  .preview-trees app-portal-source-tree {
+    height: 100%;
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .preview-container {
+    height: 80vh;
+    overflow: hidden;
+    background: #f0f0f0;
+  }
+
+  .preview-preblock {
+    display: flex;
+    background: #f0f0f0;
+    position: absolute;
+    top: calc(80vh - 40px);
+    height: 40px;
+    width: calc(100% + 1px);
+    text-align: center;
+    line-height: 40px;
+    font-weight: 500;
+    border-top: 1px solid #e6e6e6;
+  }
+
+  .topblock {
+    top: 0;
+    border-bottom: 1px solid #e6e6e6;
+    box-shadow: 0px 4px 4px #00000022;
+  }
+
+  .preview-loading {
+    background: #f0f0f0;
+    top: 40px;
+    width: 100%;
+    bottom: calc(40px);
+    position: absolute;
+    text-align: center;
+    padding-top: 20vh;
+  }
+
+  .circle-mac {
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    margin-top: 12px;
+  }
+
+  .yellow {
+    background: #ffa500;
+  }
+
+  .green {
+    background: rgb(94, 182, 7);
+  }
+
+  .red {
+    background: #ff4d4f;
+  }
+
+  .windows-logo {
+    margin-top: -1px;
+    width: 40px;
+    height: 40px;
+    color: #000;
+    font-size: 18px;
+    border: 1px solid #e0e0e0;
+  }
+
+  .windows-search {
+    padding-left: 8px;
+    border-left-width: 0;
+    width: 360px;
+    font-size: 15px;
+    text-align: left;
+    font-weight: 100;
+    vertical-align: text-bottom;
+  }
+
+  .windows-search i {
+    transform: rotateY(180deg);
+    margin-right: 8px;
+  }
+
+  .textarea-yaml-styles {
+    height: 80vh;
+    font-size: 1em;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: #484848;
+    background-color: #fcfcfc;
   }
 </style>
-<app-portal-layout>
-  <nz-tabset (nzSelectChange)="onTabChange($event)">
-    <nz-tab nzTitle="Configs">
-      <textarea rows="36" nz-input [(ngModel)]="pageConfigs"></textarea>
-    </nz-tab>
-    <nz-tab nzTitle="Preview">
-      <div class="preview-host-placeholder" #previewHost></div>
-    </nz-tab>
-  </nz-tabset>
-</app-portal-layout>

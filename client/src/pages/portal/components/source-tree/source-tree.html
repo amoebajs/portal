@@ -1,0 +1,251 @@
+<ng-container [ngSwitch]="onLoad | async">
+  <ng-container *ngSwitchCase="true">
+    <ng-container *ngIf="tree">
+      <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'component' }"></ng-container>
+      <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'directive' }"></ng-container>
+      <ng-container *ngTemplateOutlet="importGroup; context: { enabled: true, type: 'composition' }"></ng-container>
+      <ng-container *ngTemplateOutlet="entityNode; context: { model: tree.page, type: 'component' }"></ng-container>
+      <ng-container *ngTemplateOutlet="emptySourceTree"></ng-container>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngSwitchCase="false">
+    <ng-container *ngIf="onLoadError | async as scriptError; else loadingWebsdk">
+      <ng-container *ngTemplateOutlet="loadWebsdkError; context: { error: scriptError }"></ng-container>
+    </ng-container>
+  </ng-container>
+</ng-container>
+
+<ng-template #deleteModalContext let-params>
+  <div *ngIf="params.willDelete">
+    <div>节点类型：{{ params.willDelete.displayInfo.displayName }}</div>
+    <div>节点ID：{{ params.willDelete.id }}</div>
+  </div>
+</ng-template>
+
+<ng-template #importGroup let-enabled="enabled" let-type="type">
+  <div *ngIf="tree[type + 's'] && tree[type + 's'].length > 0" class="section">
+    <div class="common-decla">
+      <div class="common-title">
+        <div>
+          <ng-container
+            *ngTemplateOutlet="expandButton; context: {
+              model: null,
+              enabled: enabled,
+              type: type,
+              expanded: useImportsExpand(type)
+            }"
+          ></ng-container>
+          <i nz-icon [nzType]="useImportIcon(type)" nzTheme="outline"></i>
+          <span>{{ useImportLabel(type) }}</span>
+        </div>
+      </div>
+      <ng-container *ngIf="useImportsExpand(type)">
+        <div class="section" *ngFor="let comp of tree[type + 's']">
+          <ng-container *ngTemplateOutlet="importNode; context: { model: comp, type: type }"></ng-container>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #importNode let-model="model" let-type="type">
+  <div class="import-decla">
+    <i nz-icon [nzType]="useImportIcon(type)" nzTheme="outline"></i>
+    <span [title]="model.id">{{ model.displayInfo.displayName }}</span>
+  </div>
+</ng-template>
+
+<ng-template #entityNode let-model="model" let-paths="paths" let-type="type" let-parent="parent">
+  <div *ngIf="!!model" class="section" [class.not-root]="!!paths">
+    <div class="common-decla">
+      <div class="common-title">
+        <ng-container *ngTemplateOutlet="entityTitleContent; context: { model: model, type: type }"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="entityActions; context: { model: model, paths: paths, parent: parent, type: type }"
+        ></ng-container>
+      </div>
+      <div class="entity-children" *ngIf="checkIfShowChildren(model, 'directive')">
+        <ng-container *ngFor="let node of model.directives">
+          <ng-container
+            *ngTemplateOutlet="entityNode; context: {
+              model: node,
+              parent: model,
+              paths: pushModelPathSection(type, model, paths),
+              type: 'directive'
+            }"
+          ></ng-container>
+        </ng-container>
+      </div>
+      <div class="entity-children" *ngIf="checkIfShowChildren(model)">
+        <ng-container *ngFor="let node of model.children">
+          <ng-container
+            *ngTemplateOutlet="entityNode; context: {
+              model: node,
+              parent: model,
+              paths: pushModelPathSection(type, model, paths),
+              type: 'component'
+            }"
+          ></ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #entityTitleContent let-model="model" let-type="type">
+  <div>
+    <ng-container
+      *ngTemplateOutlet="expandButton; context: {
+        model: model,
+        enabled: checkIfExpanded(model),
+        expanded: !!model.displayInfo.expanded,
+        type: 'entity'
+      }"
+    ></ng-container>
+    <i nz-icon [nzType]="useTitleIcon(type)" nzTheme="outline"></i>
+    <span>{{ model.displayInfo.displayName }} - {{ model.id }}</span>
+  </div>
+</ng-template>
+
+<ng-template #entityActions let-model="model" let-paths="paths" let-type="type" let-parent="parent">
+  <div class="entity-actions">
+    <i
+      *ngIf="type === 'component'"
+      nz-icon
+      nzType="plus-square"
+      nzTheme="outline"
+      (click)="entityEditClick('create', model, parent, type, paths)"
+    ></i>
+    <i nz-icon nzType="form" nzTheme="outline" (click)="entityEditClick('edit', model, parent, type, paths)"></i>
+    <i nz-icon nzType="delete" nzTheme="outline" (click)="entityDeleteClick(model, type, paths)" class="delete-btn"></i>
+  </div>
+</ng-template>
+
+<ng-template #expandButton let-model="model" let-type="type" let-enabled="enabled" let-expanded="expanded">
+  <i
+    *ngIf="enabled"
+    nz-icon
+    [nzType]="!expanded? 'plus-circle': 'minus-circle'"
+    nzTheme="outline"
+    (click)="type === 'entity'? entityExpand(model): groupExpand(type)"
+  ></i>
+  <i *ngIf="!enabled" style="color: #888888" nz-icon nzType="stop" nzTheme="outline"></i>
+</ng-template>
+
+<ng-template #loadingWebsdk>
+  <div class="empty-state">
+    <nz-result nzIcon="meh-twotone" nzTitle="正在获取核心功能脚本，请稍候">
+      <div nz-result-extra>
+        <button nz-button disabled nzType="primary">点我也没用</button>
+      </div>
+    </nz-result>
+  </div>
+</ng-template>
+
+<ng-template #loadWebsdkError let-error="error">
+  <div class="empty-state">
+    <nz-result nzIcon="meh-twotone" [nzTitle]="'获取核心功能脚本失败：' + error.message">
+      <div nz-result-extra>
+        <button nz-button disabled nzType="primary">点我也没用</button>
+      </div>
+    </nz-result>
+  </div>
+</ng-template>
+
+<ng-template #emptySourceTree>
+  <div *ngIf="!tree.page" class="empty-state">
+    <nz-result nzIcon="meh-twotone" nzTitle="当前页面空无一物">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="entityEditClick('create', null, undefined, 'component')">
+          点击创建页面根
+        </button>
+      </div>
+    </nz-result>
+  </div>
+</ng-template>
+
+<style>
+  :host {
+    display: block;
+    border: 1px solid #ececec;
+    background: #fafafa;
+  }
+
+  .empty-state {
+    padding-top: 20vh;
+  }
+
+  .section {
+    margin: 8px;
+  }
+
+  .not-root {
+    margin-right: -1px;
+  }
+
+  .import-decla {
+    border: 1px solid #ececec;
+    background: #fff;
+    padding: 4px;
+    cursor: pointer;
+    transition: background 0.35s;
+  }
+
+  .import-decla:hover {
+    background: #f6f6f6;
+  }
+
+  .common-decla {
+    border: 1px solid #ececec;
+    background: #fff;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .import-decla i {
+    margin-right: 4px;
+  }
+
+  .common-title {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px;
+    transition: background 0.35s;
+  }
+
+  .entity-actions {
+    padding-right: 4px;
+  }
+
+  .entity-actions i {
+    margin-left: 4px;
+  }
+
+  .common-title .entity-actions {
+    visibility: hidden;
+  }
+
+  .common-title:hover {
+    background: #f6f6f6;
+  }
+
+  .common-title:hover .entity-actions {
+    visibility: visible;
+  }
+
+  .common-title i {
+    margin-right: 4px;
+  }
+
+  .entity-children {
+    margin-top: 4px;
+  }
+
+  .delete-btn {
+    transform: color 0.35s;
+  }
+
+  .delete-btn:hover {
+    color: #ff4d4f;
+  }
+</style>

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "declaration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "outDir": "websdk"
+  },
+  "include": ["server/sdk/index.websdk.ts"]
+}

@@ -1,0 +1,105 @@
+<div class="group-root">
+  <div *ngFor="let module of moduleList" class="module-group">
+    <ng-container *ngTemplateOutlet="moduleGroup; context: { model: module }"></ng-container>
+  </div>
+</div>
+
+<!-- module 布局 -->
+<ng-template #moduleGroup let-model="model">
+  <div class="module-title" (click)="onModuleExpand(model)">
+    <i nz-icon [nzType]="model.displayInfo.expanded? 'down': 'right'" nzTheme="outline"></i>
+    <i nz-icon nzType="folder" nzTheme="outline"></i>
+    <span [title]="model.displayInfo.displayName">{{ model.displayName }}</span>
+  </div>
+  <div *ngIf="model.displayInfo.expanded">
+    <ng-container
+      *ngTemplateOutlet="moduleSubGroup; context: {
+        model: model,
+        type: 'component',
+        target: 'components'
+      }"
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="moduleSubGroup; context: {
+        model: model,
+        type: 'directive',
+        target: 'directives'
+      }"
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="moduleSubGroup; context: {
+        model: model,
+        type: 'composition',
+        target: 'compositions'
+      }"
+    ></ng-container>
+  </div>
+</ng-template>
+
+<!-- module 二级布局 -->
+<ng-template #moduleSubGroup let-model="model" let-type="type" let-target="target">
+  <div *ngIf="model[target].length > 0" class="module-sub-group">
+    <div *ngFor="let entity of model[target]">
+      <ng-container *ngTemplateOutlet="entityGroup; context: { model: entity, type: type }"></ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- entity 布局 -->
+<ng-template #entityGroup let-model="model" let-type="type">
+  <div class="entity-group">
+    <i nz-icon [nzType]=" type === 'component' ? 'appstore': 'api' " nzTheme="outline"></i>
+    <div (click)="onEntityClick(model, type)">{{ model.displayInfo.displayName }}</div>
+  </div>
+</ng-template>
+
+<style>
+  .group-root {
+    display: block;
+  }
+
+  .module-group {
+    padding: 4px;
+    padding-bottom: 0px;
+    border: 1px solid #f2f2f2;
+    background: #f6f6f6;
+  }
+
+  .module-group:last-child {
+    padding-bottom: 4px;
+  }
+
+  .module-title {
+    background: #585858;
+    color: #fff;
+    font-weight: 400;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .module-title i {
+    line-height: 24px;
+    margin-right: 4px;
+  }
+
+  .module-sub-group {
+    background: #fcfcfc;
+  }
+
+  .entity-group {
+    display: flex;
+    cursor: pointer;
+    padding: 4px;
+    font-weight: 500;
+    transition: background 0.5s;
+  }
+
+  .entity-group:hover {
+    background: #f2f2f2;
+  }
+
+  .entity-group i {
+    line-height: 24px;
+    margin-right: 4px;
+  }
+</style>

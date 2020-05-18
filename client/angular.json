@@ -22,7 +22,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
+            "aot": true,
             "assets": [
               "src/favicon.ico",
               "src/assets",
@@ -33,7 +33,14 @@
               }
             ],
             "styles": ["src/styles.scss", "./node_modules/ng-zorro-antd/ng-zorro-antd.min.css"],
-            "scripts": []
+            "scripts": [
+              {
+                "input": "../websdk/sdk/index.js",
+                "lazy": true,
+                "inject": false,
+                "bundleName": "ews-server-websdk"
+              }
+            ]
           },
           "configurations": {
             "production": {
@@ -48,20 +55,26 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
-              "vendorChunk": false,
               "buildOptimizer": true,
+              "vendorChunk": true,
               "budgets": [
                 {
-                  "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "type": "bundle",
+                  "name": "main",
+                  "maximumWarning": "0.1mb",
+                  "maximumError": "0.4mb"
+                },
+                {
+                  "type": "bundle",
+                  "name": "vendor",
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+                  "maximumWarning": "0.006mb",
+                  "maximumError": "0.01mb"
                 }
               ]
             }

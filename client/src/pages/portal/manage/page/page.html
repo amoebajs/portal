@@ -1,0 +1,133 @@
+<app-portal-layout>
+  <ng-container *ngIf="!!details">
+    <h2>页面：{{ details.name }}</h2>
+    <h3>标题：{{ details.displayName || '--' }}</h3>
+    <h4>创建时间：{{ details.createdAt | datetime }}</h4>
+    <h4>修改时间：{{ details.updatedAt | datetime }}</h4>
+    <br />
+  </ng-container>
+  <nz-tabset *ngIf="!!details" nzTabPosition="top" nzType="card">
+    <nz-tab nzTitle="配置管理">
+      <div class="config-actions">
+        <button nz-button nzType="primary" [routerLink]="'/portal/preview/create/' + details.id">Create</button>
+      </div>
+      <ng-container
+        *ngTemplateOutlet="configListTable; context: { data: configs.items, pagination: configs.pagination }"
+      ></ng-container>
+    </nz-tab>
+    <nz-tab nzTitle="版本管理">
+      <ng-container
+        *ngTemplateOutlet="versionListTable; context: { data: versions.items, pagination: versions.pagination }"
+      ></ng-container>
+    </nz-tab>
+  </nz-tabset>
+</app-portal-layout>
+
+<ng-template #configListTable let-data="data" let-pagination="pagination">
+  <nz-table
+    #basicTable
+    [nzFrontPagination]="false"
+    [nzData]="data || []"
+    [nzTotal]="pagination.total"
+    [(nzPageIndex)]="pagination.current"
+    [(nzPageSize)]="pagination.size"
+    (nzPageIndexChange)="queryConfigList()"
+    [nzScroll]="{ x: '1000px' }"
+  >
+    <thead>
+      <tr>
+        <th nzWidth="140px" nzLeft="0px">配置名</th>
+        <th nzWidth="120px">创建者</th>
+        <th nzWidth="120px">参数内容</th>
+        <th nzWidth="120px">创建时间</th>
+        <th nzWidth="120px">更新时间</th>
+        <th nzWidth="60px" nzRight="0px">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td nzWidth="140px" nzLeft="0px">{{ data.name || 'unknown' }}</td>
+        <td nzWidth="120px">{{ data.creator }}</td>
+        <td nzWidth="120px">
+          <a (click)="showConfigDist(data.id)">查看模板配置</a>
+        </td>
+        <td nzWidth="120px">{{ data.createdAt | datetime }}</td>
+        <td nzWidth="120px">{{ data.updatedAt | datetime }}</td>
+        <td nzWidth="60px" nzRight="0px">
+          <!-- <a *ngIf="data.taskId" (click)="showVersionTaskLog(data.taskId)">查看日志</a> -->
+          <a [routerLink]="'/portal/preview/edit/' + data.id">编辑</a>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</ng-template>
+
+<ng-template #versionListTable let-data="data" let-pagination="pagination">
+  <nz-table
+    #basicTable
+    [nzFrontPagination]="false"
+    [nzData]="data || []"
+    [nzTotal]="pagination.total"
+    [(nzPageIndex)]="pagination.current"
+    [(nzPageSize)]="pagination.size"
+    (nzPageIndexChange)="queryVersionList()"
+    [nzScroll]="{ x: '1000px' }"
+  >
+    <thead>
+      <tr>
+        <th nzWidth="140px" nzLeft="0px">版本名</th>
+        <th nzWidth="120px">创建者</th>
+        <th nzWidth="120px">产物</th>
+        <th nzWidth="120px">完成时间</th>
+        <th nzWidth="60px" nzRight="0px">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td nzWidth="140px" nzLeft="0px">{{ data.name }}</td>
+        <td nzWidth="120px">{{ data.creator }}</td>
+        <td nzWidth="120px">
+          <a (click)="showVersionDist(data.id)">查看构建产物列表</a>
+        </td>
+        <td nzWidth="120px">{{ data.updatedAt | datetime }}</td>
+        <td nzWidth="60px" nzRight="0px">
+          <a *ngIf="data.taskId" (click)="showVersionTaskLog(data.taskId)">查看日志</a>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</ng-template>
+
+<ng-template #versionDistContent>
+  <pre>{{ modalContent.version }}</pre>
+</ng-template>
+
+<ng-template #configDataContent>
+  <div class="command-group">
+    <pre class="command-line">{{ modalContent.config }}</pre>
+  </div>
+</ng-template>
+
+<ng-template #taskLogContent>
+  <div class="command-group">
+    <pre class="command-line">{{ logs }}</pre>
+  </div>
+</ng-template>
+
+<style>
+  .command-group {
+    max-height: 600px;
+    overflow: auto;
+  }
+
+  .command-line {
+    background-color: #383838;
+    color: #55ee77;
+    padding: 12px;
+    width: 2000px;
+  }
+
+  .config-actions {
+    padding-bottom: 8px;
+  }
+</style>

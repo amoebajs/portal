@@ -1,34 +1,46 @@
 import SDK from "@stackblitz/sdk";
 import yamljs from "js-yaml";
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { NzMessageService, NzTabChangeEvent } from "ng-zorro-antd";
+import debounce from "lodash/debounce";
+import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { NzMessageService, NzModalService } from "ng-zorro-antd";
 import { Project } from "@stackblitz/sdk/typings/interfaces";
 import { VM } from "@stackblitz/sdk/typings/VM";
 import { PortalService } from "../services/portal.service";
+import { Builder, ICompileContext } from "../services/builder.service";
+import { callContextValidation } from "../components/source-tree/utils";
 
 @Component({
   selector: "app-portal-preview",
   templateUrl: "./preview.html",
 })
 export class PortalPreviewComponent implements OnInit, AfterViewInit {
-  @ViewChild("previewHost", { static: false }) previewHost: ElementRef;
+  @ViewChild("previewRender") previewRender: ElementRef;
+  @ViewChild("previewTpl") previewTpl: TemplateRef<HTMLDivElement>;
+  @ViewChild("saveModalContent") saveModal: TemplateRef<HTMLElement>;
+
+  public isCreate = true;
+  public configId!: string;
+  public pageId!: string;
 
   public showButton = false;
-  public pageConfigs = createDefaultConfigs();
+  public showEditor: "view" | "config" | "hide" = "view";
+  public showPreview = {
+    edit: true,
+    preview: false,
+  };
 
-  private vm!: VM;
+  public lastDepts: Record<string, string> = {};
+  public createContext!: ICompileContext;
+  public configs!: string;
+  public vm!: VM;
+
   private project: Project = {
     files: {
-      "public/index.html": `<div id="app"></div>`,
+      "public/index.html": createTemplate(),
       "src/index.js": "",
     },
-    dependencies: {
-      "@types/react": "^16.9.7",
-      zent: "^7.1.0",
-      rxjs: "^6.5.4",
-      react: "^16.12.0",
-      "react-dom": "^16.12.0",
-    },
+    dependencies: {},
     title: "Preview Page",
     description: "preview page",
     template: "create-react-app",
@@ -42,229 +54,168 @@ export class PortalPreviewComponent implements OnInit, AfterViewInit {
     },
   };
 
-  constructor(private portal: PortalService, private message: NzMessageService) {}
+  public get lastDeptKvs() {
+    return Object.entries(this.lastDepts);
+  }
+
+  constructor(
+    route: ActivatedRoute,
+    private router: Router,
+    private renderer: Renderer2,
+    private portal: PortalService,
+    private builder: Builder,
+    private message: NzMessageService,
+    private modal: NzModalService,
+  ) {
+    this.onTextareaChange = debounce(this.onTextareaChange.bind(this), 500);
+    route.params.subscribe(async params => {
+      const url = route.snapshot.url.map(i => i.path).join("/");
+      if (!url.startsWith("preview/create")) {
+        this.isCreate = false;
+        this.configId = params.id;
+        const config = await this.portal.fetchConfigDetails(this.configId);
+        this.createContext = JSON.parse(config.data);
+        this.configs = yamljs.safeDump(this.createContext);
+        console.log(this.configs);
+        const page = await this.portal.fetchPageDetails(config.pageId);
+        this.pageId = page.id;
+      } else {
+        this.isCreate = true;
+        this.pageId = params.id;
+        this.createContext = createDEVConfigs();
+        this.configs = yamljs.safeDump(this.createContext);
+      }
+    });
+  }
 
   ngOnInit() {
-    console.log(SDK);
+    // console.log(this.builder.moduleList);
   }
 
   ngAfterViewInit() {
-    console.log(this.previewHost);
     this.showButton = true;
   }
 
-  async onTabChange(e: NzTabChangeEvent) {
-    if (e.index === 1) {
-      try {
-        const configs = JSON.parse(yamljs.safeLoad(this.pageConfigs));
-        const result = await this.portal.createSource("yaml", configs);
-        if (this.vm) {
-          this.vm.applyFsDiff({
-            create: {
-              "src/index.js": result.data.source,
-            },
-            destroy: [],
-          });
-        } else {
-          this.project.files["src/index.js"] = result.data.source;
-          this.onStart();
-        }
-      } catch (error) {
-        this.message.error(JSON.stringify(error.toString()));
-      }
+  onEditorClick(value: any) {
+    if (value === "config") {
+      console.log(this.createContext);
+      this.configs = yamljs.safeDump(this.createContext);
+    }
+    this.showEditor = value;
+  }
+
+  onPreviewClick(target: any) {
+    this.showPreview[target] = !this.showPreview[target];
+    this.trackPreviewIfNeed();
+  }
+
+  onPreviewSaveClick() {
+    this.modal.confirm({
+      nzTitle: "保存",
+      nzWidth: 500,
+      nzContent: this.saveModal,
+      nzComponentParams: { content: "新建配置并保存？" },
+      nzOnOk: async () => {
+        await this.portal.createConfig(this.pageId, `Config-${new Date().getTime()}`, this.createContext);
+        this.router.navigateByUrl(`/portal/manage/page/${this.pageId}`);
+      },
+    });
+  }
+
+  onTextareaChange(value: string) {
+    try {
+      const newValue = yamljs.safeLoad(value);
+      console.log(newValue);
+      console.log(JSON.stringify(newValue, null, "  "));
+      this.createContext = callContextValidation(newValue);
+      this.trackPreviewIfNeed();
+      this.builder.createSource(<any>this.createContext, "ts").then(r => console.log(r.sourceCode));
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  onStart() {
-    SDK.embedProject(this.previewHost.nativeElement, this.project, {
+  onContextChange(context: any) {
+    this.createContext = context;
+    // console.log(context);
+    this.trackPreviewIfNeed();
+  }
+
+  private async runUpdate(confs?: any) {
+    try {
+      const configs = confs || this.createContext;
+      // const result = await this.portal.createSource(configs);
+      // 使用websdk构建源代码，脱离服务器构建
+      const result = await this.builder.createSource(configs);
+      // console.log(result.sourceCode);
+      const hasDeptsChange = this.checkIfAllEqual(result.dependencies);
+      if (this.vm && hasDeptsChange) {
+        this.vm.applyFsDiff({
+          create: {
+            "src/index.js": result.sourceCode,
+          },
+          destroy: [],
+        });
+      } else {
+        const firstChild = this.previewRender.nativeElement.childNodes[0];
+        if (firstChild) {
+          this.renderer.removeChild(this.previewRender.nativeElement, firstChild);
+          this.vm = null;
+        }
+        this.project.files["src/index.js"] = result.sourceCode;
+        this.lastDepts = { ...result.dependencies };
+        this.project.dependencies = { ...result.dependencies };
+        this.onStart();
+      }
+    } catch (error) {
+      console.log(error);
+      this.message.error(JSON.stringify(error.toString()));
+    }
+  }
+
+  private checkIfAllEqual(newDepts: Record<string, string>) {
+    return Object.entries(newDepts).every(([k, v]) => k in this.lastDepts && this.lastDepts[k] === v);
+  }
+
+  private onStart() {
+    const tpl = this.previewTpl.createEmbeddedView(null);
+    this.renderer.appendChild(this.previewRender.nativeElement, tpl.rootNodes[0]);
+    SDK.embedProject(tpl.rootNodes[0], this.project, {
       hideExplorer: true,
       hideDevTools: true,
       hideNavigation: true,
       forceEmbedLayout: true,
-      height: "750px",
       view: "preview",
     }).then(vm => {
-      // TODO
       this.vm = vm;
-      console.log(vm);
+      const iframe = this.previewRender.nativeElement.childNodes[0];
+      this.renderer.setAttribute(iframe, "style", "width: 100%; height: 80vh");
+      this.renderer.setAttribute(iframe, "height", "");
     });
+  }
+
+  private trackPreviewIfNeed(confs?: any) {
+    // console.log(confs || this.createContext);
+    if (this.showPreview.preview) {
+      this.runUpdate(confs);
+    }
   }
 }
 
-function createDefaultConfigs() {
-  return `{
-    "components": [
-      {
-        "module": "ambjs-common-component-module",
-        "name": "zent-button",
-        "id": "ZentBtnDemoComponent"
-      }
-    ],
-    "page": {
-      "module": "ambjs-common-component-module",
-      "name": "css-grid-container",
-      "id": "CssGridPageDemoRoot",
-      "children": [
-        {
-          "ref": "ZentBtnDemoComponent",
-          "id": "ZentBtnDemoCompRef01",
-          "props": {
-            "loading": {
-              "type": "state",
-              "expression": "zentBtnLoading"
-            },
-            "children": {
-              "type": "literal",
-              "syntaxType": "string",
-              "expression": "BUTTON01"
-            },
-            "size": {
-              "type": "literal",
-              "syntaxType": "string",
-              "expression": "large"
-            },
-            "type": {
-              "type": "state",
-              "expression": "zentBtnType"
-            }
-          }
-        },
-        {
-          "ref": "ZentBtnDemoComponent",
-          "id": "ZentBtnDemoCompRef02",
-          "props": {
-            "loading": {
-              "type": "literal",
-              "syntaxType": "boolean",
-              "expression": false
-            },
-            "children": {
-              "type": "state",
-              "expression": "zentBtn02Content"
-            },
-            "size": {
-              "type": "literal",
-              "syntaxType": "string",
-              "expression": "large"
-            },
-            "type": {
-              "type": "literal",
-              "syntaxType": "string",
-              "expression": "primary"
-            }
-          }
-        }
-      ],
-      "directives": [
-        {
-          "module": "ambjs-common-directive-module",
-          "name": "zent-base-css",
-          "id": "ZentBaseCssDemoDirective"
-        },
-        {
-          "module": "ambjs-common-directive-module",
-          "name": "custom-click",
-          "id": "CustomClickDemoDirective",
-          "input": {
-            "host": {
-              "type": "literal",
-              "expression": "ZentBtnDemoCompRef02"
-            },
-            "eventType": {
-              "type": "literal",
-              "expression": "setState"
-            },
-            "attrName": {
-              "type": "literal",
-              "expression": "onClick"
-            },
-            "targetName": {
-              "type": "literal",
-              "expression": "zentBtn02Content"
-            },
-            "expression": {
-              "type": "literal",
-              "expression": "e => new Date().getTime()"
-            }
-          }
-        }
-      ],
-      "input": {
-        "basic": {
-          "useComponentState": {
-            "type": "literal",
-            "expression": true
-          },
-          "defaultComponentState": {
-            "type": "literal",
-            "expression": {
-              "btn01Text": "10002",
-              "zentBtnLoading": true,
-              "zentBtnType": "danger",
-              "zentBtn02Content": "BUTTON02"
-            },
-            "objectState": {
-              "type": "literal",
-              "expression": {
-                "id": "xxx",
-                "name": "yyy"
-              }
-            },
-            "arrayState": {
-              "type": "literal",
-              "expression": [
-                {
-                  "id": "xxx",
-                  "name": "yyy"
-                },
-                {
-                  "id": "zzz",
-                  "name": "aaa"
-                }
-              ]
-            }
-          }
-        },
-        "gridTemplateColumnsCount": {
-          "type": "literal",
-          "expression": 2
-        },
-        "gridTemplateRowsFrs": {
-          "type": "literal",
-          "expression": [
-            1,
-            2
-          ]
-        }
-      },
-      "attach": {
-        "childRowStart": {
-          "type": "childRefs",
-          "expression": [
-            {
-              "id": "ZentBtnDemoCompRef01",
-              "value": 1
-            },
-            {
-              "id": "ZentBtnDemoCompRef02",
-              "value": 2
-            }
-          ]
-        },
-        "childColumnStart": {
-          "type": "childRefs",
-          "expression": [
-            {
-              "id": "ZentBtnDemoCompRef01",
-              "value": 1
-            },
-            {
-              "id": "ZentBtnDemoCompRef02",
-              "value": 2
-            }
-          ]
-        }
-      }
-    }
-  }`;
+function createTemplate() {
+  return `<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>`;
+}
+
+function createDEVConfigs(): ICompileContext {
+  return {
+    provider: "react",
+    page: null,
+  };
 }

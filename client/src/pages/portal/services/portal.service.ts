@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpService } from "../../../services/http.service";
+import { UseRouter } from "../router";
 
 export interface IMenuItem {
   name: string;
@@ -14,52 +15,94 @@ export interface IMenuGroup {
   items: IMenuItem[];
 }
 
+export interface IPreviewApiResult {
+  code: number;
+  data: {
+    source: string;
+    dependencies: Record<string, string>;
+  };
+}
+
 @Injectable()
 export class PortalService {
   public isCollapsed = false;
 
   public menulist: IMenuGroup[] = [
     {
-      name: "Group01",
+      name: "配置化面板",
       icon: "user",
       selected: false,
-      items: [
-        {
-          name: "Portal",
-          link: "/portal",
+      items: Object.entries(UseRouter.data)
+        .filter(i => !["page", "edit", "create"].includes(i[0]))
+        .map(i => ({
+          name: i[1].data.title,
+          link: "/portal" + (i[1].path === "" ? "" : "/" + i[1].path),
           selected: false,
-        },
-        {
-          name: "Preview",
-          link: "/portal/preview",
-          selected: false,
-        },
-        {
-          name: "Settings",
-          link: "/portal/settings",
-          selected: false,
-        },
-      ],
+        })),
     },
   ];
 
   public userInfos: any = { logined: false, name: "" };
 
-  constructor(private readonly http: HttpService) {}
-
-  public fetchTemplates() {
-    this.http.get("templates");
+  constructor(private readonly http: HttpService) {
+    this.fetchUserInfos();
   }
 
-  public createSource(type: "json" | "yaml", configs: any) {
-    return this.http.post<{ code: number; data: { source: string } }>("preview", { configs });
+  public fetchPageList(current: number, size: number) {
+    return this.http.get<any[]>("pages", { current, size });
+  }
+
+  public createPage(name: string, displayName?: string, desc?: string) {
+    return this.http.post<string>("page", { name, displayName, description: desc });
+  }
+
+  public updatePage(id: string | number, name: string, displayName?: string, desc?: string) {
+    return this.http.put<string>(`page/${id}`, { name, displayName, description: desc });
+  }
+
+  public createConfig(page: string | number, name: string, data: Record<string, any>) {
+    return this.http.post<string>(`page/${page}/config`, { name, data });
+  }
+
+  public fetchPageDetails(pageid: number | string) {
+    return this.http.get<any>(`page/${pageid}`);
+  }
+
+  public fetchPageVersionList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/versions`, { current, size });
+  }
+
+  public fetchPageVersionDetails(pageid: number | string, versionid: string | number) {
+    return this.http.get<any>(`page/${pageid}/version/${versionid}`);
+  }
+
+  public fetchPageConfigList(pageid: number | string, current: number, size: number) {
+    return this.http.get<any>(`page/${pageid}/configs`, { current, size });
+  }
+
+  public fetchPageConfigDetails(pageid: number | string, configid: string | number) {
+    return this.http.get<any>(`page/${pageid}/config/${configid}`);
+  }
+
+  public fetchConfigDetails(configid: string | number) {
+    return this.http.get<any>(`config/${configid}`);
+  }
+
+  public fetchVersionDetails(versionid: string | number) {
+    return this.http.get<any>(`version/${versionid}`);
+  }
+
+  public fetchTaskLogs(taskid: number | string) {
+    return this.http.get<any>(`task/${taskid}/logs`);
+  }
+
+  public createSource(configs: any) {
+    return this.http.post<IPreviewApiResult>("preview", { configs });
   }
 
   public async fetchUserInfos() {
     const userInfo: any = await this.http.get("user");
-    if (userInfo.code === 0) {
-      this.userInfos = { ...this.userInfos, ...userInfo.data };
-    }
+    this.userInfos = { ...this.userInfos, ...userInfo };
   }
 
   public toggleMenuCollapsed() {

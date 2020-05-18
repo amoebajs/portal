@@ -31,15 +31,12 @@ export class PortalLayoutComponent implements OnInit, OnDestroy {
   }
 
   constructor(route: ActivatedRoute, router: Router, private portal: PortalService) {
-    this.routeSubp = route.url.subscribe(data => {
+    this.routeSubp = route.url.subscribe(() => {
       this.portal.setCurrentUrl(router.url);
     });
   }
 
-  ngOnInit(): void {
-    this.portal.fetchTemplates();
-    this.portal.fetchUserInfos();
-  }
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     if (this.routeSubp && !this.routeSubp.closed) {
@@ -47,7 +44,7 @@ export class PortalLayoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onMenuClock(event: any) {
+  public onMenuClock() {
     this.portal.toggleMenuCollapsed();
   }
 }

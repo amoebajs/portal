@@ -1,0 +1,62 @@
+<app-portal-layout>
+  <div class="top-bar">
+    <button nz-button nzType="primary" (click)="createPage()">Create</button>
+  </div>
+  <nz-table #basicTable [nzData]="(data && data.items) || []">
+    <thead>
+      <tr>
+        <th>页面名</th>
+        <th>页面标题</th>
+        <th>创建者</th>
+        <th>页面状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{ data.name }}</td>
+        <td>{{ data.displayName || '--' }}</td>
+        <td>{{ data.creator }}</td>
+        <td>{{ data.status === 1 ? '完成构建': '存在修改' }}</td>
+        <td>
+          <a [routerLink]="'/portal/manage/page/' + data.id">详情</a>
+          <span> | </span>
+          <a (click)="editPage(data.id)">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </nz-table>
+</app-portal-layout>
+
+<ng-template #PageCreateForm>
+  <form nz-form class="create-form" [formGroup]="formData">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="email">Name</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input formControlName="name" type="text" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="email">DisplayName</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input formControlName="displayName" type="text" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="email">Description</nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input formControlName="description" type="text" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</ng-template>
+
+<style>
+  .top-bar {
+    margin-bottom: 8px;
+  }
+
+  .create-form {
+    padding: 8px;
+  }
+</style>

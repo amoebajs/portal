@@ -25,7 +25,7 @@ export class AppComponent {
 }
 
 function getTitle(title?: string): string {
-  return title ? title + " - Big Mogician" : "Big Mogician";
+  return title ? title + " - Editable Web System" : "Editable Web System";
 }
 
 function searchTargetChild(r: ActivatedRoute) {

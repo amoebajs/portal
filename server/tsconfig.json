@@ -9,17 +9,24 @@
     "esModuleInterop": true,
     "target": "es2017",
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "./dist/src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "paths": {
-      "@global/*": ["./src/global/*"],
-      "@app/*": ["./src/app/*"],
-      "@assets/*": ["./src/assets/*"],
-      "@configs/*": ["./src/configs/*"],
-      "@utils/*": ["./src/utils/*"]
+      "#global/*": ["./src/global/*"],
+      "#middlewares/*": ["./src/middlewares/*"],
+      "#services/*": ["./src/services/*"],
+      "#filters/*": ["./src/filters/*"],
+      "#guards/*": ["./src/guards/*"],
+      "#typings/*": ["./src/typings/*"],
+      "#app/*": ["./src/app/*"],
+      "#core/*": ["./src/core/*"],
+      "#assets/*": ["./src/assets/*"],
+      "#configs/*": ["./src/configs/*"],
+      "#database/*": ["./src/database/*"],
+      "#utils/*": ["./src/utils/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "sdk"]
 }
